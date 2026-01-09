@@ -37,68 +37,88 @@ class AppRoutes {
   static const secret = '/secret';
 
   static final routes = [
-    // Use Fade for the initial entry into the game
     GetPage(
-      name: splash, 
-      page: () => SplashScreen(), 
-      transition: Transition.fade,
-    ),
-    GetPage(
-      name: welcome, 
-      page: () => WelcomeScreen(), 
-      transition: Transition.fadeIn,
-    ),
-    GetPage(
-      name: home, 
-      page: () => HomeScreen(), 
-      transition: Transition.cupertino,
-    ),
-    
-    // Standard "Safe" App Transitions
-    GetPage(
-      name: messenger, 
-      page: () => MessengerListScreen(), 
+      name: splash,
+      page: () => SplashScreen(),
       transition: Transition.cupertino,
     ),
     GetPage(
-      name: messengerChat, 
-      page: () => MessengerChatScreen(), 
-      transition: Transition.rightToLeftWithFade,
+      name: welcome,
+      page: () => WelcomeScreen(),
+      transition: Transition.cupertino,
     ),
-
-    // INTENSE: The "Secret" App Transition (Zoom)
     GetPage(
-      name: makelove, 
-      page: () => MakeloveListScreen(), 
+      name: home,
+      page: () => HomeScreen(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: messenger,
+      page: () => MessengerListScreen(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: messengerChat,
+      page: () => MessengerChatScreen(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: makelove,
+      page: () => MakeloveListScreen(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: makeloveChat,
+      page: () => MakeloveChatScreen(),
       transition: Transition.zoom,
-      transitionDuration: const Duration(milliseconds: 500),
+      transitionDuration: Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     ),
     GetPage(
-      name: makeloveChat, 
-      page: () => MakeloveChatScreen(),
-      transition: Transition.zoom,
-      transitionDuration: const Duration(milliseconds: 600),
-      curve: Curves.fastOutSlowIn,
+      name: settings,
+      page: () => SettingsScreen(),
+      transition: Transition.cupertino,
     ),
-
-    // MYSTERIOUS: Fade transition for Secret Chat
     GetPage(
-      name: secret, 
+      name: adminDialpad,
+      page: () => DialpadScreen(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: adminDashboard,
+      page: () => AdminDashboard(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: adminUploader,
+      page: () => EpisodeUploader(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: profile,
+      page: () => ProfileScreen(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: profileEdit,
+      page: () => ProfileEditScreen(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: gallery,
+      page: () => GalleryScreen(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: endgame,
+      page: () => EndgameScreen(),
+      transition: Transition.cupertino,
+    ),
+    GetPage(
+      name: secret,
       page: () => SecretChatScreen(),
       transition: Transition.fade,
-      transitionDuration: const Duration(milliseconds: 800),
+      transitionDuration: Duration(milliseconds: 800),
     ),
-
-    // Utilities and Admin
-    GetPage(name: settings, page: () => SettingsScreen(), transition: Transition.downToUp),
-    GetPage(name: adminDialpad, page: () => DialpadScreen(), transition: Transition.noTransition),
-    GetPage(name: adminDashboard, page: () => AdminDashboard(), transition: Transition.fade),
-    GetPage(name: adminUploader, page: () => EpisodeUploader(), transition: Transition.rightToLeft),
-    
-    GetPage(name: profile, page: () => ProfileScreen(), transition: Transition.cupertino),
-    GetPage(name: profileEdit, page: () => ProfileEditScreen(), transition: Transition.cupertino),
-    GetPage(name: gallery, page: () => GalleryScreen(), transition: Transition.zoom),
-    GetPage(name: endgame, page: () => EndgameScreen(), transition: Transition.fadeIn),
   ];
 }
