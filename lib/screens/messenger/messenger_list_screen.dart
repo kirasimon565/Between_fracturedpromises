@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../app/constants.dart';
 import '../../models/message.dart';
 import '../../services/story_engine.dart';
 import '../../theme/colors.dart';
@@ -35,15 +36,27 @@ class _MessengerListScreenState extends State<MessengerListScreen> {
           return Center(child: CircularProgressIndicator());
         }
 
-        // Filter messages for Safe senders (Ethan, Claire, Olivia)
-        // This is a simplified view; normally we'd group by thread.
-        // For the demo, we'll just show the active threads.
-        return ListView(
-          children: [
-            _buildChatTile("Ethan", "Stuck at the office again...", "2m ago", true),
-            _buildChatTile("Claire", "He's late again?", "5m ago", false),
-            _buildChatTile("Olivia", "Did you see my post?", "1h ago", false),
-          ],
+        final threads = _engine.activeThreads.where((t) {
+          // Filter out secret contacts (Daniel)
+          return t.id.toLowerCase() != 'daniel';
+        }).toList();
+
+        return ListView.separated(
+          itemCount: threads.length,
+          separatorBuilder: (c, i) => Divider(height: 1),
+          itemBuilder: (context, index) {
+            final thread = threads[index];
+            final lastMsg = thread.messages.last;
+            // Capitalize first letter
+            final name = thread.id[0].toUpperCase() + thread.id.substring(1);
+
+            return _buildChatTile(
+              name,
+              lastMsg.content,
+              "Now", // TODO: Real timestamp
+              true // TODO: Read status
+            );
+          },
         );
       }),
     );
@@ -52,6 +65,7 @@ class _MessengerListScreenState extends State<MessengerListScreen> {
   Widget _buildChatTile(String name, String lastMessage, String time, bool unread) {
     return ListTile(
       leading: CircleAvatar(
+        backgroundImage: AssetImage(AppConstants.getAvatarPath(name)),
         backgroundColor: Colors.grey[300],
         child: Text(name[0]),
       ),

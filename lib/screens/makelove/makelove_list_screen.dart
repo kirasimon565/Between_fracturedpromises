@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../app/constants.dart';
 import '../../services/story_engine.dart';
 import '../../theme/colors.dart';
 import '../../theme/theme.dart';
@@ -36,11 +37,23 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> {
         backgroundColor: AppColors.makeloveBackground,
         elevation: 0,
       ),
-      body: ListView(
-        children: [
-          _buildMatchTile("Daniel", "Curiosity killed the cat...", "Now"),
-        ],
-      ),
+      body: Obx(() {
+        final threads = _engine.activeThreads.where((t) {
+          // Filter for secret contacts (Daniel)
+          return t.id.toLowerCase() == 'daniel';
+        }).toList();
+
+        return ListView.builder(
+          itemCount: threads.length,
+          itemBuilder: (context, index) {
+            final thread = threads[index];
+            final lastMsg = thread.messages.last;
+            final name = thread.id[0].toUpperCase() + thread.id.substring(1);
+
+            return _buildMatchTile(name, lastMsg.content, "Now");
+          },
+        );
+      }),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppColors.makeloveBackground,
         selectedItemColor: AppColors.makelovePrimary,
@@ -66,6 +79,7 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> {
         leading: CircleAvatar(
           radius: 25,
           backgroundColor: AppColors.makelovePrimary,
+          backgroundImage: AssetImage(AppConstants.getAvatarPath(name)),
           child: Text(name[0], style: TextStyle(color: Colors.white)),
         ),
         title: Text(name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),

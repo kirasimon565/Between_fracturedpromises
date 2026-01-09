@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import '../../app/constants.dart';
 import '../../models/message.dart';
 import '../../services/story_engine.dart';
 import '../../widgets/typing_indicator.dart';
@@ -29,7 +30,7 @@ class MakeloveChatScreen extends StatelessWidget {
                padding: EdgeInsets.all(2),
                decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.makelovePrimary),
                child: CircleAvatar(
-                 backgroundImage: AssetImage('assets/avatars/${partnerName.toLowerCase()}.png'), // Assuming logic
+                 backgroundImage: AssetImage(AppConstants.getAvatarPath(partnerName)),
                  backgroundColor: Colors.black,
                  child: Text(partnerName[0]),
                ),

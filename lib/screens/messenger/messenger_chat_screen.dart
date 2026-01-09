@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import '../../app/constants.dart';
 import '../../models/message.dart';
 import '../../services/story_engine.dart';
 import '../../widgets/typing_indicator.dart';
@@ -25,7 +26,10 @@ class MessengerChatScreen extends StatelessWidget {
         elevation: 1,
         title: Row(
           children: [
-            CircleAvatar(child: Text(partnerName[0])),
+            CircleAvatar(
+              backgroundImage: AssetImage(AppConstants.getAvatarPath(partnerName)),
+              child: Text(partnerName[0])
+            ),
             SizedBox(width: 10),
             Text(partnerName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ],
