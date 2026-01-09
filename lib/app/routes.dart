@@ -11,6 +11,11 @@ import '../screens/admin/admin_dashboard.dart';
 import '../screens/admin/episode_uploader.dart';
 import '../screens/messenger/messenger_chat_screen.dart';
 import '../screens/makelove/makelove_chat_screen.dart';
+import '../screens/profile/profile_screen.dart';
+import '../screens/profile/profile_edit_screen.dart';
+import '../screens/gallery/gallery_screen.dart';
+import '../screens/endgame/endgame_screen.dart';
+import '../screens/secret/secret_chat_screen.dart';
 
 class AppRoutes {
   static const splash = '/splash';
@@ -25,6 +30,12 @@ class AppRoutes {
   static const makeloveChat = '/makelove/chat';
   static const adminUploader = '/admin/uploader';
 
+  static const profile = '/profile';
+  static const profileEdit = '/profile/edit';
+  static const gallery = '/gallery';
+  static const endgame = '/endgame';
+  static const secret = '/secret';
+
   static final routes = [
     GetPage(name: splash, page: () => SplashScreen()),
     GetPage(name: welcome, page: () => WelcomeScreen()),
@@ -37,5 +48,10 @@ class AppRoutes {
     GetPage(name: adminDialpad, page: () => DialpadScreen()),
     GetPage(name: adminDashboard, page: () => AdminDashboard()),
     GetPage(name: adminUploader, page: () => EpisodeUploader()),
+    GetPage(name: profile, page: () => ProfileScreen()),
+    GetPage(name: profileEdit, page: () => ProfileEditScreen()),
+    GetPage(name: gallery, page: () => GalleryScreen()),
+    GetPage(name: endgame, page: () => EndgameScreen()),
+    GetPage(name: secret, page: () => SecretChatScreen()),
   ];
 }

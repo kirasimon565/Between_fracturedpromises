@@ -93,11 +93,17 @@ class StoryEngine extends GetxService {
   }
 
   List<Message> getMessagesForThread(String partnerName) {
-    // Return all messages where sender is partner OR sender is nadia (assuming single linear story context for now)
-    // In a real complex graph, we'd need a threadId on the message.
-    // For this demo, we assume if it's in the log, and it's Nadia, it belongs to the current context.
-    // We will just filter by the partner for now + Nadia's adjacent messages.
-    // SIMPLIFICATION: Just return all for now to test UI, or filter strictly.
-    return unlockedMessages.where((m) => m.sender.name == partnerName || m.sender == Sender.nadia).toList();
+    return unlockedMessages.where((m) {
+      if (m.sender == Sender.system) return false;
+
+      final bool isFromPartner = m.sender.name.toLowerCase() == partnerName.toLowerCase();
+      final bool isFromMeToPartner = m.sender == Sender.nadia &&
+                                     m.recipient?.toLowerCase() == partnerName.toLowerCase();
+
+      // Fallback for demo: if no recipient set on Nadia's msg, assume it matches strictly
+      // based on adjacent logic or just don't show to be safe.
+      // But for this patch, we have updated the JSON to include recipients.
+      return isFromPartner || isFromMeToPartner;
+    }).toList();
   }
 }

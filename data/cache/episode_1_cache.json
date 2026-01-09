@@ -8,6 +8,7 @@
         {
           "id": "m1",
           "sender": "nadia",
+          "recipient": "ethan",
           "content": "Hey, are you coming home soon?",
           "type": "text",
           "delay": 0
@@ -15,6 +16,7 @@
         {
           "id": "m2",
           "sender": "ethan",
+          "recipient": "nadia",
           "content": "Stuck at the office again. Don't wait up.",
           "type": "text",
           "delay": 2000
@@ -22,6 +24,7 @@
         {
           "id": "m3",
           "sender": "nadia",
+          "recipient": "ethan",
           "content": "Okay... love you.",
           "type": "text",
           "delay": 1500
@@ -29,6 +32,7 @@
         {
           "id": "m4",
           "sender": "claire",
+          "recipient": "nadia",
           "content": "He's late again?",
           "type": "text",
           "delay": 3000
@@ -36,6 +40,7 @@
         {
           "id": "m5",
           "sender": "nadia",
+          "recipient": "claire",
           "content": "Yeah. It's fine.",
           "type": "text",
           "delay": 1000
@@ -55,6 +60,7 @@
         {
           "id": "m7",
           "sender": "daniel",
+          "recipient": "nadia",
           "content": "So, what brings a girl like you to a place like this?",
           "type": "text",
           "delay": 1000
@@ -62,6 +68,7 @@
         {
           "id": "m8",
           "sender": "nadia",
+          "recipient": "daniel",
           "content": "Just curiosity.",
           "type": "text",
           "delay": 2000
@@ -69,6 +76,7 @@
          {
           "id": "m9",
           "sender": "daniel",
+          "recipient": "nadia",
           "content": "Curiosity killed the cat, but satisfaction brought it back ;)",
           "type": "text",
           "delay": 2000

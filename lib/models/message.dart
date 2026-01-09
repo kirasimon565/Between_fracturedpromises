@@ -9,6 +9,7 @@ enum Sender { nadia, ethan, claire, olivia, daniel, liam, system }
 class Message {
   final String id;
   final Sender sender;
+  final String? recipient; // Name of the intended recipient (e.g. 'ethan', 'daniel')
   final String content;
   final MessageType type;
   final int delay; // milliseconds before showing
@@ -16,6 +17,7 @@ class Message {
   Message({
     required this.id,
     required this.sender,
+    this.recipient,
     required this.content,
     this.type = MessageType.text,
     this.delay = 1000,

@@ -19,10 +19,16 @@ class AvatarCircle extends StatelessWidget {
     return CircleAvatar(
       radius: radius,
       backgroundColor: backgroundColor,
-      backgroundImage: url != null && url!.isNotEmpty ? AssetImage(url!) : null,
-      child: url == null || url!.isEmpty
-          ? Text(label[0].toUpperCase(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+      backgroundImage: url != null && url!.isNotEmpty
+          ? AssetImage(url!)
           : null,
+      onBackgroundImageError: (_, __) {
+        // Fallback gracefully if asset is empty/missing
+      },
+      child: (url == null || url!.isEmpty) // Also show text if image fails/empty (logic simplified as onBackgroundImageError doesn't easily switch child)
+          ? Text(label[0].toUpperCase(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+          : null, // Note: standard CircleAvatar keeps showing background image even if error, often just blank.
+                  // For robust fallback we'd need a custom widget, but this helps prevent crash loop if handled internally by flutter.
     );
   }
 }

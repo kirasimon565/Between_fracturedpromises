@@ -9,6 +9,7 @@ part of 'message.dart';
 Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       id: json['id'] as String,
       sender: $enumDecode(_$SenderEnumMap, json['sender']),
+      recipient: json['recipient'] as String?,
       content: json['content'] as String,
       type: $enumDecodeNullable(_$MessageTypeEnumMap, json['type']) ??
           MessageType.text,
@@ -18,6 +19,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'id': instance.id,
       'sender': _$SenderEnumMap[instance.sender]!,
+      'recipient': instance.recipient,
       'content': instance.content,
       'type': _$MessageTypeEnumMap[instance.type]!,
       'delay': instance.delay,
