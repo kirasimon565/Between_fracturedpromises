@@ -1,0 +1,79 @@
+{
+  "id": "episode_1",
+  "title": "The Spark",
+  "scenes": [
+    {
+      "id": "scene_1",
+      "messages": [
+        {
+          "id": "m1",
+          "sender": "nadia",
+          "content": "Hey, are you coming home soon?",
+          "type": "text",
+          "delay": 0
+        },
+        {
+          "id": "m2",
+          "sender": "ethan",
+          "content": "Stuck at the office again. Don't wait up.",
+          "type": "text",
+          "delay": 2000
+        },
+        {
+          "id": "m3",
+          "sender": "nadia",
+          "content": "Okay... love you.",
+          "type": "text",
+          "delay": 1500
+        },
+        {
+          "id": "m4",
+          "sender": "claire",
+          "content": "He's late again?",
+          "type": "text",
+          "delay": 3000
+        },
+        {
+          "id": "m5",
+          "sender": "nadia",
+          "content": "Yeah. It's fine.",
+          "type": "text",
+          "delay": 1000
+        },
+        {
+          "id": "m6",
+          "sender": "system",
+          "content": "Nadia installs Makelove...",
+          "type": "text",
+          "delay": 5000
+        }
+      ]
+    },
+    {
+      "id": "scene_2",
+      "messages": [
+        {
+          "id": "m7",
+          "sender": "daniel",
+          "content": "So, what brings a girl like you to a place like this?",
+          "type": "text",
+          "delay": 1000
+        },
+        {
+          "id": "m8",
+          "sender": "nadia",
+          "content": "Just curiosity.",
+          "type": "text",
+          "delay": 2000
+        },
+         {
+          "id": "m9",
+          "sender": "daniel",
+          "content": "Curiosity killed the cat, but satisfaction brought it back ;)",
+          "type": "text",
+          "delay": 2000
+        }
+      ]
+    }
+  ]
+}
