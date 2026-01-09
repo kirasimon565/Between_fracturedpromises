@@ -6,6 +6,7 @@ import '../../widgets/typing_indicator.dart';
 import '../../theme/colors.dart';
 import 'makelove_bubble.dart';
 import '../../widgets/chat_input_bar.dart';
+import '../../widgets/choice_overlay.dart';
 
 class MakeloveChatScreen extends StatelessWidget {
   final String partnerName;

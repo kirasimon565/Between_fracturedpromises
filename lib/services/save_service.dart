@@ -16,4 +16,10 @@ class SaveService extends GetxService {
 
     print("Game saved: $episodeId / $sceneId");
   }
+
+  // Example method to load a specific save slot (simulated)
+  Future<void> loadSaveSlot(int slotIndex) async {
+    // In a real app, read from ApplicationDocumentsDirectory/save_$slotIndex.json
+    print("Loading save slot $slotIndex...");
+  }
 }
