@@ -19,11 +19,24 @@ class StateService extends GetxService {
     return this;
   }
 
+  final RxMap<String, dynamic> variables = <String, dynamic>{}.obs;
+
   void updateProgress(String episodeId, String sceneId) {
     currentEpisodeId.value = episodeId;
     currentSceneId.value = sceneId;
     _prefs.setString('current_episode', episodeId);
     _prefs.setString('current_scene', sceneId);
+  }
+
+  void setVariable(String key, dynamic value) {
+    variables[key] = value;
+    // Simple persistence for variables (could be optimized)
+    _prefs.setString('var_$key', value.toString());
+  }
+
+  void recordChoice(String choiceId) {
+    // Save choice history logic here
+    print("Choice recorded: $choiceId");
   }
 
   void unlockAdmin() {

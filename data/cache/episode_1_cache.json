@@ -23,92 +23,80 @@
         },
         {
           "id": "m3",
-          "sender": "nadia",
-          "recipient": "ethan",
-          "content": "Okay... love you.",
-          "type": "text",
-          "delay": 1500
-        },
-        {
-          "id": "m4",
           "sender": "claire",
           "recipient": "nadia",
           "content": "He's late again?",
           "type": "text",
           "delay": 3000
+        }
+      ],
+      "choices": [
+        {
+          "id": "c1_reply_claire",
+          "text": "Complain to Claire",
+          "nextSceneId": "scene_2_claire",
+          "impact": {"suspicion_claire": 10}
         },
         {
-          "id": "m5",
-          "sender": "nadia",
-          "recipient": "claire",
-          "content": "Yeah. It's fine.",
-          "type": "text",
-          "delay": 1000
-        },
-        {
-          "id": "m6",
-          "sender": "system",
-          "content": "Nadia installs Makelove...",
-          "type": "text",
-          "delay": 5000
+          "id": "c1_ignore_claire",
+          "text": "Ignore her",
+          "nextSceneId": "scene_2_solo",
+          "impact": {"trust_ethan": 55}
         }
       ]
     },
     {
-      "id": "scene_2",
+      "id": "scene_2_claire",
+      "messages": [
+        {
+          "id": "m4",
+          "sender": "nadia",
+          "recipient": "claire",
+          "content": "Yeah. It's getting ridiculous.",
+          "type": "text",
+          "delay": 1000
+        },
+        {
+          "id": "m5",
+          "sender": "claire",
+          "recipient": "nadia",
+          "content": "You deserve better, hun.",
+          "type": "text",
+          "delay": 2000
+        }
+      ],
+      "defaultNextScene": "scene_3_app"
+    },
+    {
+      "id": "scene_2_solo",
+      "messages": [
+        {
+          "id": "m6",
+          "sender": "system",
+          "content": "Nadia sighs and puts the phone down.",
+          "type": "text",
+          "delay": 2000
+        }
+      ],
+      "defaultNextScene": "scene_3_app"
+    },
+    {
+      "id": "scene_3_app",
       "messages": [
         {
           "id": "m7",
+          "sender": "system",
+          "content": "Nadia installs Makelove...",
+          "type": "text",
+          "delay": 3000
+        },
+        {
+          "id": "m8",
           "sender": "daniel",
           "recipient": "nadia",
           "content": "So, what brings a girl like you to a place like this?",
           "type": "text",
-          "delay": 1000
-        },
-        {
-          "id": "m8",
-          "sender": "nadia",
-          "recipient": "daniel",
-          "content": "Just curiosity.",
-          "type": "text",
           "delay": 2000
-        },
-         {
-          "id": "m9",
-          "sender": "daniel",
-          "recipient": "nadia",
-          "content": "Curiosity killed the cat, but satisfaction brought it back ;)",
-          "type": "text",
-          "delay": 2000
-        }
-      ]
-    },
-    {
-      "id": "scene_3",
-      "messages": [
-         {
-          "id": "m10",
-          "sender": "ethan",
-          "recipient": "nadia",
-          "content": "I'm heading back now. See you in 20.",
-          "type": "text",
-          "delay": 1000
-        },
-        {
-          "id": "m11",
-          "sender": "nadia",
-          "recipient": "ethan",
-          "content": "Okay, drive safe.",
-          "type": "text",
-          "delay": 1500
-        },
-        {
-          "id": "m12",
-          "sender": "daniel",
-          "recipient": "nadia",
-          "content": "Tell me a secret, Nadia.",
-          "type": "text",
-          "delay": 3000
         }
       ]
     }

@@ -62,7 +62,15 @@ class MessengerChatScreen extends StatelessWidget {
               );
             }),
           ),
-          ChatInputBar(), // Visual only for now
+          Obx(() {
+            if (_engine.currentChoices.isNotEmpty) {
+               return ChoiceOverlay(
+                 choices: _engine.currentChoices.map((c) => c.text).toList(),
+                 onSelected: (index) => _engine.makeChoice(_engine.currentChoices[index])
+               );
+            }
+            return ChatInputBar();
+          }),
         ],
       ),
     );
