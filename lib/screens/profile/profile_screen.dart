@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../app/constants.dart';
 import '../../theme/colors.dart';
 import 'profile_controller.dart';
 import 'verification_badge.dart';
@@ -31,7 +32,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 60,
-                  backgroundImage: AssetImage('assets/avatars/nadia.png'),
+                  backgroundImage: AssetImage(AppConstants.avatarNadia),
                   backgroundColor: Colors.grey,
                 ),
                 Positioned(

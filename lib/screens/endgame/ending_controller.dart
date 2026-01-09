@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../app/constants.dart';
 import '../../models/ending.dart';
 
 class EndingController extends GetxController {
@@ -8,6 +9,6 @@ class EndingController extends GetxController {
     type: EndingType.fractured,
     title: "Fractured",
     description: "You chose to stay, but the trust is gone.",
-    imagePath: 'assets/gallery/ending_fractured.png'
+    imagePath: AppConstants.galleryEndingFractured
   ).obs;
 }

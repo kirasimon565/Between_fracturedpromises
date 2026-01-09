@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../app/constants.dart';
 import '../../app/routes.dart';
 import '../../theme/colors.dart';
 import 'app_icon.dart';
@@ -15,7 +16,7 @@ class HomeScreen extends StatelessWidget {
           // Wallpaper
           Positioned.fill(
             child: Image.asset(
-              'assets/backgrounds/default.png',
+              AppConstants.bgDefault,
               fit: BoxFit.cover,
               errorBuilder: (c,e,s) => Container(color: Colors.black),
             ),
