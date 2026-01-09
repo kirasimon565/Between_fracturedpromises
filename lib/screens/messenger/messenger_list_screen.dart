@@ -77,8 +77,7 @@ class _MessengerListScreenState extends State<MessengerListScreen> {
         ],
       ),
       onTap: () {
-        // Navigate to chat detail (not implemented in this pass, showing placeholder)
-        Get.snackbar("Navigating", "Opening chat with $name");
+        Get.toNamed('/messenger/chat', arguments: name);
       },
     );
   }

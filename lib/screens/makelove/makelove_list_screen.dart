@@ -72,7 +72,7 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> {
         subtitle: Text(lastMessage, style: TextStyle(color: Colors.white70)),
         trailing: Icon(Icons.chevron_right, color: Colors.grey),
         onTap: () {
-           Get.snackbar("Secret Chat", "Opening chat with $name");
+           Get.toNamed('/makelove/chat', arguments: name);
         },
       ),
     );

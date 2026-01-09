@@ -18,7 +18,7 @@ class AdminDashboard extends StatelessWidget {
             title: "Episode Uploader",
             icon: Icons.cloud_upload,
             desc: "Upload JSON episodes to Firestore",
-            onTap: () {},
+            onTap: () => Get.toNamed('/admin/uploader'),
           ),
           _buildAdminCard(
             title: "Live Ops",
