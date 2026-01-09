@@ -82,6 +82,35 @@
           "delay": 2000
         }
       ]
+    },
+    {
+      "id": "scene_3",
+      "messages": [
+         {
+          "id": "m10",
+          "sender": "ethan",
+          "recipient": "nadia",
+          "content": "I'm heading back now. See you in 20.",
+          "type": "text",
+          "delay": 1000
+        },
+        {
+          "id": "m11",
+          "sender": "nadia",
+          "recipient": "ethan",
+          "content": "Okay, drive safe.",
+          "type": "text",
+          "delay": 1500
+        },
+        {
+          "id": "m12",
+          "sender": "daniel",
+          "recipient": "nadia",
+          "content": "Tell me a secret, Nadia.",
+          "type": "text",
+          "delay": 3000
+        }
+      ]
     }
   ]
 }
