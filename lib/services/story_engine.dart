@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'firestore_service.dart';
 import 'state_service.dart';
 import '../utils/delays.dart';
+import '../models/scene.dart';
 
 class StoryEngine extends GetxService {
   final FirestoreService _firestore = Get.find<FirestoreService>();
