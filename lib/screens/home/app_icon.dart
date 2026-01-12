@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 
 class AppIcon extends StatelessWidget {
   final String label;
-  final IconData icon;
-  final Color color;
+  final String assetPath; // Changed from IconData
   final VoidCallback onTap;
 
   const AppIcon({
     Key? key,
     required this.label,
-    required this.icon,
-    required this.color,
+    required this.assetPath,
     required this.onTap,
   }) : super(key: key);
 
@@ -21,22 +19,24 @@ class AppIcon extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(15),
+          // Using Image.asset to show your custom designed app icons
+          SizedBox(
+            width: 62,
+            height: 62,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Image.asset(assetPath, fit: BoxFit.cover),
             ),
-            child: Icon(icon, color: Colors.white, size: 30),
           ),
-          SizedBox(height: 5),
+          const SizedBox(height: 6),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
-              fontSize: 12,
-              shadows: [Shadow(color: Colors.black, blurRadius: 2)]
+              fontSize: 11,
+              fontWeight: FontWeight.w300,
+              letterSpacing: 0.5,
+              shadows: [Shadow(color: Colors.black54, blurRadius: 4)]
             )
           ),
         ],
