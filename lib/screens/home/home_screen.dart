@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app/constants.dart';
 import '../../app/routes.dart';
-import '../../theme/colors.dart';
 import 'app_icon.dart';
 import 'status_bar.dart';
 
@@ -10,18 +9,18 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Phone wallpaper
       body: Stack(
         children: [
-          // Wallpaper
+          // WALLPAPER: Your specific art
           Positioned.fill(
             child: Image.asset(
-              AppConstants.bgDefault,
+              AppConstants.bgHome,
               fit: BoxFit.cover,
-              errorBuilder: (c,e,s) => Container(color: Colors.black),
             ),
           ),
-          // Content
+          // Darken wallpaper slightly to make icons readable
+          Container(color: Colors.black.withOpacity(0.2)),
+          
           SafeArea(
             child: Column(
               children: [
@@ -29,34 +28,34 @@ class HomeScreen extends StatelessWidget {
                 Expanded(
                   child: GridView.count(
                     crossAxisCount: 4,
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
+                    mainAxisSpacing: 25,
                     children: [
                       AppIcon(
                         label: "Messenger",
-                        icon: Icons.chat_bubble,
-                        color: AppColors.messengerPrimary,
+                        assetPath: AppConstants.iconMessenger, // Use your PNG
                         onTap: () => Get.toNamed(AppRoutes.messenger)
                       ),
                       AppIcon(
                         label: "Makelove",
-                        icon: Icons.favorite,
-                        color: AppColors.makelovePrimary,
+                        assetPath: AppConstants.iconMakelove, // Use your PNG
                         onTap: () => Get.toNamed(AppRoutes.makelove)
                       ),
                       AppIcon(
                         label: "Settings",
-                        icon: Icons.settings,
-                        color: Colors.grey,
+                        assetPath: AppConstants.iconSettings,
                         onTap: () => Get.toNamed(AppRoutes.settings)
                       ),
                       AppIcon(
                         label: "Gallery",
-                        icon: Icons.photo_library,
-                        color: Colors.purple,
+                        assetPath: AppConstants.iconGallery,
                         onTap: () => Get.toNamed(AppRoutes.gallery)
                       ),
-                      // Placeholder apps
-                      AppIcon(label: "Camera", icon: Icons.camera_alt, color: Colors.grey[800]!, onTap: () {}),
+                      AppIcon(
+                        label: "Camera", 
+                        assetPath: AppConstants.iconCamera, 
+                        onTap: () {}
+                      ),
                     ],
                   ),
                 ),
@@ -71,18 +70,26 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildDock() {
     return Container(
+      margin: const EdgeInsets.fromLTRB(15, 0, 15, 20),
       height: 90,
-      color: Colors.white.withOpacity(0.1),
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15), // Glassmorphism dock
+        borderRadius: BorderRadius.circular(30),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-           Icon(Icons.phone, color: Colors.green, size: 40),
-           Icon(Icons.public, color: Colors.blue, size: 40),
-           Icon(Icons.message, color: Colors.greenAccent, size: 40),
-           Icon(Icons.music_note, color: Colors.redAccent, size: 40),
+           _dockItem(AppConstants.iconPhone),
+           _dockItem(AppConstants.iconBrowser),
+           _dockItem(AppConstants.iconMessenger),
+           _dockItem(AppConstants.iconApp), // Your music/theme icon
         ],
       ),
     );
+  }
+
+  Widget _dockItem(String asset) {
+    return Image.asset(asset, width: 55, height: 55);
   }
 }
