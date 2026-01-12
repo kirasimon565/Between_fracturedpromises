@@ -8,45 +8,56 @@ class AdminDashboard extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.adminBackground,
       appBar: AppBar(
-        title: Text("Admin Dashboard"),
-        backgroundColor: Colors.grey[900],
+        title: const Text("ROOT@SYSTEM: ~ / DASHBOARD", style: TextStyle(fontSize: 14, letterSpacing: 1)),
+        backgroundColor: Colors.black,
         foregroundColor: AppColors.adminText,
+        elevation: 0,
       ),
       body: ListView(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(25),
         children: [
           _buildAdminCard(
-            title: "Episode Uploader",
-            icon: Icons.cloud_upload,
-            desc: "Upload JSON episodes to Firestore",
+            title: "EPISODE UPLOADER",
+            icon: Icons.terminal,
+            desc: "Inject JSON script to Firestore cloud",
             onTap: () => Get.toNamed('/admin/uploader'),
           ),
           _buildAdminCard(
-            title: "Live Ops",
-            icon: Icons.flash_on,
-            desc: "Hotfix dialogue, push notifications",
+            title: "LIVE OPS HOTFIX",
+            icon: Icons.bolt,
+            desc: "Modify variables and active threads",
             onTap: () {},
           ),
           _buildAdminCard(
-            title: "Analytics",
-            icon: Icons.bar_chart,
-            desc: "View player progress and choices",
+            title: "STORY ANALYTICS",
+            icon: Icons.analytics_outlined,
+            desc: "Monitor global player choices",
             onTap: () {},
           ),
+          const SizedBox(height: 40),
+          Center(
+            child: TextButton(
+              onPressed: () => Get.offAllNamed('/home'),
+              child: Text("EXIT TO SYSTEM", style: TextStyle(color: AppColors.adminText.withOpacity(0.5))),
+            ),
+          )
         ],
       ),
     );
   }
 
   Widget _buildAdminCard({required String title, required IconData icon, required String desc, required VoidCallback onTap}) {
-    return Card(
-      color: Colors.grey[900],
-      margin: EdgeInsets.only(bottom: 15),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.adminText.withOpacity(0.2)),
+        color: Colors.white.withOpacity(0.02),
+      ),
       child: ListTile(
-        leading: Icon(icon, color: AppColors.adminText, size: 40),
-        title: Text(title, style: TextStyle(color: AppColors.adminText, fontWeight: FontWeight.bold)),
-        subtitle: Text(desc, style: TextStyle(color: Colors.white70)),
-        trailing: Icon(Icons.arrow_forward_ios, color: Colors.white30),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        leading: Icon(icon, color: AppColors.adminText, size: 30),
+        title: Text(title, style: TextStyle(color: AppColors.adminText, fontWeight: FontWeight.bold, letterSpacing: 1)),
+        subtitle: Text(desc, style: const TextStyle(color: Colors.white38, fontSize: 12)),
         onTap: onTap,
       ),
     );
