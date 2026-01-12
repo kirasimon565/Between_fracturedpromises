@@ -15,7 +15,7 @@ class _StatusBarState extends State<StatusBar> {
   void initState() {
     super.initState();
     _timeString = _formatTime(DateTime.now());
-    _timer = Timer.periodic(Duration(seconds: 10), (Timer t) => _getTime());
+    _timer = Timer.periodic(const Duration(seconds: 10), (Timer t) => _getTime());
   }
 
   @override
@@ -26,32 +26,26 @@ class _StatusBarState extends State<StatusBar> {
 
   void _getTime() {
     final String formattedDateTime = _formatTime(DateTime.now());
-    if (mounted) {
-      setState(() {
-        _timeString = formattedDateTime;
-      });
-    }
+    if (mounted) setState(() => _timeString = formattedDateTime);
   }
 
-  String _formatTime(DateTime dateTime) {
-    return DateFormat('h:mm').format(dateTime);
-  }
+  String _formatTime(DateTime dateTime) => DateFormat('HH:mm').format(dateTime);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(_timeString, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          Row(
+          Text(_timeString, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w400)),
+          const Row(
             children: [
-              Icon(Icons.signal_cellular_4_bar, color: Colors.white, size: 16),
-              SizedBox(width: 5),
-              Icon(Icons.wifi, color: Colors.white, size: 16),
-              SizedBox(width: 5),
-              Icon(Icons.battery_full, color: Colors.white, size: 16),
+              Icon(Icons.signal_cellular_alt, color: Colors.white, size: 14),
+              SizedBox(width: 6),
+              Icon(Icons.wifi, color: Colors.white, size: 14),
+              SizedBox(width: 6),
+              Icon(Icons.battery_4_bar, color: Colors.white, size: 14),
             ],
           ),
         ],
