@@ -1,9 +1,15 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
 }
+
+// BREAK THE STACK OVERFLOW: 
+// Manually setting the build directory prevents the recursive "AgpDecorated" loop.
+layout.buildDirectory.set(file("${project.projectDir}/build"))
 
 android {
     namespace = "com.between.fracturedpromises"
@@ -31,8 +37,8 @@ android {
     }
 
     buildTypes {
+        // Use the lambda syntax to avoid the PostProcessing circular reference
         release {
-            // Using debug signing for now to ensure the build completes
             signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             isShrinkResources = false
