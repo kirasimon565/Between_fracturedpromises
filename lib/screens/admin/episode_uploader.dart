@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../services/firestore_service.dart';
+import '../../theme/colors.dart';
 
 class EpisodeUploader extends StatefulWidget {
   @override
@@ -14,18 +15,23 @@ class _EpisodeUploaderState extends State<EpisodeUploader> {
   bool _isLoading = false;
 
   void _upload() async {
-    if (_idController.text.isEmpty || _jsonController.text.isEmpty) return;
+    if (_idController.text.isEmpty || _jsonController.text.isEmpty) {
+      Get.snackbar("Error", "Required fields empty", colorText: Colors.red);
+      return;
+    }
 
     setState(() => _isLoading = true);
     try {
-      // Validate JSON
-      // In real app, we'd use jsonDecode check
-      await _firestore.uploadEpisode(_idController.text, {
-        'raw_data': _jsonController.text // Simplified for demo
+      // Logic for Firebase upload
+      await _firestore.uploadEpisode(_idController.text.trim(), {
+        'episode_id': _idController.text,
+        'content': _jsonController.text,
+        'timestamp': DateTime.now().toIso8601String(),
       });
-      Get.snackbar("Success", "Episode uploaded!");
+      Get.snackbar("Success", "Episode ${_idController.text} is now live!", 
+        backgroundColor: Colors.green, colorText: Colors.white);
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      Get.snackbar("Upload Failed", e.toString(), backgroundColor: Colors.red);
     } finally {
       setState(() => _isLoading = false);
     }
@@ -34,30 +40,52 @@ class _EpisodeUploaderState extends State<EpisodeUploader> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Upload Episode")),
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text("EPISODE UPLOADER", style: TextStyle(fontSize: 13)),
+        backgroundColor: Colors.black,
+        foregroundColor: AppColors.adminText,
+      ),
       body: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             TextField(
               controller: _idController,
-              decoration: InputDecoration(labelText: "Episode ID (e.g. episode_2)"),
+              style: TextStyle(color: AppColors.adminText),
+              decoration: InputDecoration(
+                labelText: "EPISODE_ID",
+                labelStyle: TextStyle(color: AppColors.adminText.withOpacity(0.5)),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.adminText.withOpacity(0.2))),
+              ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 20),
             Expanded(
               child: TextField(
                 controller: _jsonController,
                 maxLines: null,
+                style: const TextStyle(color: Colors.white70, fontSize: 12, fontFamily: 'monospace'),
                 decoration: InputDecoration(
-                  labelText: "Paste JSON Here",
-                  border: OutlineInputBorder(),
+                  labelText: "PASTE SCRIPT JSON",
+                  labelStyle: TextStyle(color: AppColors.adminText.withOpacity(0.5)),
+                  alignLabelWithHint: true,
+                  fillColor: Colors.white.withOpacity(0.02),
+                  filled: true,
+                  border: const OutlineInputBorder(borderSide: BorderSide.none),
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(onPressed: _upload, child: Text("UPLOAD TO FIRESTORE"))
+                ? const CircularProgressIndicator(color: Colors.green)
+                : SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.adminText.withOpacity(0.1)),
+                      onPressed: _upload, 
+                      child: Text("EXECUTE UPLOAD", style: TextStyle(color: AppColors.adminText))
+                    ),
+                  )
           ],
         ),
       ),
