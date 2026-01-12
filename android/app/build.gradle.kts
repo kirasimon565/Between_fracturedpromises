@@ -2,12 +2,10 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-    // Keep this if you have the google-services.json in place
     id("com.google.gms.google-services")
 }
 
 android {
-    // 1. Set namespace IMMEDIATELY to stop circular guessing
     namespace = "com.between.fracturedpromises"
     compileSdk = 34
 
@@ -20,9 +18,9 @@ android {
         jvmTarget = "17"
     }
 
+    // Explicitly defining this avoids the circular directory mapping loop
     defaultConfig {
         applicationId = "com.between.fracturedpromises"
-        // 2. Hardcode these temporarily to break the property loop
         minSdk = 21
         targetSdk = 34
         versionCode = 1
@@ -30,11 +28,13 @@ android {
     }
 
     buildTypes {
+        // BREAK THE LOOP: Define release directly without using 'getByName'
+        // This prevents the "PostProcessingBlock" from initializing prematurely
         release {
-            // 3. Force debug signing to prevent loop on keystore checks
             signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             isShrinkResources = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }
