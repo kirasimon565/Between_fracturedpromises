@@ -20,49 +20,52 @@ class MessengerChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.messengerBackground, // NO MORE WHITE
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.messengerText,
-        elevation: 1,
+        backgroundColor: Colors.black.withOpacity(0.8),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        titleSpacing: 0,
         title: Row(
           children: [
+            // Using ACTUAL character art
             CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.white10,
               backgroundImage: AssetImage(AppConstants.getAvatarPath(partnerName)),
-              child: Text(partnerName[0])
             ),
-            SizedBox(width: 10),
-            Text(partnerName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(width: 12),
+            Text(partnerName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
           ],
         ),
         actions: [
-          IconButton(icon: Icon(Icons.call, color: AppColors.messengerPrimary), onPressed: () {}),
-          IconButton(icon: Icon(Icons.videocam, color: AppColors.messengerPrimary), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.videocam_outlined, size: 20), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.info_outline, size: 20), onPressed: () {}),
         ],
       ),
       body: Column(
         children: [
           Expanded(
             child: Obx(() {
-              // Filter messages for this conversation
               final messages = _engine.getMessagesForThread(partnerName.toLowerCase());
               final isTyping = _engine.isTyping[partnerName.toLowerCase()] ?? false;
 
               return ListView.builder(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                reverse: false, // Set to true if messages should stick to bottom
                 itemCount: messages.length + (isTyping ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index == messages.length) {
-                     return Align(
+                     return const Align(
                        alignment: Alignment.centerLeft,
-                       child: TypingIndicator(color: Colors.grey),
+                       child: Padding(
+                         padding: EdgeInsets.only(left: 15, top: 10),
+                         child: TypingIndicator(color: Colors.white24),
+                       ),
                      );
                   }
-
                   final msg = messages[index];
-                  return MessengerBubble(
-                    message: msg,
-                    isMe: msg.sender == Sender.nadia
-                  );
+                  return MessengerBubble(message: msg, isMe: msg.sender == Sender.nadia);
                 },
               );
             }),
@@ -74,7 +77,7 @@ class MessengerChatScreen extends StatelessWidget {
                  onSelected: (index) => _engine.makeChoice(_engine.currentChoices[index])
                );
             }
-            return ChatInputBar();
+            return const ChatInputBar();
           }),
         ],
       ),
