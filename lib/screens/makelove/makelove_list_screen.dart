@@ -17,77 +17,67 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> {
   @override
   void initState() {
     super.initState();
-    // Force Secret Theme
     _themeService.setSecretMode(true);
-  }
-
-  @override
-  void dispose() {
-    // Revert to Safe Theme on exit
-    _themeService.setSecretMode(false);
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.makeloveBackground,
       appBar: AppBar(
-        title: Text("Makelove", style: TextStyle(fontFamily: 'Cursive', fontSize: 28)),
+        title: const Text("MAKELOVE", style: TextStyle(letterSpacing: 6, fontSize: 16, fontWeight: FontWeight.w300)),
         centerTitle: true,
-        backgroundColor: AppColors.makeloveBackground,
+        backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: Obx(() {
-        final threads = _engine.activeThreads.where((t) {
-          // Filter for secret contacts (Daniel)
-          return t.id.toLowerCase() == 'daniel';
-        }).toList();
+        final threads = _engine.activeThreads.where((t) => t.id.toLowerCase() == 'daniel').toList();
 
         return ListView.builder(
           itemCount: threads.length,
           itemBuilder: (context, index) {
             final thread = threads[index];
             final lastMsg = thread.messages.last;
-            final name = thread.id[0].toUpperCase() + thread.id.substring(1);
+            final name = thread.id.toUpperCase();
 
-            return _buildMatchTile(name, lastMsg.content, "Now");
+            return _buildMatchTile(name, lastMsg.content);
           },
         );
       }),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: AppColors.makeloveBackground,
-        selectedItemColor: AppColors.makelovePrimary,
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Matches"),
-          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble), label: "Chats"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
-      ),
     );
   }
 
-  Widget _buildMatchTile(String name, String lastMessage, String time) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: AppColors.makelovePrimary.withOpacity(0.3)),
-      ),
-      child: ListTile(
-        leading: CircleAvatar(
-          radius: 25,
-          backgroundColor: AppColors.makelovePrimary,
-          backgroundImage: AssetImage(AppConstants.getAvatarPath(name)),
-          child: Text(name[0], style: TextStyle(color: Colors.white)),
+  Widget _buildMatchTile(String name, String lastMessage) {
+    return GestureDetector(
+      onTap: () => Get.toNamed('/makelove/chat', arguments: name),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        height: 120,
+        decoration: BoxDecoration(
+          // Use the portrait as the background for the tile
+          image: DecorationImage(
+            image: AssetImage(AppConstants.getAvatarPath(name)),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
+          ),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: AppColors.makelovePrimary.withOpacity(0.4)),
         ),
-        title: Text(name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        subtitle: Text(lastMessage, style: TextStyle(color: Colors.white70)),
-        trailing: Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: () {
-           Get.toNamed('/makelove/chat', arguments: name);
-        },
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 2)),
+              Text(
+                lastMessage, 
+                maxLines: 1, 
+                style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12, fontStyle: FontStyle.italic)
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
