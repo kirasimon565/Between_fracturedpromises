@@ -14,47 +14,56 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.makeloveBackground,
       appBar: AppBar(
-        title: Text("My Profile"),
+        title: const Text("PROFIL", style: TextStyle(letterSpacing: 4, fontSize: 14)), // International system feel
         backgroundColor: Colors.transparent,
         elevation: 0,
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.edit, color: AppColors.makelovePrimary),
+            icon: const Icon(Icons.tune, color: Colors.white70, size: 20), // More "Settings" style icon
             onPressed: () => Get.toNamed('/profile/edit'),
           )
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 30),
         child: Column(
           children: [
-            Stack(
-              children: [
-                CircleAvatar(
-                  radius: 60,
-                  backgroundImage: AssetImage(AppConstants.avatarNadia),
-                  backgroundColor: Colors.grey,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: VerificationBadge(),
-                ),
-              ],
+            const SizedBox(height: 20),
+            Center(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Outer decorative ring
+                  Container(
+                    width: 130,
+                    height: 130,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.makelovePrimary.withOpacity(0.3), width: 1),
+                    ),
+                  ),
+                  CircleAvatar(
+                    radius: 58,
+                    backgroundImage: AssetImage(AppConstants.avatarNadia), // Your Nadia asset
+                  ),
+                  Positioned(bottom: 5, right: 5, child: VerificationBadge()),
+                ],
+              ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 25),
             Obx(() => Text(
-                  "${controller.name.value}, ${controller.age.value}",
-                  style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                )),
-            SizedBox(height: 30),
-            Obx(() => ProfileInfoCard(
-              title: "Bio",
-              content: controller.bio.value,
-              icon: Icons.format_quote
+              "${controller.name.value.toUpperCase()}, ${controller.age.value}",
+              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w300, letterSpacing: 2),
             )),
-            ProfileInfoCard(title: "Location", content: "New York, NY", icon: Icons.location_on),
-            ProfileInfoCard(title: "Occupation", content: "Graphic Designer", icon: Icons.work),
+            const SizedBox(height: 40),
+            Obx(() => ProfileInfoCard(
+              title: "STATUS / BIO",
+              content: controller.bio.value,
+              icon: Icons.notes,
+            )),
+            const ProfileInfoCard(title: "CURRENT LOCATION", content: "NEW YORK, NY", icon: Icons.map_outlined),
+            const ProfileInfoCard(title: "DESIGNATED ROLE", content: "GRAPHIC DESIGNER", icon: Icons.terminal_outlined),
           ],
         ),
       ),
