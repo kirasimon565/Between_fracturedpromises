@@ -10,14 +10,28 @@ class GalleryViewer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      // Fully immersive: the image is the only focus
+      extendBodyBehindAppBar: true, 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        iconTheme: IconThemeData(color: Colors.white),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.white70),
+          onPressed: () => Get.back(),
+        ),
       ),
-      body: Center(
-        child: Hero(
-          tag: imagePath,
-          child: Image.asset(imagePath, fit: BoxFit.contain),
+      body: GestureDetector(
+        onVerticalDragEnd: (_) => Get.back(), // Swipe away to close
+        child: Center(
+          child: Hero(
+            tag: imagePath,
+            child: InteractiveViewer( // Allows zooming into "evidence"
+              panEnabled: true,
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Image.asset(imagePath, fit: BoxFit.contain),
+            ),
+          ),
         ),
       ),
     );
