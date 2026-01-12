@@ -1,17 +1,4 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
-buildscript {
-    val kotlinVersion = "1.9.0"
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath("com.android.tools.build:gradle:8.1.1")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("com.google.gms:google-services:4.3.15") // Updated for better .kts compatibility
-    }
-}
+// Root build.gradle.kts
 
 allprojects {
     repositories {
@@ -20,12 +7,13 @@ allprojects {
     }
 }
 
-val newBuildDir = rootProject.layout.buildDirectory.dir("../../build")
-rootProject.layout.buildDirectory.set(newBuildDir)
+// Fixed Directory Logic: Use the project name to prevent circular mapping
+val rootBuildDir = rootProject.layout.buildDirectory.dir("../../build")
+rootProject.layout.buildDirectory.set(rootBuildDir)
 
 subprojects {
-    val newSubprojectBuildDir = rootProject.layout.buildDirectory.dir(project.name)
-    project.layout.buildDirectory.set(newSubprojectBuildDir)
+    val subprojectBuildDir = rootProject.layout.buildDirectory.dir(project.name)
+    project.layout.buildDirectory.set(subprojectBuildDir)
 }
 
 subprojects {
