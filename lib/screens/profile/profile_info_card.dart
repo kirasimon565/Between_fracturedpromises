@@ -9,13 +9,26 @@ class ProfileInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white10,
-      margin: EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.white70),
-        title: Text(title, style: TextStyle(color: Colors.white54, fontSize: 12)),
-        subtitle: Text(content, style: TextStyle(color: Colors.white, fontSize: 16)),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)), // Sleek thin separator
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white24, size: 18),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 1.5)),
+                const SizedBox(height: 4),
+                Text(content, style: const TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.w300)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
