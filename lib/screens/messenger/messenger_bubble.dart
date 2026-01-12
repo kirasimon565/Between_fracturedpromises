@@ -14,8 +14,11 @@ class MessengerBubble extends StatelessWidget {
     if (message.sender == Sender.system) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Text(message.content, style: AppTextStyles.messengerCaption),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Text(
+            message.content.toUpperCase(), 
+            style: AppTextStyles.messengerCaption.copyWith(letterSpacing: 2, color: Colors.white38)
+          ),
         ),
       );
     }
@@ -23,21 +26,27 @@ class MessengerBubble extends StatelessWidget {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
-        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        margin: EdgeInsets.only(
+          top: 4, 
+          bottom: 4, 
+          left: isMe ? 60 : 12, 
+          right: isMe ? 12 : 60
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
+          // Use the Noir colors from our new theme
           color: isMe ? AppColors.messengerBubbleSelf : AppColors.messengerBubbleOther,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(18),
-            topRight: Radius.circular(18),
-            bottomLeft: isMe ? Radius.circular(18) : Radius.circular(4),
-            bottomRight: isMe ? Radius.circular(4) : Radius.circular(18),
+            topLeft: const Radius.circular(12),
+            topRight: const Radius.circular(12),
+            bottomLeft: Radius.circular(isMe ? 12 : 2),
+            bottomRight: Radius.circular(isMe ? 2 : 12),
           ),
         ),
         child: Text(
           message.content,
           style: AppTextStyles.messengerBody.copyWith(
-            color: isMe ? Colors.white : Colors.black,
+            color: Colors.white.withOpacity(0.9), // Cleaner white text for dark mode
           ),
         ),
       ),
