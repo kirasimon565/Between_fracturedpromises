@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app/constants.dart';
-import '../../models/message.dart';
 import '../../services/story_engine.dart';
 import '../../theme/colors.dart';
 
@@ -16,7 +15,6 @@ class _MessengerListScreenState extends State<MessengerListScreen> {
   @override
   void initState() {
     super.initState();
-    // In a real app, this might be called elsewhere or checked if already loaded
     if (_engine.currentEpisode.value == null) {
       _engine.loadEpisode('episode_1');
     }
@@ -25,74 +23,52 @@ class _MessengerListScreenState extends State<MessengerListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.messengerBackground,
       appBar: AppBar(
-        title: Text("Chats"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        title: const Text("MESSAGES", style: TextStyle(letterSpacing: 2, fontSize: 14)),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: Obx(() {
         if (_engine.currentEpisode.value == null) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator(color: Colors.white24));
         }
 
-        final threads = _engine.activeThreads.where((t) {
-          // Filter out secret contacts (Daniel)
-          return t.id.toLowerCase() != 'daniel';
-        }).toList();
+        final threads = _engine.activeThreads.where((t) => t.id.toLowerCase() != 'daniel').toList();
 
-        return ListView.separated(
+        return ListView.builder(
           itemCount: threads.length,
-          separatorBuilder: (c, i) => Divider(height: 1),
           itemBuilder: (context, index) {
             final thread = threads[index];
             final lastMsg = thread.messages.last;
-            // Capitalize first letter
             final name = thread.id[0].toUpperCase() + thread.id.substring(1);
 
-            return _buildChatTile(
-              name,
-              lastMsg.content,
-              "Now", // TODO: Real timestamp
-              true // TODO: Read status
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tileColor: Colors.white.withOpacity(0.03),
+                leading: CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.white10,
+                  backgroundImage: AssetImage(AppConstants.getAvatarPath(name)),
+                ),
+                title: Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+                subtitle: Text(
+                  lastMsg.content,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                ),
+                trailing: Text("NOW", style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 10)),
+                onTap: () => Get.toNamed('/messenger/chat', arguments: name),
+              ),
             );
           },
         );
       }),
-    );
-  }
-
-  Widget _buildChatTile(String name, String lastMessage, String time, bool unread) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundImage: AssetImage(AppConstants.getAvatarPath(name)),
-        backgroundColor: Colors.grey[300],
-        child: Text(name[0]),
-      ),
-      title: Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(
-        lastMessage,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontWeight: unread ? FontWeight.bold : FontWeight.normal),
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(time, style: TextStyle(fontSize: 12, color: Colors.grey)),
-          if (unread)
-            Container(
-              margin: EdgeInsets.only(top: 5),
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(color: AppColors.messengerPrimary, shape: BoxShape.circle),
-            )
-        ],
-      ),
-      onTap: () {
-        Get.toNamed('/messenger/chat', arguments: name);
-      },
     );
   }
 }
