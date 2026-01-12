@@ -1,17 +1,14 @@
-import java.util.Properties
+// 1. We move the plugins out of the top block to stop the 'Decorated' loop
+apply(plugin = "com.android.application")
+apply(plugin = "kotlin-android")
+apply(plugin = "dev.flutter.flutter-gradle-plugin")
+apply(plugin = "com.google.gms.google-services")
 
-plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services")
-}
-
-// BREAK THE STACK OVERFLOW: 
-// Manually setting the build directory prevents the recursive "AgpDecorated" loop.
+// 2. Break the directory calculation loop immediately
 layout.buildDirectory.set(file("${project.projectDir}/build"))
 
 android {
+    // Required for AGP 8.0+
     namespace = "com.between.fracturedpromises"
     compileSdk = 34
 
@@ -37,7 +34,7 @@ android {
     }
 
     buildTypes {
-        // Use the lambda syntax to avoid the PostProcessing circular reference
+        // We use 'create' or direct access to avoid the AgpDecorated StackOverflow
         release {
             signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
