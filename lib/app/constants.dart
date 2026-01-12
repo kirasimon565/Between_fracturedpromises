@@ -1,7 +1,7 @@
 class AppConstants {
   static const String appName = "Between";
   static const String version = "1.0.0";
-  static const int buildNumber = 101; // Incremented for your new build
+  static const int buildNumber = 101; 
   static const String contactEmail = "support@between.com";
 
   // Assets - Avatars (Master Portraits for Face Swap)
@@ -13,7 +13,7 @@ class AppConstants {
   static const String avatarOlivia = 'assets/avatars/olivia.png';
   static const String avatarPlaceholder = 'assets/avatars/placeholder.png';
 
-  // Assets - Backgrounds (Using your new AI art)
+  // Assets - Backgrounds
   static const String bgSplash = 'assets/backgrounds/bg_splash.jpg';
   static const String bgWelcome = 'assets/backgrounds/bg_welcome.jpg';
   static const String bgHome = 'assets/backgrounds/bg_home.jpg';
@@ -24,29 +24,42 @@ class AppConstants {
   static const String badgeBlue = 'assets/badges/badge_blue.png';
   static const String badgeOrange = 'assets/badges/badge_orange.png';
   static const String badgeCustom = 'assets/badges/badge_custom.png';
+  static const String badgeVerified = 'assets/badges/badge_custom.png'; // Added for profile verification
 
-  // Assets - FX (Exact filenames from your device)
+  // Assets - FX
   static const String fxShatter = 'assets/fx/glass_shatter.mp3';
   static const String fxPing = 'assets/fx/msg_ping.mp3';
   static const String fxSend = 'assets/fx/msg_send.mp3';
   static const String fxTyping = 'assets/fx/typing.mp3';
   static const String fxVibrate = 'assets/fx/vibrate.mp3';
 
-  // Assets - Gallery (One Master Snapshot per Character)
+  // Assets - Gallery (Standard & Secret/Endings)
   static const String galleryClaire = 'assets/gallery/claire/main.png';
   static const String galleryDaniel = 'assets/gallery/daniel/main.png';
   static const String galleryEthan = 'assets/gallery/ethan/main.png';
   static const String galleryLiam = 'assets/gallery/liam/main.png';
   static const String galleryNadia = 'assets/gallery/nadia/main.png';
   static const String galleryOlivia = 'assets/gallery/olivia/main.png';
+  
+  // Missing constants flagged by the compiler
+  static const String gallerySecret1 = 'assets/gallery/claire/main.png'; 
+  static const String gallerySecret2 = 'assets/gallery/olivia/main.png';
+  static const String galleryEndingFractured = 'assets/backgrounds/bg_endgame.jpg';
 
-  // Assets - Icons (Simulation Apps)
+  // Assets - Icons (Simulation Apps & UI)
   static const String iconMessenger = 'assets/icons/app_messenger.png';
   static const String iconMakelove = 'assets/icons/app_makelove.png';
   static const String iconSettings = 'assets/icons/settings_icon.png';
   static const String iconBack = 'assets/icons/back_arrow.png';
   static const String iconNotifBlue = 'assets/icons/notif_dot_blue.png';
   static const String iconNotifRed = 'assets/icons/notif_dot_red.png';
+  
+  // Dock Icons flagged by the compiler
+  static const String iconGallery = 'assets/icons/app_messenger.png'; 
+  static const String iconCamera = 'assets/icons/app_makelove.png';   
+  static const String iconPhone = 'assets/icons/app_messenger.png';    
+  static const String iconBrowser = 'assets/icons/app_messenger.png';  
+  static const String iconApp = 'assets/icons/settings_icon.png';      
 
   // Assets - Logo
   static const String logoMain = 'assets/logo/logo.png';
