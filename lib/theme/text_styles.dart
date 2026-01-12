@@ -1,42 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'colors.dart';
 
 class AppTextStyles {
-  // Messenger (Safe) Styles
-  static final TextStyle messengerTitle = GoogleFonts.inter(
-    fontSize: 17,
+  // Use "Questrial" or "Montserrat" for a more modern, cinematic feel
+  static final TextStyle messengerTitle = GoogleFonts.montserrat(
+    fontSize: 18,
     fontWeight: FontWeight.w600,
-    color: Colors.black,
+    color: AppColors.messengerText,
+    letterSpacing: 1.2,
   );
 
   static final TextStyle messengerBody = GoogleFonts.inter(
     fontSize: 15,
-    fontWeight: FontWeight.normal,
-    color: Colors.black,
+    color: AppColors.messengerText,
+    height: 1.4,
   );
 
-  static final TextStyle messengerCaption = GoogleFonts.inter(
-    fontSize: 12,
-    fontWeight: FontWeight.w400,
-    color: Colors.grey[600],
-  );
-
-  // Makelove (Secret) Styles
-  static final TextStyle makeloveTitle = GoogleFonts.lato(
-    fontSize: 18,
+  // Makelove Styles (More intimate/dangerous)
+  static final TextStyle makeloveTitle = GoogleFonts.playfairDisplay(
+    fontSize: 20,
     fontWeight: FontWeight.bold,
     color: Colors.white,
-  );
-
-  static final TextStyle makeloveBody = GoogleFonts.lato(
-    fontSize: 16,
-    fontWeight: FontWeight.normal,
-    color: Colors.white,
-  );
-
-  static final TextStyle makeloveCaption = GoogleFonts.lato(
-    fontSize: 12,
-    fontWeight: FontWeight.w300,
-    color: Colors.white70,
+    fontStyle: FontStyle.italic,
   );
 }
