@@ -1,4 +1,5 @@
 // Root build.gradle.kts
+// Cleaned version to stop the StackOverflow loop
 
 allprojects {
     repositories {
@@ -7,14 +8,8 @@ allprojects {
     }
 }
 
-// Fixed Directory Logic: Use the project name to prevent circular mapping
-val rootBuildDir = rootProject.layout.buildDirectory.dir("../../build")
-rootProject.layout.buildDirectory.set(rootBuildDir)
-
-subprojects {
-    val subprojectBuildDir = rootProject.layout.buildDirectory.dir(project.name)
-    project.layout.buildDirectory.set(subprojectBuildDir)
-}
+// We remove the manual "layout.buildDirectory" remapping here.
+// Gradle will use the default /build folders, which stops the recursion.
 
 subprojects {
     project.evaluationDependsOn(":app")
