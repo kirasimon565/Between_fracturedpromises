@@ -1,28 +1,13 @@
-// 1. We move the plugins out of the top block to stop the 'Decorated' loop
-apply(plugin = "com.android.application")
-apply(plugin = "kotlin-android")
-apply(plugin = "dev.flutter.flutter-gradle-plugin")
-apply(plugin = "com.google.gms.google-services")
-
-// 2. Break the directory calculation loop immediately
-layout.buildDirectory.set(file("${project.projectDir}/build"))
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
+}
 
 android {
-    // Required for AGP 8.0+
     namespace = "com.between.fracturedpromises"
     compileSdk = 34
-
-    sourceSets {
-        getByName("main").java.srcDirs("src/main/kotlin")
-    }
-
-    defaultConfig {
-        applicationId = "com.between.fracturedpromises"
-        minSdk = 21
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
-    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -33,8 +18,15 @@ android {
         jvmTarget = "17"
     }
 
+    defaultConfig {
+        applicationId = "com.between.fracturedpromises"
+        minSdk = 21
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0.0"
+    }
+
     buildTypes {
-        // We use 'create' or direct access to avoid the AgpDecorated StackOverflow
         release {
             signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
