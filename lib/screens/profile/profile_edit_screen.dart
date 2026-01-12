@@ -18,40 +18,44 @@ class ProfileEditScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.makeloveBackground,
       appBar: AppBar(
-        title: Text("Edit Profile"),
-        backgroundColor: Colors.transparent,
+        title: const Text("MODIFIKASI", style: TextStyle(fontSize: 13, letterSpacing: 2)),
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: IconButton(icon: const Icon(Icons.close, size: 20), onPressed: () => Get.back()),
         actions: [
-          IconButton(
-            icon: Icon(Icons.check, color: AppColors.makelovePrimary),
+          TextButton(
             onPressed: () {
               controller.saveProfile(nameController.text, bioController.text);
               Get.back();
             },
+            child: const Text("SAVE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           )
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(30),
         child: Column(
           children: [
             TextField(
               controller: nameController,
-              style: TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: "Name",
-                labelStyle: TextStyle(color: Colors.grey),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w300),
+              decoration: const InputDecoration(
+                labelText: "NAME IDENTIFIER",
+                labelStyle: TextStyle(color: Colors.white38, fontSize: 12),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white10)),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.redAccent)),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 30),
             TextField(
               controller: bioController,
-              style: TextStyle(color: Colors.white),
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: "Bio",
-                labelStyle: TextStyle(color: Colors.grey),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w300, height: 1.5),
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: "PERSONAL BIOGRAPHY",
+                labelStyle: TextStyle(color: Colors.white38, fontSize: 12),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white10)),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.redAccent)),
               ),
             ),
           ],
