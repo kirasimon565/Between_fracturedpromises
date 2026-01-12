@@ -22,56 +22,55 @@ class MakeloveChatScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.makeloveBackground,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.black,
         elevation: 0,
-        title: Row(
+        centerTitle: true,
+        title: Column(
           children: [
-             Container(
-               padding: EdgeInsets.all(2),
-               decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.makelovePrimary),
-               child: CircleAvatar(
-                 backgroundImage: AssetImage(AppConstants.getAvatarPath(partnerName)),
-                 backgroundColor: Colors.black,
-                 child: Text(partnerName[0]),
-               ),
-             ),
-            SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Text(
+              partnerName.toUpperCase(), 
+              style: const TextStyle(color: Colors.white, fontSize: 14, letterSpacing: 3)
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(partnerName, style: TextStyle(color: Colors.white, fontSize: 16)),
-                Text("Online", style: TextStyle(color: AppColors.makelovePrimary, fontSize: 12)),
+                Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
+                const SizedBox(width: 6),
+                const Text("LIVE", style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
               ],
             ),
           ],
         ),
-        actions: [
-          IconButton(icon: Icon(Icons.more_horiz, color: Colors.white), onPressed: () {}),
-        ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.white54),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: Column(
         children: [
+          // Visual separator line
+          Container(height: 1, color: AppColors.makelovePrimary.withOpacity(0.2)),
           Expanded(
             child: Obx(() {
               final messages = _engine.getMessagesForThread(partnerName.toLowerCase());
               final isTyping = _engine.isTyping[partnerName.toLowerCase()] ?? false;
 
               return ListView.builder(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 itemCount: messages.length + (isTyping ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index == messages.length) {
-                     return Align(
+                     return const Align(
                        alignment: Alignment.centerLeft,
-                       child: TypingIndicator(color: AppColors.makelovePrimary),
+                       child: Padding(
+                         padding: EdgeInsets.only(left: 20),
+                         child: TypingIndicator(color: Colors.redAccent),
+                       ),
                      );
                   }
-
                   final msg = messages[index];
-                  return MakeloveBubble(
-                    message: msg,
-                    isMe: msg.sender == Sender.nadia
-                  );
+                  return MakeloveBubble(message: msg, isMe: msg.sender == Sender.nadia);
                 },
               );
             }),
@@ -83,7 +82,7 @@ class MakeloveChatScreen extends StatelessWidget {
                  onSelected: (index) => _engine.makeChoice(_engine.currentChoices[index])
                );
             }
-            return ChatInputBar();
+            return const ChatInputBar();
           }),
         ],
       ),
