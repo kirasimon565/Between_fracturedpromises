@@ -30,18 +30,17 @@ plugins {
 
 include(":app")
 
-// Logic for Flutter plugins
-val flutterProjectRoot = settingsDir.toPath().parent
-val pluginsProperties = Properties()
+// Improved Plugin Loading Logic
+val flutterProjectRoot = settingsDir.parentFile.toPath()
 val pluginsFile = File(flutterProjectRoot.toFile(), ".flutter-plugins")
 if (pluginsFile.exists()) {
+    val pluginsProperties = Properties()
     pluginsFile.inputStream().use { pluginsProperties.load(it) }
-}
-
-pluginsProperties.forEach { name, path ->
-    val pluginDirectory = flutterProjectRoot.resolve(path.toString()).resolve("android").toFile()
-    if (pluginDirectory.exists()) {
-        include(":$name")
-        project(":$name").projectDir = pluginDirectory
+    pluginsProperties.forEach { name, path ->
+        val pluginDirectory = flutterProjectRoot.resolve(path.toString()).resolve("android").toFile()
+        if (pluginDirectory.exists()) {
+            include(":$name")
+            project(":$name").projectDir = pluginDirectory
+        }
     }
 }
