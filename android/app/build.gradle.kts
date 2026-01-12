@@ -1,29 +1,15 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // Note: The flutter plugin is usually applied in settings.gradle.kts 
-    // but kept here if your setup requires it.
     id("dev.flutter.flutter-gradle-plugin")
+    // Keep this if you have the google-services.json in place
     id("com.google.gms.google-services")
 }
 
 android {
-    // This must match your package name
+    // 1. Set namespace IMMEDIATELY to stop circular guessing
     namespace = "com.between.fracturedpromises"
     compileSdk = 34
-
-    sourceSets {
-        getByName("main").java.srcDirs("src/main/kotlin")
-    }
-
-    defaultConfig {
-        applicationId = "com.between.fracturedpromises"
-        // Use the flutter extension directly to avoid circular references
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
-    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -34,9 +20,18 @@ android {
         jvmTarget = "17"
     }
 
+    defaultConfig {
+        applicationId = "com.between.fracturedpromises"
+        // 2. Hardcode these temporarily to break the property loop
+        minSdk = 21
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0.0"
+    }
+
     buildTypes {
-        getByName("release") {
-            // For now, we use debug signing to ensure the build finishes
+        release {
+            // 3. Force debug signing to prevent loop on keystore checks
             signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             isShrinkResources = false
