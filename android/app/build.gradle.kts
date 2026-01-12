@@ -5,20 +5,12 @@ plugins {
     id("com.google.gms.google-services")
 }
 
-// BREAK THE LOOP: Manually set the build directory to stop circular evaluation
-layout.buildDirectory.set(file("${project.projectDir}/build"))
-
 android {
     namespace = "com.between.fracturedpromises"
     compileSdk = 34
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
+    sourceSets {
+        getByName("main").java.srcDirs("src/main/kotlin")
     }
 
     defaultConfig {
@@ -29,12 +21,21 @@ android {
         versionName = "1.0.0"
     }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
     buildTypes {
         release {
-            // Force standard behavior to avoid "PostProcessingBlock" circularity
+            // Using debug signing for now to ensure the build completes
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             isShrinkResources = false
-            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
