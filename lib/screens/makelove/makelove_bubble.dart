@@ -11,33 +11,40 @@ class MakeloveBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message.sender == Sender.system) return SizedBox.shrink();
+    if (message.sender == Sender.system) return const SizedBox.shrink();
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isMe ? AppColors.makeloveBubbleSelf : AppColors.makeloveBubbleOther,
+          // Sharp edges to match the "Fractured" aesthetic
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-            bottomLeft: isMe ? Radius.circular(20) : Radius.circular(0),
-            bottomRight: isMe ? Radius.circular(0) : Radius.circular(20),
+            topLeft: const Radius.circular(4),
+            topRight: const Radius.circular(4),
+            bottomLeft: Radius.circular(isMe ? 4 : 0),
+            bottomRight: Radius.circular(isMe ? 0 : 4),
+          ),
+          border: Border.all(
+            color: isMe ? AppColors.makelovePrimary.withOpacity(0.5) : Colors.white10,
+            width: 0.5,
           ),
           boxShadow: [
-            BoxShadow(
-              color: isMe ? AppColors.makelovePrimary.withOpacity(0.4) : Colors.black12,
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            )
+            if (isMe) 
+              BoxShadow(
+                color: AppColors.makelovePrimary.withOpacity(0.2),
+                blurRadius: 10,
+                spreadRadius: 1,
+              )
           ]
         ),
         child: Text(
           message.content,
           style: AppTextStyles.makeloveBody.copyWith(
-            color: Colors.white,
+            color: Colors.white.withOpacity(0.9),
+            letterSpacing: 0.3,
           ),
         ),
       ),
