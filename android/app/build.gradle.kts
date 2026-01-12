@@ -5,6 +5,9 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+// BREAK THE LOOP: Manually set the build directory to stop circular evaluation
+layout.buildDirectory.set(file("${project.projectDir}/build"))
+
 android {
     namespace = "com.between.fracturedpromises"
     compileSdk = 34
@@ -18,7 +21,6 @@ android {
         jvmTarget = "17"
     }
 
-    // Explicitly defining this avoids the circular directory mapping loop
     defaultConfig {
         applicationId = "com.between.fracturedpromises"
         minSdk = 21
@@ -28,13 +30,11 @@ android {
     }
 
     buildTypes {
-        // BREAK THE LOOP: Define release directly without using 'getByName'
-        // This prevents the "PostProcessingBlock" from initializing prematurely
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            // Force standard behavior to avoid "PostProcessingBlock" circularity
             isMinifyEnabled = false
             isShrinkResources = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
