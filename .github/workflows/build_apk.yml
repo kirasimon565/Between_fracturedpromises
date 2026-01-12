@@ -2,7 +2,7 @@ name: Build Flutter APK
 
 on:
   push:
-    branches: [ main ] # Runs automatically when you push code
+    branches: [ setup-between-project-11757872405521559736 ] # Runs automatically when you push code
 
 jobs:
   build:
