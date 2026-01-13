@@ -82,7 +82,7 @@ class MakeloveChatScreen extends StatelessWidget {
                  onSelected: (index) => _engine.makeChoice(_engine.currentChoices[index])
                );
             }
-            return const ChatInputBar();
+            return ChatInputBar();
           }),
         ],
       ),
