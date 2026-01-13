@@ -84,37 +84,35 @@ jobs:
           else
             echo "⚠️ google-services.json NOT found - Firebase features may not work"
             echo "Creating a placeholder google-services.json for build purposes"
-            cat > android/app/google-services.json << 'EOFGOOGLE'
-{
-  "project_info": {
-    "project_number": "123456789",
-    "project_id": "placeholder-project",
-    "storage_bucket": "placeholder-project.appspot.com"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:123456789:android:abcdef1234567890",
-        "android_client_info": {
-          "package_name": "com.between.fracturedpromises"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDummyKeyForBuildPurposes123456789"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    }
-  ],
-  "configuration_version": "1"
-}
-EOFGOOGLE
+            echo '{
+              "project_info": {
+                "project_number": "123456789",
+                "project_id": "placeholder-project",
+                "storage_bucket": "placeholder-project.appspot.com"
+              },
+              "client": [
+                {
+                  "client_info": {
+                    "mobilesdk_app_id": "1:123456789:android:abcdef1234567890",
+                    "android_client_info": {
+                      "package_name": "com.between.fracturedpromises"
+                    }
+                  },
+                  "oauth_client": [],
+                  "api_key": [
+                    {
+                      "current_key": "AIzaSyDummyKeyForBuildPurposes123456789"
+                    }
+                  ],
+                  "services": {
+                    "appinvite_service": {
+                      "other_platform_oauth_client": []
+                    }
+                  }
+                }
+              ],
+              "configuration_version": "1"
+            }' > android/app/google-services.json
           fi
 
       - name: Clean build
