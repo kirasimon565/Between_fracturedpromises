@@ -77,6 +77,46 @@ jobs:
             -keyalg RSA -keysize 2048 -validity 10000 \
             -dname "CN=Android Debug,O=Android,C=US"
 
+      - name: Check for google-services.json
+        run: |
+          if [ -f "android/app/google-services.json" ]; then
+            echo "✅ google-services.json found"
+          else
+            echo "⚠️ google-services.json NOT found - Firebase features may not work"
+            echo "Creating a placeholder google-services.json for build purposes"
+            cat > android/app/google-services.json << 'EOFGOOGLE'
+{
+  "project_info": {
+    "project_number": "123456789",
+    "project_id": "placeholder-project",
+    "storage_bucket": "placeholder-project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123456789:android:abcdef1234567890",
+        "android_client_info": {
+          "package_name": "com.between.fracturedpromises"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDummyKeyForBuildPurposes123456789"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+EOFGOOGLE
+          fi
+
       - name: Clean build
         run: flutter clean
 
@@ -99,7 +139,38 @@ jobs:
       - name: Build APK (all architectures)
         id: build_apk
         continue-on-error: true
-        run: flutter build apk --release --split-per-abi --verbose 2>&1 | tee build_log.txt
+        run: |
+          set +e
+          flutter build apk --release --split-per-abi --verbose > build_log.txt 2>&1
+          BUILD_EXIT=$?
+          echo "BUILD_EXIT_CODE=$BUILD_EXIT" >> $GITHUB_ENV
+          cat build_log.txt
+          exit $BUILD_EXIT
+
+      - name: Show last 200 lines of build log
+        if: always()
+        run: |
+          echo "=== Checking if build_log.txt exists ==="
+          ls -lh build_log.txt || echo "build_log.txt not found"
+          echo ""
+          echo "=== File size ==="
+          wc -l build_log.txt || echo "Cannot count lines"
+          echo ""
+          echo "=== Last 200 lines of build output ==="
+          tail -200 build_log.txt 2>/dev/null || echo "Cannot read build log"
+          
+      - name: Extract Gradle errors
+        if: always()
+        run: |
+          echo "=== Searching for error messages ==="
+          grep -i "error" build_log.txt | tail -50 || echo "No errors found in log"
+          echo ""
+          echo "=== Searching for exceptions ==="
+          grep -i "exception" build_log.txt | tail -20 || echo "No exceptions found"
+          echo ""
+          grep -A 10 "FAILURE: Build failed" build_log.txt || echo "No Gradle failure message found"
+          echo ""
+          grep -A 5 "What went wrong:" build_log.txt || echo "No 'What went wrong' section found"
 
       - name: Check build directory structure
         if: always()
