@@ -56,23 +56,61 @@ jobs:
       - name: Clean build
         run: flutter clean
 
+      - name: Check Gradle wrapper
+        run: |
+          echo "=== Gradle wrapper version ==="
+          cd android
+          ./gradlew --version
+          cd ..
+
       - name: Build APK (all architectures)
-        run: flutter build apk --release --split-per-abi --verbose
+        id: build_apk
+        continue-on-error: true
+        run: flutter build apk --release --split-per-abi --verbose 2>&1 | tee build_log.txt
+
+      - name: Check build directory structure
+        if: always()
+        run: |
+          echo "=== Checking if build directory exists ==="
+          ls -la build/ || echo "build directory not found"
+          echo ""
+          echo "=== Checking build/app if it exists ==="
+          ls -la build/app/ || echo "build/app directory not found"
+          echo ""
+          echo "=== Full directory tree of build ==="
+          find build -type d 2>/dev/null || echo "No build directory found"
 
       - name: Search for APK files
         if: always()
         run: |
           echo "=== Searching for all APK files ==="
-          find build -name "*.apk" -type f
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found anywhere"
           echo ""
           echo "=== Checking standard output directory ==="
-          ls -la build/app/outputs/flutter-apk/ || echo "flutter-apk directory not found"
+          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "flutter-apk directory not found"
           echo ""
           echo "=== Checking all output directories ==="
-          find build/app/outputs -type d
+          find build/app/outputs -type d 2>/dev/null || echo "No outputs directory"
           echo ""
           echo "=== Checking for any APK in outputs ==="
-          find build/app/outputs -name "*.apk" -type f
+          find build/app/outputs -name "*.apk" -type f 2>/dev/null || echo "No APK in outputs"
+      
+      - name: Check Gradle build logs
+        if: always()
+        run: |
+          echo "=== Checking for Gradle daemon logs ==="
+          find ~/.gradle -name "*.log" -type f -exec echo "File: {}" \; -exec tail -100 {} \; 2>/dev/null || echo "No Gradle logs found"
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build_log.txt
+
+      - name: Fail if build failed
+        if: steps.build_apk.outcome == 'failure'
+        run: exit 1
 
       - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v4
