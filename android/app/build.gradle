@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace "com.between.fracturedpromises"
-    compileSdk 34
+    compileSdk 36
 
     sourceSets {
         main.java.srcDirs += 'src/main/java'
@@ -17,7 +17,7 @@ android {
     defaultConfig {
         applicationId "com.between.fracturedpromises"
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 36
         versionCode 1
         versionName "1.0.0"
     }
