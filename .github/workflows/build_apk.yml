@@ -64,10 +64,8 @@ jobs:
           rm -f android/local.properties
           
           # Create new local.properties with correct CI paths
-          cat > android/local.properties << EOF
-flutter.sdk=$FLUTTER_ROOT
-sdk.dir=$ANDROID_SDK_ROOT
-EOF
+          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+          echo "sdk.dir=$ANDROID_SDK_ROOT" >> android/local.properties
           
           echo "=== Contents of local.properties ==="
           cat android/local.properties
