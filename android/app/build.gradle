@@ -49,3 +49,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
+
+// Apply the Flutter plugin dependencies (modern declarative way)
+apply plugin: 'com.google.gms.google-services'
