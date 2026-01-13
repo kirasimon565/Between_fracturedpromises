@@ -40,6 +40,19 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate Gradle wrapper if missing
+        run: |
+          if [ ! -f "android/gradlew" ]; then
+            echo "Gradle wrapper not found, generating..."
+            cd android
+            gradle wrapper --gradle-version 8.7 --distribution-type all
+            chmod +x gradlew
+            cd ..
+          else
+            echo "Gradle wrapper exists"
+            chmod +x android/gradlew
+          fi
+
       - name: Configure local.properties
         run: |
           echo "flutter.sdk=$FLUTTER_HOME" > android/local.properties
@@ -55,6 +68,15 @@ jobs:
 
       - name: Clean build
         run: flutter clean
+
+      - name: Generate Gradle wrapper
+        run: |
+          cd android
+          gradle wrapper --gradle-version 8.7
+          cd ..
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x android/gradlew
 
       - name: Check Gradle wrapper
         run: |
