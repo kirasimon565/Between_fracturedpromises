@@ -30,7 +30,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: '8.7'
+          gradle-version: '8.9'
 
       - name: Verify Flutter installation
         run: |
@@ -50,7 +50,7 @@ jobs:
           if [ ! -f "android/gradlew" ]; then
             echo "Gradle wrapper not found, generating..."
             cd android
-            gradle wrapper --gradle-version 8.7 --distribution-type all
+            gradle wrapper --gradle-version 8.9 --distribution-type all
             chmod +x gradlew
             cd ..
           else
