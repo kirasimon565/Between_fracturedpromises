@@ -5,7 +5,6 @@ plugins {
     id "com.google.gms.google-services"
 }
 
-// 1. LOCATE FLUTTER SDK: This ensures the script knows where to look for the engine
 def flutterRoot = System.getenv('FLUTTER_ROOT')
 if (flutterRoot == null) {
     def localProperties = new Properties()
@@ -21,7 +20,6 @@ android {
     compileSdk 34
 
     sourceSets {
-        // Pointing to the new Java directory we created
         main.java.srcDirs += 'src/main/java'
         main.java.srcDirs += 'src/main/kotlin'
     }
@@ -57,14 +55,14 @@ flutter {
 }
 
 dependencies {
-    // 2. FORCE LINKING: This fixes the "package io.flutter does not exist" error
-    if (flutterRoot != null) {
-        compileOnly fileTree(dir: "$flutterRoot/bin/cache/artifacts/engine/android-arm64-release", include: ['*.jar'])
-        compileOnly fileTree(dir: "$flutterRoot/bin/cache/artifacts/engine/android-x64-release", include: ['*.jar'])
-        compileOnly fileTree(dir: "$flutterRoot/bin/cache/artifacts/engine/android-x86-release", include: ['*.jar'])
-    }
-
+    // Standard Firebase dependencies
     implementation platform('com.google.firebase:firebase-bom:33.7.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+}
+
+// THE FIX: This line forces the Flutter tool to inject all plugin dependencies 
+// into the Java/Kotlin classpath so the compiler can see Firebase, Firestore, etc.
+if (flutterRoot != null) {
+    apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 }
