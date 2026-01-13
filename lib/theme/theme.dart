@@ -6,8 +6,14 @@ class ThemeService extends GetxService {
   final _isSecretMode = false.obs;
   bool get isSecretMode => _isSecretMode.value;
 
+  // FIX: Added the specific method the screens are calling
+  void setSecretMode(bool enabled) {
+    _isSecretMode.value = enabled;
+    Get.changeTheme(enabled ? secretTheme : safeTheme);
+  }
+
   ThemeData get safeTheme => ThemeData(
-    brightness: Brightness.dark, // Changed from Light to Dark
+    brightness: Brightness.dark,
     primaryColor: AppColors.messengerPrimary,
     scaffoldBackgroundColor: AppColors.messengerBackground,
     appBarTheme: const AppBarTheme(
@@ -30,9 +36,7 @@ class ThemeService extends GetxService {
     ),
   );
 
-  // Logic remains same, but the colors above are now Noir
   void toggleTheme() {
-    _isSecretMode.value = !_isSecretMode.value;
-    Get.changeTheme(_isSecretMode.value ? secretTheme : safeTheme);
+    setSecretMode(!_isSecretMode.value);
   }
 }
