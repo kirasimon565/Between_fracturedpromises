@@ -11,7 +11,7 @@ android {
 
     // This line ensures your Kotlin source code is recognized!
     sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
+        main.java.srcDirs += 'src/main/java'
     }
 
     defaultConfig {
