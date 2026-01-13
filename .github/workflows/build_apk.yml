@@ -3,6 +3,9 @@ name: Build Flutter APK
 on:
   push:
     branches: [ setup-between-project-11757872405521559736 ]
+  pull_request:
+    branches: [ setup-between-project-11757872405521559736 ]
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
 
 jobs:
   build:
@@ -24,21 +27,52 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Verify Flutter installation
+        run: |
+          flutter --version
+          flutter doctor -v
+
       - name: Install dependencies
         run: flutter pub get
 
-      # --- NEW STEP: Create local.properties ---
       - name: Configure local.properties
         run: |
           echo "flutter.sdk=$FLUTTER_HOME" > android/local.properties
           echo "sdk.dir=$ANDROID_SDK_ROOT" >> android/local.properties
+          cat android/local.properties
 
-      - name: Build APK
+      - name: Clean build
+        run: flutter clean
+
+      - name: Build APK (all architectures)
         run: flutter build apk --release --split-per-abi
 
-      - name: Upload APK
+      - name: List build outputs
+        run: ls -la build/app/outputs/flutter-apk/
+
+      - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
-          # Path updated to ensure it finds the specific arm64 build
-          path: build/app/outputs/flutter-apk/app-release-arm64-v8a.apk
+          name: app-release-arm64-v8a
+          path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+
+      - name: Upload armeabi-v7a APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-armeabi-v7a
+          path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+
+      - name: Upload x86_64 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-x86_64
+          path: build/app/outputs/flutter-apk/app-x86_64-release.apk
+        continue-on-error: true  # x86_64 might not always be built
+
+      - name: Upload universal APK (if exists)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app-release-universal
+          path: build/app/outputs/flutter-apk/app-release.apk
+        continue-on-error: true
