@@ -36,6 +36,11 @@ jobs:
         run: |
           flutter --version
           flutter doctor -v
+          echo ""
+          echo "=== Flutter Environment Variables ==="
+          echo "FLUTTER_ROOT: $FLUTTER_ROOT"
+          echo "Verifying Flutter tools gradle..."
+          ls -la "$FLUTTER_ROOT/packages/flutter_tools/gradle" || echo "ERROR: Flutter tools gradle not found!"
 
       - name: Install dependencies
         run: flutter pub get
@@ -55,8 +60,16 @@ jobs:
 
       - name: Configure local.properties
         run: |
-          echo "flutter.sdk=$FLUTTER_HOME" > android/local.properties
-          echo "sdk.dir=$ANDROID_SDK_ROOT" >> android/local.properties
+          # Remove any existing local.properties
+          rm -f android/local.properties
+          
+          # Create new local.properties with correct CI paths
+          cat > android/local.properties << EOF
+flutter.sdk=$FLUTTER_ROOT
+sdk.dir=$ANDROID_SDK_ROOT
+EOF
+          
+          echo "=== Contents of local.properties ==="
           cat android/local.properties
 
       - name: Create debug keystore
