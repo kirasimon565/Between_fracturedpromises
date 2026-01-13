@@ -27,6 +27,11 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.7'
+
       - name: Verify Flutter installation
         run: |
           flutter --version
@@ -41,20 +46,39 @@ jobs:
           echo "sdk.dir=$ANDROID_SDK_ROOT" >> android/local.properties
           cat android/local.properties
 
+      - name: Create debug keystore
+        run: |
+          keytool -genkey -v -keystore android/app/debug.keystore \
+            -storepass android -alias androiddebugkey -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
       - name: Clean build
         run: flutter clean
 
       - name: Build APK (all architectures)
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release --split-per-abi --verbose
 
-      - name: List build outputs
-        run: ls -la build/app/outputs/flutter-apk/
+      - name: Search for APK files
+        if: always()
+        run: |
+          echo "=== Searching for all APK files ==="
+          find build -name "*.apk" -type f
+          echo ""
+          echo "=== Checking standard output directory ==="
+          ls -la build/app/outputs/flutter-apk/ || echo "flutter-apk directory not found"
+          echo ""
+          echo "=== Checking all output directories ==="
+          find build/app/outputs -type d
+          echo ""
+          echo "=== Checking for any APK in outputs ==="
+          find build/app/outputs -name "*.apk" -type f
 
       - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release-arm64-v8a
-          path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
       - name: Upload armeabi-v7a APK
         uses: actions/upload-artifact@v4
@@ -68,11 +92,3 @@ jobs:
           name: app-release-x86_64
           path: build/app/outputs/flutter-apk/app-x86_64-release.apk
         continue-on-error: true  # x86_64 might not always be built
-
-      - name: Upload universal APK (if exists)
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: app-release-universal
-          path: build/app/outputs/flutter-apk/app-release.apk
-        continue-on-error: true
