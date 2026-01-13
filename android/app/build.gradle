@@ -5,16 +5,6 @@ plugins {
     id "com.google.gms.google-services"
 }
 
-def flutterRoot = System.getenv('FLUTTER_ROOT')
-if (flutterRoot == null) {
-    def localProperties = new Properties()
-    def localPropertiesFile = rootProject.file('local.properties')
-    if (localPropertiesFile.exists()) {
-        localPropertiesFile.withReader('UTF-8') { reader -> localProperties.load(reader) }
-        flutterRoot = localProperties.getProperty('flutter.sdk')
-    }
-}
-
 android {
     namespace "com.between.fracturedpromises"
     compileSdk 34
@@ -55,14 +45,7 @@ flutter {
 }
 
 dependencies {
-    // Standard Firebase dependencies
     implementation platform('com.google.firebase:firebase-bom:33.7.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-}
-
-// THE FIX: This line forces the Flutter tool to inject all plugin dependencies 
-// into the Java/Kotlin classpath so the compiler can see Firebase, Firestore, etc.
-if (flutterRoot != null) {
-    apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 }
