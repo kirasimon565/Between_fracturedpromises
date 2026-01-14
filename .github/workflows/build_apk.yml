@@ -34,18 +34,30 @@ jobs:
             -keyalg RSA -keysize 2048 -validity 10000 \
             -dname "CN=Android Debug,O=Android,C=US"
 
-      # We don't need to "force" Gradle 8.9 here because your 
-      # gradle-wrapper.properties in the repo already says 8.9.
-      # Flutter will download it automatically.
+      - name: Build with Gradle Directly
+        run: |
+          # This builds the APKs without using the buggy Flutter file-watcher
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
 
-      - name: Build APK
-        run: flutter build apk --release --split-per-abi
+      - name: Organize APKs for Upload
+        run: |
+          # Create the standard output directory
+          mkdir -p build/app/outputs/flutter-apk/
+          
+          # Find and move the split APKs from the Android build folder to the Flutter build folder
+          # This ensures the 'upload-artifact' step below can find them.
+          cp android/app/build/outputs/apk/release/app-arm64-v8a-release.apk build/app/outputs/flutter-apk/ || true
+          cp android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk build/app/outputs/flutter-apk/ || true
+          
+          # List files for debugging to be 100% sure
+          ls -R build/app/outputs/
 
       - name: Upload arm64 APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release-arm64
-          # This is the standard path where Flutter puts it
           path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
       - name: Upload armeabi APK
