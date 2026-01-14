@@ -1,24 +1,20 @@
 name: Live Web Test Tunnel
+run-name: Web Test on ${{ github.ref_name }} # Shows the branch name in the list
 
 on:
-  workflow_dispatch: # This is the "Manual Trigger"
-    inputs:
-      duration:
-        description: 'Tunnel duration in seconds (3600 = 1 hour)'
-        required: true
-        default: '3600'
+  workflow_dispatch: # Manual trigger
 
 jobs:
   test_web:
-    runs-on: ubuntu-latest
-    # This ensures the job only runs if you are on your specific setup branch
+    # Only allow this to run on your specific branch
     if: github.ref == 'refs/heads/setup-between-project-11757872405521559736'
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Hardcoded Branch
         uses: actions/checkout@v4
         with:
-          ref: setup-between-project-11757872405521559736
+          ref: setup-between-project-11757872405521559736 # Hardcoded branch
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -31,12 +27,15 @@ jobs:
           flutter pub get
           flutter build web --release
 
-      - name: Start Live Tunnel
+      - name: Start Live Tunnel (1 Hour)
         run: |
           echo "------------------------------------------------------------"
           echo "🚀 YOUR LIVE WEB LINK WILL APPEAR BELOW"
           echo "------------------------------------------------------------"
           cd build/web
+          # Host the web folder on port 8000
           python3 -m http.server 8000 & 
-          # Tunneling to Pinggy for the specified duration
-          ssh -o StrictHostKeyChecking=no -p 443 -R0:localhost:8000 a.pinggy.io sleep ${{ github.event.inputs.duration }}
+          
+          # Open tunnel via Pinggy for 3600 seconds (1 hour)
+          # Note: If it asks for a fingerprint, StrictHostKeyChecking=no handles it
+          ssh -o StrictHostKeyChecking=no -p 443 -R0:localhost:8000 a.pinggy.io sleep 3600
