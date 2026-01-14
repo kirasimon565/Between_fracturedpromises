@@ -36,22 +36,25 @@ jobs:
 
       - name: Build with Gradle Directly
         run: |
-          # This builds the APKs without using the buggy Flutter file-watcher
           cd android
+          # 1. Generate a fresh wrapper since the JAR is missing in the repo
+          gradle wrapper --gradle-version 8.9 --distribution-type all
+          
+          # 2. Make it executable
           chmod +x gradlew
+          
+          # 3. Build the APKs (This handles SDK 36 via your gradle.properties)
           ./gradlew assembleRelease --no-daemon
 
       - name: Organize APKs for Upload
         run: |
-          # Create the standard output directory
           mkdir -p build/app/outputs/flutter-apk/
           
-          # Find and move the split APKs from the Android build folder to the Flutter build folder
-          # This ensures the 'upload-artifact' step below can find them.
-          cp android/app/build/outputs/apk/release/app-arm64-v8a-release.apk build/app/outputs/flutter-apk/ || true
-          cp android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk build/app/outputs/flutter-apk/ || true
+          # Use find to locate APKs regardless of which subfolder they landed in
+          echo "Finding APKs..."
+          find android/app/build/outputs/apk/release/ -name "*.apk" -exec cp {} build/app/outputs/flutter-apk/ \;
           
-          # List files for debugging to be 100% sure
+          echo "Final check of output folder:"
           ls -R build/app/outputs/
 
       - name: Upload arm64 APK
