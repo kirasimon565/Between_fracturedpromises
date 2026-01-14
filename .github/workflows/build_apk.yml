@@ -27,11 +27,6 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.9'
-
       - name: Verify Flutter installation
         run: |
           flutter --version
@@ -57,6 +52,15 @@ jobs:
             echo "Gradle wrapper exists"
             chmod +x android/gradlew
           fi
+
+      - name: Verify Gradle wrapper configuration
+        run: |
+          echo "=== Contents of gradle-wrapper.properties ==="
+          cat android/gradle/wrapper/gradle-wrapper.properties
+          echo ""
+          echo "=== Clearing Gradle cache to force re-download ==="
+          rm -rf ~/.gradle/caches/
+          rm -rf ~/.gradle/wrapper/dists/gradle-8.7*
 
       - name: Configure local.properties
         run: |
@@ -132,6 +136,14 @@ jobs:
           echo "=== Gradle wrapper version ==="
           cd android
           ./gradlew --version
+          cd ..
+          
+      - name: Test Gradle build directly
+        continue-on-error: true
+        run: |
+          echo "=== Running Gradle assembleRelease directly ==="
+          cd android
+          ./gradlew assembleRelease --stacktrace --info 2>&1 | tail -100
           cd ..
 
       - name: Build APK (all architectures)
