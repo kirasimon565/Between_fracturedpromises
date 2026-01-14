@@ -29,11 +29,21 @@ jobs:
           flutter pub get
           flutter build web --release
 
-      - name: Start Live Tunnel (1 Hour)
+            - name: Start Live Tunnel (1 Hour)
         run: |
           echo "------------------------------------------------------------"
           echo "🚀 YOUR LIVE WEB LINK WILL APPEAR BELOW"
           echo "------------------------------------------------------------"
+          
           cd build/web
+          # Start a background server on port 8000
           python3 -m http.server 8000 & 
-          ssh -o StrictHostKeyChecking=no -p 443 -R0:localhost:8000 a.pinggy.io sleep 3600
+          
+          # Wait 2 seconds for server to start
+          sleep 2
+          
+          # Correct Pinggy SSH command for GitHub Actions:
+          # -t: Force pseudo-terminal (helps display the URL)
+          # ServerAliveInterval: Keeps the connection from dropping
+          # Strictly use 'free.pinggy.io' for the free tier
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:8000 -t free.pinggy.io sleep 3600
