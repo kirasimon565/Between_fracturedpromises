@@ -1,13 +1,13 @@
-name: Live Web Test Tunnel
+name: Stable Web Test Tunnel
 run-name: Web Test on ${{ github.ref_name }}
 
 on:
   workflow_dispatch:
     inputs:
       duration:
-        description: 'Tunnel duration in seconds (3600 = 1 hour)'
+        description: 'Minutes to keep live (max 360)'
         required: true
-        default: '3600'
+        default: '60'
   push:
     branches:
       - 'setup-between-project-11757872405521559736'
@@ -15,11 +15,10 @@ on:
 jobs:
   test_web:
     runs-on: ubuntu-latest
-    # Hardcoded check to ensure it only runs on your branch
     if: github.ref == 'refs/heads/setup-between-project-11757872405521559736'
 
     steps:
-      - name: Checkout Hardcoded Branch
+      - name: Checkout Code
         uses: actions/checkout@v4
         with:
           ref: setup-between-project-11757872405521559736
@@ -35,19 +34,33 @@ jobs:
           flutter pub get
           flutter build web --release
 
-      - name: Start Live Tunnel (1 Hour)
+      - name: Install Cloudflared
+        run: |
+          wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared-linux-amd64.deb
+
+      - name: Start Live Tunnel
         run: |
           echo "------------------------------------------------------------"
-          echo "🚀 YOUR LIVE WEB LINK WILL APPEAR IN THE LOG BELOW"
+          echo "🚀 YOUR LIVE WEB LINK WILL BE GENERATED BELOW"
           echo "------------------------------------------------------------"
           
           cd build/web
-          # Start a background server to host the files
-          python3 -m http.server 8000 & 
+          # Start background server
+          python3 -m http.server 8080 & 
           
-          # Wait a moment for the server to initialize
-          sleep 3
+          # Start Cloudflare Tunnel in the background
+          # This captures the output and extracts the link automatically
+          cloudflared tunnel --url http://localhost:8080 > tunnel.log 2>&1 &
           
-          # Force a terminal (-t) and bypass host checks to show the URL
-          # Use free.pinggy.io to ensure compatibility with free tier
-          ssh -t -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:8000 free.pinggy.io sleep ${{ github.event.inputs.duration || 3600 }}
+          # Wait a few seconds for the tunnel to generate the URL
+          sleep 10
+          
+          # Print the URL clearly in the log
+          echo "✅ CLICK THE LINK BELOW TO TEST YOUR APP:"
+          grep -o 'https://[-a-z0-9.]*\.trycloudflare.com' tunnel.log | head -n 1
+          echo "------------------------------------------------------------"
+          
+          # Keep the job running for the requested time
+          echo "Waiting for ${{ github.event.inputs.duration || 60 }} minutes..."
+          sleep $(( ( ${{ github.event.inputs.duration || 60 }} ) * 60 ))
