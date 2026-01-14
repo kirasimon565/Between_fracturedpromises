@@ -2,16 +2,22 @@ name: Live Web Test Tunnel
 run-name: Web Test on ${{ github.ref_name }}
 
 on:
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: 'Tunnel duration in seconds (3600 = 1 hour)'
+        required: true
+        default: '3600'
   push:
     branches:
-      - 'setup-between-project-11757872405521559736' # Force GitHub to register the file
+      - 'setup-between-project-11757872405521559736'
 
 jobs:
   test_web:
     runs-on: ubuntu-latest
-    # This prevents the job from running on EVERY push if you only want manual runs
-    # But for the first time, let it run to confirm it works
+    # Hardcoded check to ensure it only runs on your branch
+    if: github.ref == 'refs/heads/setup-between-project-11757872405521559736'
+
     steps:
       - name: Checkout Hardcoded Branch
         uses: actions/checkout@v4
@@ -29,21 +35,19 @@ jobs:
           flutter pub get
           flutter build web --release
 
-            - name: Start Live Tunnel (1 Hour)
+      - name: Start Live Tunnel (1 Hour)
         run: |
           echo "------------------------------------------------------------"
-          echo "🚀 YOUR LIVE WEB LINK WILL APPEAR BELOW"
+          echo "🚀 YOUR LIVE WEB LINK WILL APPEAR IN THE LOG BELOW"
           echo "------------------------------------------------------------"
           
           cd build/web
-          # Start a background server on port 8000
+          # Start a background server to host the files
           python3 -m http.server 8000 & 
           
-          # Wait 2 seconds for server to start
-          sleep 2
+          # Wait a moment for the server to initialize
+          sleep 3
           
-          # Correct Pinggy SSH command for GitHub Actions:
-          # -t: Force pseudo-terminal (helps display the URL)
-          # ServerAliveInterval: Keeps the connection from dropping
-          # Strictly use 'free.pinggy.io' for the free tier
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:8000 -t free.pinggy.io sleep 3600
+          # Force a terminal (-t) and bypass host checks to show the URL
+          # Use free.pinggy.io to ensure compatibility with free tier
+          ssh -t -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:8000 free.pinggy.io sleep ${{ github.event.inputs.duration || 3600 }}
