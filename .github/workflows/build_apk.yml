@@ -40,27 +40,28 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Generate Gradle wrapper if missing
+      - name: Force regenerate Gradle wrapper to 8.9
         run: |
-          if [ ! -f "android/gradlew" ]; then
-            echo "Gradle wrapper not found, generating..."
-            cd android
-            gradle wrapper --gradle-version 8.9 --distribution-type all
-            chmod +x gradlew
-            cd ..
-          else
-            echo "Gradle wrapper exists"
-            chmod +x android/gradlew
-          fi
-
-      - name: Verify Gradle wrapper configuration
-        run: |
-          echo "=== Contents of gradle-wrapper.properties ==="
-          cat android/gradle/wrapper/gradle-wrapper.properties
-          echo ""
-          echo "=== Clearing Gradle cache to force re-download ==="
-          rm -rf ~/.gradle/caches/
-          rm -rf ~/.gradle/wrapper/dists/gradle-8.7*
+          echo "=== Removing old Gradle wrapper files ==="
+          rm -rf android/gradle/wrapper/
+          rm -f android/gradlew
+          rm -f android/gradlew.bat
+          
+          echo "=== Installing Gradle 8.9 ==="
+          wget https://services.gradle.org/distributions/gradle-8.9-bin.zip
+          unzip -q gradle-8.9-bin.zip
+          
+          echo "=== Generating new wrapper with Gradle 8.9 ==="
+          cd android
+          ../gradle-8.9/bin/gradle wrapper --gradle-version 8.9 --distribution-type all
+          chmod +x gradlew
+          
+          echo "=== Verifying wrapper properties ==="
+          cat gradle/wrapper/gradle-wrapper.properties
+          
+          echo "=== Testing wrapper ==="
+          ./gradlew --version
+          cd ..
 
       - name: Configure local.properties
         run: |
@@ -125,7 +126,7 @@ jobs:
       - name: Generate Gradle wrapper
         run: |
           cd android
-          gradle wrapper --gradle-version 8.7
+          gradle wrapper --gradle-version 8.9
           cd ..
 
       - name: Make Gradle wrapper executable
