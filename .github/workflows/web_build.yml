@@ -1,0 +1,37 @@
+name: Build Flutter Web
+
+on:
+  push:
+    branches: [ setup-between-project-11757872405521559736 ]
+  pull_request:
+    branches: [ setup-between-project-11757872405521559736 ]
+  workflow_dispatch:
+
+jobs:
+  build_web:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Clean build
+        run: flutter clean
+
+      - name: Build Web (Release)
+        run: flutter build web --release
+
+      - name: Upload Web Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-web-build
+          path: build/web/
