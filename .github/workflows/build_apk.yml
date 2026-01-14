@@ -3,14 +3,11 @@ name: Build Flutter APK
 on:
   push:
     branches: [ setup-between-project-11757872405521559736 ]
-  pull_request:
-    branches: [ setup-between-project-11757872405521559736 ]
-  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,53 +24,8 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Verify Flutter installation
-        run: |
-          flutter --version
-          flutter doctor -v
-          echo ""
-          echo "=== Flutter Environment Variables ==="
-          echo "FLUTTER_ROOT: $FLUTTER_ROOT"
-          echo "Verifying Flutter tools gradle..."
-          ls -la "$FLUTTER_ROOT/packages/flutter_tools/gradle" || echo "ERROR: Flutter tools gradle not found!"
-
       - name: Install dependencies
         run: flutter pub get
-
-      - name: Force regenerate Gradle wrapper to 8.9
-        run: |
-          echo "=== Removing old Gradle wrapper files ==="
-          rm -rf android/gradle/wrapper/
-          rm -f android/gradlew
-          rm -f android/gradlew.bat
-          
-          echo "=== Installing Gradle 8.9 ==="
-          wget https://services.gradle.org/distributions/gradle-8.9-bin.zip
-          unzip -q gradle-8.9-bin.zip
-          
-          echo "=== Generating new wrapper with Gradle 8.9 ==="
-          cd android
-          ../gradle-8.9/bin/gradle wrapper --gradle-version 8.9 --distribution-type all
-          chmod +x gradlew
-          
-          echo "=== Verifying wrapper properties ==="
-          cat gradle/wrapper/gradle-wrapper.properties
-          
-          echo "=== Testing wrapper ==="
-          ./gradlew --version
-          cd ..
-
-      - name: Configure local.properties
-        run: |
-          # Remove any existing local.properties
-          rm -f android/local.properties
-          
-          # Create new local.properties with correct CI paths
-          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
-          echo "sdk.dir=$ANDROID_SDK_ROOT" >> android/local.properties
-          
-          echo "=== Contents of local.properties ==="
-          cat android/local.properties
 
       - name: Create debug keystore
         run: |
@@ -82,166 +34,22 @@ jobs:
             -keyalg RSA -keysize 2048 -validity 10000 \
             -dname "CN=Android Debug,O=Android,C=US"
 
-      - name: Check for google-services.json
-        run: |
-          if [ -f "android/app/google-services.json" ]; then
-            echo "✅ google-services.json found"
-          else
-            echo "⚠️ google-services.json NOT found - Firebase features may not work"
-            echo "Creating a placeholder google-services.json for build purposes"
-            echo '{
-              "project_info": {
-                "project_number": "123456789",
-                "project_id": "placeholder-project",
-                "storage_bucket": "placeholder-project.appspot.com"
-              },
-              "client": [
-                {
-                  "client_info": {
-                    "mobilesdk_app_id": "1:123456789:android:abcdef1234567890",
-                    "android_client_info": {
-                      "package_name": "com.between.fracturedpromises"
-                    }
-                  },
-                  "oauth_client": [],
-                  "api_key": [
-                    {
-                      "current_key": "AIzaSyDummyKeyForBuildPurposes123456789"
-                    }
-                  ],
-                  "services": {
-                    "appinvite_service": {
-                      "other_platform_oauth_client": []
-                    }
-                  }
-                }
-              ],
-              "configuration_version": "1"
-            }' > android/app/google-services.json
-          fi
+      # We don't need to "force" Gradle 8.9 here because your 
+      # gradle-wrapper.properties in the repo already says 8.9.
+      # Flutter will download it automatically.
 
-      - name: Clean build
-        run: flutter clean
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
 
-      - name: Generate Gradle wrapper
-        run: |
-          cd android
-          gradle wrapper --gradle-version 8.9
-          cd ..
-
-      - name: Make Gradle wrapper executable
-        run: chmod +x android/gradlew
-
-      - name: Check Gradle wrapper
-        run: |
-          echo "=== Gradle wrapper version ==="
-          cd android
-          ./gradlew --version
-          cd ..
-          
-      - name: Test Gradle build directly
-        continue-on-error: true
-        run: |
-          echo "=== Running Gradle assembleRelease directly ==="
-          cd android
-          ./gradlew assembleRelease --stacktrace --info 2>&1 | tail -100
-          cd ..
-
-      - name: Build APK (all architectures)
-        id: build_apk
-        continue-on-error: true
-        run: |
-          set +e
-          flutter build apk --release --split-per-abi --verbose > build_log.txt 2>&1
-          BUILD_EXIT=$?
-          echo "BUILD_EXIT_CODE=$BUILD_EXIT" >> $GITHUB_ENV
-          cat build_log.txt
-          exit $BUILD_EXIT
-
-      - name: Show last 200 lines of build log
-        if: always()
-        run: |
-          echo "=== Checking if build_log.txt exists ==="
-          ls -lh build_log.txt || echo "build_log.txt not found"
-          echo ""
-          echo "=== File size ==="
-          wc -l build_log.txt || echo "Cannot count lines"
-          echo ""
-          echo "=== Last 200 lines of build output ==="
-          tail -200 build_log.txt 2>/dev/null || echo "Cannot read build log"
-          
-      - name: Extract Gradle errors
-        if: always()
-        run: |
-          echo "=== Searching for error messages ==="
-          grep -i "error" build_log.txt | tail -50 || echo "No errors found in log"
-          echo ""
-          echo "=== Searching for exceptions ==="
-          grep -i "exception" build_log.txt | tail -20 || echo "No exceptions found"
-          echo ""
-          grep -A 10 "FAILURE: Build failed" build_log.txt || echo "No Gradle failure message found"
-          echo ""
-          grep -A 5 "What went wrong:" build_log.txt || echo "No 'What went wrong' section found"
-
-      - name: Check build directory structure
-        if: always()
-        run: |
-          echo "=== Checking if build directory exists ==="
-          ls -la build/ || echo "build directory not found"
-          echo ""
-          echo "=== Checking build/app if it exists ==="
-          ls -la build/app/ || echo "build/app directory not found"
-          echo ""
-          echo "=== Full directory tree of build ==="
-          find build -type d 2>/dev/null || echo "No build directory found"
-
-      - name: Search for APK files
-        if: always()
-        run: |
-          echo "=== Searching for all APK files ==="
-          find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found anywhere"
-          echo ""
-          echo "=== Checking standard output directory ==="
-          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "flutter-apk directory not found"
-          echo ""
-          echo "=== Checking all output directories ==="
-          find build/app/outputs -type d 2>/dev/null || echo "No outputs directory"
-          echo ""
-          echo "=== Checking for any APK in outputs ==="
-          find build/app/outputs -name "*.apk" -type f 2>/dev/null || echo "No APK in outputs"
-      
-      - name: Check Gradle build logs
-        if: always()
-        run: |
-          echo "=== Checking for Gradle daemon logs ==="
-          find ~/.gradle -name "*.log" -type f -exec echo "File: {}" \; -exec tail -100 {} \; 2>/dev/null || echo "No Gradle logs found"
-
-      - name: Upload build log
-        if: always()
+      - name: Upload arm64 APK
         uses: actions/upload-artifact@v4
         with:
-          name: build-log
-          path: build_log.txt
+          name: app-release-arm64
+          # This is the standard path where Flutter puts it
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
-      - name: Fail if build failed
-        if: steps.build_apk.outcome == 'failure'
-        run: exit 1
-
-      - name: Upload arm64-v8a APK
+      - name: Upload armeabi APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-arm64-v8a
-          path: android/app/build/outputs/flutter-apk/app-arm64-v8a-release.apk
-
-      - name: Upload armeabi-v7a APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-armeabi-v7a
-          path: android/app/build/outputs/flutter-apk/app-armeabi-v7a-release.apk
-
-      - name: Upload x86_64 APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-x86_64
-          path: android/app/build/outputs/flutter-apk/app-x86_64-release.apk
-        continue-on-error: true  # x86_64 might not always be built
+          name: app-release-armeabi
+          path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
