@@ -1,20 +1,22 @@
 name: Live Web Test Tunnel
-run-name: Web Test on ${{ github.ref_name }} # Shows the branch name in the list
+run-name: Web Test on ${{ github.ref_name }}
 
 on:
   workflow_dispatch: # Manual trigger
+  push:
+    branches:
+      - 'setup-between-project-11757872405521559736' # Force GitHub to register the file
 
 jobs:
   test_web:
-    # Only allow this to run on your specific branch
-    if: github.ref == 'refs/heads/setup-between-project-11757872405521559736'
     runs-on: ubuntu-latest
-
+    # This prevents the job from running on EVERY push if you only want manual runs
+    # But for the first time, let it run to confirm it works
     steps:
       - name: Checkout Hardcoded Branch
         uses: actions/checkout@v4
         with:
-          ref: setup-between-project-11757872405521559736 # Hardcoded branch
+          ref: setup-between-project-11757872405521559736
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -33,9 +35,5 @@ jobs:
           echo "🚀 YOUR LIVE WEB LINK WILL APPEAR BELOW"
           echo "------------------------------------------------------------"
           cd build/web
-          # Host the web folder on port 8000
           python3 -m http.server 8000 & 
-          
-          # Open tunnel via Pinggy for 3600 seconds (1 hour)
-          # Note: If it asks for a fingerprint, StrictHostKeyChecking=no handles it
           ssh -o StrictHostKeyChecking=no -p 443 -R0:localhost:8000 a.pinggy.io sleep 3600
