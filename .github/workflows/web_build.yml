@@ -1,16 +1,11 @@
-name: Build Flutter Web
+name: Flutter Web Live Test (1 Hour)
 
 on:
-  push:
-    branches: [ setup-between-project-11757872405521559736 ]
-  pull_request:
-    branches: [ setup-between-project-11757872405521559736 ]
-  workflow_dispatch:
+  workflow_dispatch: # Allows you to trigger this manually from the "Actions" tab
 
 jobs:
-  build_web:
+  web_tunnel:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,19 +14,30 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Build Flutter Web
+        run: |
+          flutter pub get
+          flutter build web --release
 
-      - name: Clean build
-        run: flutter clean
+      - name: Install Local Server & Tunnel
+        run: |
+          npm install -g serve
+          npm install -g localtunnel
 
-      - name: Build Web (Release)
-        run: flutter build web --release
-
-      - name: Upload Web Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: flutter-web-build
-          path: build/web/
+      - name: Launch Tunnel
+        run: |
+          # Start the server in the background
+          serve -s build/web -l 8080 &
+          
+          echo "------------------------------------------------------------"
+          echo "🚀 WEB TEST IS STARTING!"
+          echo "The tunnel will stay active for 60 minutes."
+          echo "------------------------------------------------------------"
+          
+          # Start localtunnel and keep it running
+          # It will print the URL in the logs
+          lt --port 8080 & 
+          
+          # Keep the action alive for 1 hour
+          sleep 3600
