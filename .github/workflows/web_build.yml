@@ -1,43 +1,42 @@
-name: Flutter Web Live Test (1 Hour)
+name: Live Web Test Tunnel
 
 on:
-  workflow_dispatch: # Allows you to trigger this manually from the "Actions" tab
+  workflow_dispatch: # This is the "Manual Trigger"
+    inputs:
+      duration:
+        description: 'Tunnel duration in seconds (3600 = 1 hour)'
+        required: true
+        default: '3600'
 
 jobs:
-  web_tunnel:
+  test_web:
     runs-on: ubuntu-latest
+    # This ensures the job only runs if you are on your specific setup branch
+    if: github.ref == 'refs/heads/setup-between-project-11757872405521559736'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: setup-between-project-11757872405521559736
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
 
       - name: Build Flutter Web
         run: |
           flutter pub get
           flutter build web --release
 
-      - name: Install Local Server & Tunnel
+      - name: Start Live Tunnel
         run: |
-          npm install -g serve
-          npm install -g localtunnel
-
-      - name: Launch Tunnel
-        run: |
-          # Start the server in the background
-          serve -s build/web -l 8080 &
-          
           echo "------------------------------------------------------------"
-          echo "🚀 WEB TEST IS STARTING!"
-          echo "The tunnel will stay active for 60 minutes."
+          echo "🚀 YOUR LIVE WEB LINK WILL APPEAR BELOW"
           echo "------------------------------------------------------------"
-          
-          # Start localtunnel and keep it running
-          # It will print the URL in the logs
-          lt --port 8080 & 
-          
-          # Keep the action alive for 1 hour
-          sleep 3600
+          cd build/web
+          python3 -m http.server 8000 & 
+          # Tunneling to Pinggy for the specified duration
+          ssh -o StrictHostKeyChecking=no -p 443 -R0:localhost:8000 a.pinggy.io sleep ${{ github.event.inputs.duration }}
