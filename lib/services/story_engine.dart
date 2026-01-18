@@ -1,149 +1,135 @@
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import '../models/episode.dart';
+import 'package:rxdart/rxdart.dart';
 import '../models/message.dart';
-import '../models/chat_thread.dart';
 import '../models/choice.dart';
-import 'package:flutter/services.dart';
-import 'dart:convert';
 import 'firestore_service.dart';
 import 'state_service.dart';
 import '../utils/delays.dart';
-import '../models/scene.dart';
 
 class StoryEngine extends GetxService {
   final FirestoreService _firestore = Get.find<FirestoreService>();
   final StateService _stateService = Get.find<StateService>();
 
-  // State
-  Rx<Episode?> currentEpisode = Rx<Episode?>(null);
-  RxList<Message> unlockedMessages = <Message>[].obs;
-  RxMap<String, bool> isTyping = <String, bool>{}.obs;
-  RxList<Choice> currentChoices = <Choice>[].obs;
+  // --- External Outputs (Streams) ---
+  final Map<String, BehaviorSubject<List<Message>>> _visibleMessages = {};
+  final RxMap<String, bool> isTyping = <String, bool>{}.obs;
 
-  // Thread Views
-  RxList<ChatThread> get activeThreads {
-    final Map<String, List<Message>> groups = {};
-    for (var m in unlockedMessages) {
-      if (m.sender == Sender.system) continue;
+  // --- Internal State ---
+  final Map<String, StreamSubscription> _subscriptions = {};
+  final Map<String, List<Message>> _incomingBuffers = {};
+  final Map<String, bool> _isProcessingQueue = {};
 
-      // Determine thread key: if I am sender, use recipient. If they are sender, use them.
-      String key;
-      if (m.sender == Sender.nadia) {
-        key = m.recipient?.toLowerCase() ?? 'unknown';
+  // Cache the last snapshot to re-process on scene change
+  final Map<String, QuerySnapshot> _lastSnapshots = {};
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Listen to scene changes to re-evaluate visible messages
+    ever(_stateService.currentSceneId, (_) => _recheckAllThreads());
+  }
+
+  void _recheckAllThreads() {
+    // If the scene changes, we need to check if we have buffered messages for the NEW scene
+    // in our _lastSnapshots.
+    _lastSnapshots.forEach((threadId, snapshot) {
+      _handleFirestoreUpdate(threadId, snapshot);
+    });
+  }
+
+  // --- Public API ---
+
+  Stream<List<Message>> getMessagesStream(String threadId) {
+    if (!_visibleMessages.containsKey(threadId)) {
+      _visibleMessages[threadId] = BehaviorSubject<List<Message>>.seeded([]);
+      _startListeningToThread(threadId);
+    }
+    return _visibleMessages[threadId]!.stream;
+  }
+
+  void _startListeningToThread(String threadId) {
+    if (_subscriptions.containsKey(threadId)) return;
+
+    String episodeId = _stateService.currentEpisodeId.value;
+
+    _subscriptions[threadId] = _firestore.streamMessages(episodeId, threadId).listen((snapshot) {
+      _handleFirestoreUpdate(threadId, snapshot);
+    });
+  }
+
+  // --- Logic ---
+
+  void _handleFirestoreUpdate(String threadId, QuerySnapshot snapshot) {
+    _lastSnapshots[threadId] = snapshot; // Cache for reactivity
+
+    // 1. Parse all messages
+    List<Message> allMessages = snapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      return Message.fromJson(data);
+    }).toList();
+
+    String currentSceneId = _stateService.currentSceneId.value;
+
+    // 2. Identify New Messages for the CURRENT SCENE
+    final currentVisible = _visibleMessages[threadId]?.value ?? [];
+
+    // We only want messages that match the current scene ID.
+    // Note: Past messages from previous scenes remain in `currentVisible` (history).
+    // We append new ones.
+
+    final relevantMessages = allMessages.where((m) => m.sceneId == currentSceneId).toList();
+    relevantMessages.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+
+    final visibleIds = currentVisible.map((m) => m.id).toSet();
+    final newMessages = relevantMessages.where((m) => !visibleIds.contains(m.id)).toList();
+
+    if (newMessages.isNotEmpty) {
+      if (_incomingBuffers[threadId] == null) _incomingBuffers[threadId] = [];
+      _incomingBuffers[threadId]!.addAll(newMessages);
+      _processQueue(threadId);
+    }
+  }
+
+  void _processQueue(String threadId) async {
+    if (_isProcessingQueue[threadId] == true) return;
+    _isProcessingQueue[threadId] = true;
+
+    while (_incomingBuffers[threadId]?.isNotEmpty ?? false) {
+      final msg = _incomingBuffers[threadId]!.removeAt(0);
+
+      // 1. Typing Indicator
+      if (msg.sender != Sender.nadia && msg.sender != Sender.system) {
+        isTyping[threadId] = true;
+        int typeTime = msg.delay > 0 ? msg.delay : AppDelays.minTyping;
+        await Future.delayed(Duration(milliseconds: typeTime));
+        isTyping[threadId] = false;
       } else {
-        key = m.sender.name.toLowerCase();
+        await Future.delayed(Duration(milliseconds: AppDelays.messageGap));
       }
 
-      if (groups.containsKey(key)) {
-        groups[key]!.add(m);
-      } else {
-        groups[key] = [m];
-      }
-    }
-    return groups.entries.map((e) => ChatThread(id: e.key, messages: e.value)).toList().obs;
-  }
-
-  // Active Playback
-  int _currentMessageIndex = 0;
-  List<Message> _sceneQueue = [];
-
-  Future<void> loadEpisode(String episodeId) async {
-    try {
-      unlockedMessages.clear();
-      currentChoices.clear();
-
-      final String jsonString = await rootBundle.loadString('data/cache/${episodeId}_cache.json');
-      final Map<String, dynamic> json = jsonDecode(jsonString);
-      currentEpisode.value = Episode.fromJson(json);
-
-      if (currentEpisode.value != null && currentEpisode.value!.scenes.isNotEmpty) {
-        playScene(currentEpisode.value!.scenes.first.id);
-      }
-    } catch (e) {
-      print("Local load failed: $e");
-    }
-  }
-
-  void playScene(String sceneId) {
-    if (currentEpisode.value == null) return;
-
-    final scene = currentEpisode.value!.scenes.firstWhere(
-      (s) => s.id == sceneId,
-      orElse: () => Scene(id: 'error', messages: [])
-    );
-
-    // Persist progress
-    _stateService.updateProgress(currentEpisode.value!.id, sceneId);
-
-    _sceneQueue = scene.messages;
-    _currentMessageIndex = 0;
-    currentChoices.clear(); // Clear previous choices
-    _playNextMessage(scene);
-  }
-
-  void _playNextMessage(dynamic currentScene) async {
-    // If queue finished
-    if (_currentMessageIndex >= _sceneQueue.length) {
-      _handleSceneEnd(currentScene);
-      return;
+      // 2. Add to Visible
+      final currentList = _visibleMessages[threadId]?.value ?? [];
+      _visibleMessages[threadId]?.add([...currentList, msg]);
     }
 
-    final msg = _sceneQueue[_currentMessageIndex];
-
-    // Simulate Typing
-    if (msg.sender != Sender.nadia && msg.sender != Sender.system) {
-       isTyping[msg.sender.name.toLowerCase()] = true;
-       await Future.delayed(Duration(milliseconds: AppDelays.minTyping));
-       isTyping[msg.sender.name.toLowerCase()] = false;
-    }
-
-    unlockedMessages.add(msg);
-    _currentMessageIndex++;
-
-    await Future.delayed(Duration(milliseconds: msg.delay > 0 ? msg.delay : AppDelays.messageGap));
-
-    _playNextMessage(currentScene);
+    _isProcessingQueue[threadId] = false;
   }
 
-  void _handleSceneEnd(dynamic scene) {
-    // Check for choices
-    if (scene.choices != null && scene.choices!.isNotEmpty) {
-      currentChoices.assignAll(scene.choices!);
-    } else if (scene.defaultNextScene != null) {
-      // Auto advance
-      playScene(scene.defaultNextScene!);
-    } else {
-      print("Episode End");
-      // Could trigger an "Episode Complete" screen here
-    }
-  }
-
+  // Handle Choice Selection
   void makeChoice(Choice choice) {
-    currentChoices.clear();
-
-    // Apply impact
     if (choice.impact != null) {
       choice.impact!.forEach((key, value) {
         _stateService.setVariable(key, value);
       });
     }
 
-    // Save choice to history
-    _stateService.recordChoice(choice.id);
+    _stateService.recordChoice(choice.targetNode);
+    _stateService.updateProgress(_stateService.currentEpisodeId.value, choice.targetNode);
 
-    // Next Scene
-    playScene(choice.nextSceneId);
-  }
-
-  List<Message> getMessagesForThread(String partnerName) {
-    return unlockedMessages.where((m) {
-      if (m.sender == Sender.system) return false;
-
-      final bool isFromPartner = m.sender.name.toLowerCase() == partnerName.toLowerCase();
-      final bool isFromMeToPartner = m.sender == Sender.nadia &&
-                                     m.recipient?.toLowerCase() == partnerName.toLowerCase();
-
-      return isFromPartner || isFromMeToPartner;
-    }).toList();
+    isTyping.clear();
+    // The `ever` listener on currentSceneId will trigger _recheckAllThreads automatically.
   }
 }

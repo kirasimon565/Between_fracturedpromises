@@ -1,11 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'choice.dart';
 
 part 'message.g.dart';
 
 enum MessageType { text, image, choice }
 enum Sender { nadia, ethan, claire, olivia, daniel, liam, system }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Message {
   final String id;
   final Sender sender;
@@ -14,6 +15,14 @@ class Message {
   final MessageType type;
   final int delay; // milliseconds before showing
 
+  @JsonKey(name: 'order_index')
+  final int orderIndex;
+
+  @JsonKey(name: 'scene_id')
+  final String? sceneId;
+
+  final List<Choice>? choices;
+
   Message({
     required this.id,
     required this.sender,
@@ -21,6 +30,9 @@ class Message {
     required this.content,
     this.type = MessageType.text,
     this.delay = 1000,
+    this.orderIndex = 0,
+    this.sceneId,
+    this.choices,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);

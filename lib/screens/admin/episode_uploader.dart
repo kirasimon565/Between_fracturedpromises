@@ -22,12 +22,9 @@ class _EpisodeUploaderState extends State<EpisodeUploader> {
 
     setState(() => _isLoading = true);
     try {
-      // Logic for Firebase upload
-      await _firestore.uploadEpisode(_idController.text.trim(), {
-        'episode_id': _idController.text,
-        'content': _jsonController.text,
-        'timestamp': DateTime.now().toIso8601String(),
-      });
+      // Logic for Firebase upload with granular parsing
+      await _firestore.uploadEpisodeScript(_idController.text.trim(), _jsonController.text);
+
       Get.snackbar("Success", "Episode ${_idController.text} is now live!", 
         backgroundColor: Colors.green, colorText: Colors.white);
     } catch (e) {
