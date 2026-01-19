@@ -140,7 +140,7 @@ class __PulseDotsState extends State<_PulseDots> with SingleTickerProviderStateM
           builder: (context, child) {
              // Staggered Opacity
              double offset = index * 0.3;
-             double value = math.sin((_controller.value * 2 * pi) - offset);
+             double value = math.sin((_controller.value * 2 * math.pi) - offset);
              double opacity = (value * 0.5 + 0.5).clamp(0.2, 1.0);
 
              return Container(
