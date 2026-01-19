@@ -2,125 +2,242 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app/constants.dart';
 import '../../services/story_engine.dart';
+import '../../services/audio_service.dart';
 import '../../theme/colors.dart';
 import '../../theme/theme.dart';
 import '../../models/message.dart';
+import 'dart:math' as math;
 
 class MakeloveListScreen extends StatefulWidget {
   @override
   _MakeloveListScreenState createState() => _MakeloveListScreenState();
 }
 
-class _MakeloveListScreenState extends State<MakeloveListScreen> {
+class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTickerProviderStateMixin {
   final ThemeService _themeService = Get.find<ThemeService>();
   final StoryEngine _engine = Get.find<StoryEngine>();
+  final AudioService _audio = Get.find<AudioService>();
+  late AnimationController _swayController;
 
   @override
   void initState() {
     super.initState();
     _themeService.setSecretMode(true);
+    // Sway animation for the "Hanging Rope" header
+    _swayController = AnimationController(
+      vsync: this, 
+      duration: const Duration(seconds: 5)
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _swayController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Hard black
-      appBar: AppBar(
-        title: const Text("MAKELOVE", style: TextStyle(letterSpacing: 8, fontSize: 14, fontWeight: FontWeight.w900, color: Colors.red)),
-        centerTitle: true,
-        backgroundColor: Colors.black,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white38),
-          onPressed: () => Get.back(),
-        ),
+      backgroundColor: const Color(0xFF050000), // Deeper red-black base
+      body: Stack(
+        children: [
+          // 1. Pulsing Ambient Red Glow
+          _buildAmbientGlow(),
+
+          SafeArea(
+            child: Column(
+              children: [
+                // 2. Hanging Title (Advanced Noir Version)
+                _buildHangingHeader(),
+
+                const SizedBox(height: 30),
+
+                // 3. Match List
+                Expanded(
+                  child: Obx(() {
+                    final threads = _engine.activeThreadIds
+                        .where((id) => id.toLowerCase() == 'daniel') // Filtered for Makelove
+                        .toList();
+
+                    if (threads.isEmpty) {
+                      return Center(
+                         child: Column(
+                           mainAxisSize: MainAxisSize.min,
+                           children: [
+                             const Icon(Icons.wifi_off_rounded, color: Colors.red, size: 30),
+                             const SizedBox(height: 15),
+                             Text(
+                               "NO SIGNAL DETECTED", 
+                               style: TextStyle(color: Colors.red.withOpacity(0.3), letterSpacing: 5, fontSize: 10)
+                             ),
+                           ],
+                         ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 0),
+                      itemCount: threads.length,
+                      itemBuilder: (context, index) {
+                        final threadId = threads[index];
+                        final name = threadId.toUpperCase();
+
+                        return StreamBuilder<Message?>(
+                          stream: _engine.getLastMessageStream(threadId),
+                          builder: (context, snapshot) {
+                             final lastMsg = snapshot.data;
+                             final content = lastMsg?.content ?? "Establishing link...";
+                             return _buildAdvancedMatchTile(name, content);
+                          }
+                        );
+                      },
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      body: Obx(() {
-        final allThreads = _engine.activeThreadIds.toList();
-        final threads = allThreads.where((id) => id.toLowerCase() == 'daniel').toList();
-
-        if (threads.isEmpty) {
-          return Center(
-             child: Text("NO SIGNAL", style: TextStyle(color: Colors.red.withOpacity(0.3), letterSpacing: 4)),
-          );
-        }
-
-        return ListView.builder(
-          itemCount: threads.length,
-          itemBuilder: (context, index) {
-            final threadId = threads[index];
-            final name = threadId.toUpperCase();
-
-            return StreamBuilder<Message?>(
-              stream: _engine.getLastMessageStream(threadId),
-              builder: (context, snapshot) {
-                 final lastMsg = snapshot.data;
-                 final content = lastMsg?.content ?? "Waiting...";
-                 return _buildMatchTile(name, content);
-              }
-            );
-          },
-        );
-      }),
     );
   }
 
-  Widget _buildMatchTile(String name, String lastMessage) {
-    return GestureDetector(
-      onTap: () => Get.toNamed('/makelove/chat', arguments: name),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
-        height: 140,
+  Widget _buildAmbientGlow() {
+    return Positioned.fill(
+      child: DecoratedBox(
         decoration: BoxDecoration(
-          color: const Color(0xFF100000),
-          border: Border(
-            top: BorderSide(color: Colors.red.withOpacity(0.5), width: 1),
-            bottom: BorderSide(color: Colors.red.withOpacity(0.5), width: 1),
+          gradient: RadialGradient(
+            center: Alignment.center,
+            radius: 1.2,
+            colors: [Colors.red.withOpacity(0.08), Colors.transparent],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHangingHeader() {
+    return AnimatedBuilder(
+      animation: _swayController,
+      builder: (context, child) {
+        double angle = 0.02 * math.sin(_swayController.value * 2 * math.pi);
+        return Transform.rotate(
+          angle: angle,
+          alignment: Alignment.topCenter,
+          child: child,
+        );
+      },
+      child: Column(
+        children: [
+          Container(width: 1, height: 50, color: Colors.red.withOpacity(0.3)), // The Red Rope
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              border: Border.all(color: Colors.red.withOpacity(0.5), width: 0.5),
+              boxShadow: [
+                BoxShadow(color: Colors.red.withOpacity(0.1), blurRadius: 15)
+              ],
+            ),
+            child: const Text(
+              "MAKELOVE",
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 14,
+                letterSpacing: 10,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdvancedMatchTile(String name, String lastMessage) {
+    return GestureDetector(
+      onTap: () {
+        _audio.playVibrate(); // 🔊 Crimson feedback
+        Get.toNamed('/makelove/chat', arguments: name);
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        height: 160,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          border: Border.symmetric(
+            horizontal: BorderSide(color: Colors.red.withOpacity(0.2), width: 0.5)
           ),
         ),
         child: Stack(
           children: [
+            // Distorted Background Avatar
             Positioned.fill(
-              child: Opacity(
-                opacity: 0.4,
-                child: Image.asset(
-                  AppConstants.getAvatarPath(name),
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
+              child: ShaderMask(
+                shaderCallback: (rect) => LinearGradient(
+                  colors: [Colors.black, Colors.black.withOpacity(0.2), Colors.black],
+                  stops: const [0.0, 0.5, 1.0],
+                ).createShader(rect),
+                blendMode: BlendMode.dstIn,
+                child: Opacity(
+                  opacity: 0.5,
+                  child: Image.asset(
+                    AppConstants.getAvatarPath(name),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
+            
+            // Content Overlay
             Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
                           color: Colors.red,
-                          child: Text(name, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12)),
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          lastMessage,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'Didot',
-                            fontStyle: FontStyle.italic
-                          )
+                        child: Text(
+                          name, 
+                          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 2)
                         ),
-                      ],
+                      ),
+                      const SizedBox(width: 10),
+                      const Text("LIVE", style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    lastMessage,
+                    maxLines: 2,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 16,
+                      fontFamily: 'Didot',
+                      fontStyle: FontStyle.italic,
+                      height: 1.3
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_sharp, color: Colors.red),
                 ],
+              ),
+            ),
+            
+            // Trailing "Sharp" Indicator
+            const Positioned(
+              right: 30,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: Icon(Icons.arrow_forward_ios_rounded, color: Colors.red, size: 16),
               ),
             ),
           ],
