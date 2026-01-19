@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../app/routes.dart';
 import '../../app/constants.dart';
 import '../../theme/colors.dart';
+import '../../services/audio_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -10,17 +12,64 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final AudioService _audioService = Get.find<AudioService>();
   int _tapCount = 0;
+  
+  // Local state for toggles
+  bool _isSoundFxEnabled = true;
+  bool _isMusicEnabled = true;
+  bool _isNotificationsEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  // Load saved preferences from disk
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isSoundFxEnabled = prefs.getBool('settings_sfx') ?? true;
+      _isMusicEnabled = prefs.getBool('settings_music') ?? true;
+      _isNotificationsEnabled = prefs.getBool('settings_notif') ?? true;
+    });
+  }
+
+  // Save preference and update the AudioService immediately
+  Future<void> _toggleSetting(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+    
+    setState(() {
+      if (key == 'settings_sfx') _isSoundFxEnabled = value;
+      if (key == 'settings_music') {
+        _isMusicEnabled = value;
+        // 🔊 Logic to stop/start theme music instantly
+        if (!value) {
+          _audioService.stopAll(); 
+        } else {
+          _audioService.playIntroTheme(); // Resume theme
+        }
+      }
+      if (key == 'settings_notif') _isNotificationsEnabled = value;
+    });
+  }
 
   void _handleVersionTap() {
     _tapCount++;
     if (_tapCount >= 5) {
       _tapCount = 0;
-      // Secretly navigates to the Dialpad
-      // We trigger a haptic feedback or snackbar here usually
-      Get.snackbar("SYSTEM", "SECURE GATEWAY DETECTED",
-        colorText: Colors.red, backgroundColor: Colors.black,
-        snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 1));
+      // 🔊 Audio feedback for secret unlock
+      _audioService.playVibrate(); 
+      
+      Get.snackbar(
+        "SYSTEM", "SECURE GATEWAY DETECTED",
+        colorText: Colors.red, 
+        backgroundColor: Colors.black,
+        snackPosition: SnackPosition.BOTTOM, 
+        duration: const Duration(seconds: 1)
+      );
 
       Future.delayed(const Duration(seconds: 1), () {
         Get.toNamed(AppRoutes.adminDialpad);
@@ -31,12 +80,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A), // Very dark grey
+      backgroundColor: const Color(0xFF0A0A0A),
       appBar: AppBar(
         title: const Text("SETTINGS", style: TextStyle(letterSpacing: 2, fontSize: 14)),
         backgroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -46,9 +99,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSettingsItem(Icons.lock_outline, "Privacy & Security", () {}),
 
           _buildSectionHeader("SYSTEM"),
-          _buildSettingsItem(Icons.notifications_none, "Notifications", () {}, trailing: _buildSwitch(true)),
-          _buildSettingsItem(Icons.volume_up_outlined, "Sound Effects", () {}, trailing: _buildSwitch(true)),
-          _buildSettingsItem(Icons.music_note_outlined, "Ambient Music", () {}, trailing: _buildSwitch(false)),
+          _buildSettingsItem(
+            Icons.notifications_none, 
+            "Notifications", 
+            () {}, 
+            trailing: _buildSwitch(_isNotificationsEnabled, (v) => _toggleSetting('settings_notif', v))
+          ),
+          _buildSettingsItem(
+            Icons.volume_up_outlined, 
+            "Sound Effects", 
+            () {}, 
+            trailing: _buildSwitch(_isSoundFxEnabled, (v) => _toggleSetting('settings_sfx', v))
+          ),
+          _buildSettingsItem(
+            Icons.music_note_outlined, 
+            "Ambient Music", 
+            () {}, 
+            trailing: _buildSwitch(_isMusicEnabled, (v) => _toggleSetting('settings_music', v))
+          ),
 
           const SizedBox(height: 30),
           const Divider(color: Colors.white10),
@@ -88,10 +156,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSwitch(bool value) {
+  Widget _buildSwitch(bool value, ValueChanged<bool> onChanged) {
     return Switch(
       value: value,
-      onChanged: (v) {},
+      onChanged: onChanged, // 🛠️ Now triggers the save logic
       activeColor: Colors.white,
       activeTrackColor: Colors.white24,
       inactiveThumbColor: Colors.grey,
