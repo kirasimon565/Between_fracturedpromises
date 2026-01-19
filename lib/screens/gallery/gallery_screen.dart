@@ -8,12 +8,12 @@ import '../../theme/colors.dart';
 
 class GalleryScreen extends StatelessWidget {
   final GalleryController controller = Get.put(GalleryController());
-  final AudioService _audio = Get.find<AudioService>(); // 🔊 Found service
+  final AudioService _audio = Get.find<AudioService>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Dark vault theme
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text(
           "SECURE GALLERY", 
@@ -48,7 +48,6 @@ class GalleryScreen extends StatelessWidget {
           );
         }
 
-        // 🛠️ Using Staggered Grid for the "Asymmetric Paradox" design
         return MasonryGridView.count(
           padding: const EdgeInsets.all(20),
           crossAxisCount: 2,
@@ -57,7 +56,6 @@ class GalleryScreen extends StatelessWidget {
           itemCount: controller.unlockedImages.length,
           itemBuilder: (context, index) {
             final path = controller.unlockedImages[index];
-            
             return _buildGalleryTile(path, index);
           },
         );
@@ -68,7 +66,7 @@ class GalleryScreen extends StatelessWidget {
   Widget _buildGalleryTile(String path, int index) {
     return GestureDetector(
       onTap: () {
-        _audio.playPing(); // 🔊 Play sound on open
+        _audio.playPing();
         Get.to(() => GalleryViewer(imagePath: path), transition: Transition.fadeIn);
       },
       child: Hero(
@@ -76,7 +74,7 @@ class GalleryScreen extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(15), // Rounded professional look
+            borderRadius: BorderRadius.circular(15),
             border: Border.all(
               color: Colors.white.withOpacity(0.1),
               width: 0.5,
@@ -96,11 +94,9 @@ class GalleryScreen extends StatelessWidget {
                 Image.asset(
                   path,
                   fit: BoxFit.cover,
-                  // Noir desaturation
                   color: Colors.black.withOpacity(0.1),
                   colorBlendMode: BlendMode.darken,
                 ),
-                // Subtle Glassmorphism gradient overlay
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
