@@ -4,6 +4,7 @@ import 'dart:ui';
 import '../../app/routes.dart';
 import '../../app/constants.dart';
 import '../../services/audio_service.dart';
+import '../../services/state_service.dart';
 import 'welcome_widgets.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProviderStateMixin {
   late AnimationController _bgController;
   final AudioService _audioService = Get.find<AudioService>();
+  final StateService _stateService = Get.find<StateService>();
 
   // Narrative Hook sentences
   final List<String> _sentences = [
@@ -26,12 +28,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     
-    // Start the Ambient Noir Theme from assets/music/
-    _audioService.playTheme('noir_ambient.mp3');
+    // 🔊 Start the Intro Theme music
+    _audioService.playIntroTheme();
 
     _bgController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 40), // 40-second Ken Burns effect loop
+      duration: const Duration(seconds: 40), 
     )..repeat(reverse: true);
   }
 
@@ -43,12 +45,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    // Check if progress exists to show/hide the Continue button
+    bool hasSavedProgress = _stateService.currentEpisodeId.value != null;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Layer 0 - Background (Ken Burns effect on rainy window asset)
+          // Layer 0 - Background (Ken Burns effect)
           AnimatedBuilder(
             animation: _bgController,
             builder: (context, child) {
@@ -76,8 +81,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                   center: Alignment.center,
                   radius: 1.2,
                   colors: [
-                    Colors.black.withOpacity(0.1), // Center clarity
-                    Colors.black.withOpacity(0.9), // Deep dark edges
+                    Colors.black.withOpacity(0.1),
+                    Colors.black.withOpacity(0.9),
                   ],
                   stops: const [0.2, 1.0],
                 ),
@@ -94,7 +99,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                 children: [
                   const Spacer(),
 
-                  // 🛠️ FIX: Replaced Main Title Text with the Gold Ring Logo
+                  // 🛠️ Logo Integration
                   TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0.0, end: 1.0),
                     duration: const Duration(milliseconds: 2000),
@@ -105,7 +110,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                        );
                     },
                     child: Image.asset(
-                      'assets/logo/logo.png', // Corrected path from your pubspec
+                      'assets/logo/logo.png', // Corrected path
                       width: 220,
                       fit: BoxFit.contain,
                     ),
@@ -113,7 +118,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
 
                   const SizedBox(height: 10),
 
-                  // Subtitle: Fractured Promises
+                  // Subtitle
                   FutureBuilder(
                     future: Future.delayed(const Duration(milliseconds: 800)),
                     builder: (context, snapshot) {
@@ -136,7 +141,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
 
                   const SizedBox(height: 60),
 
-                  // Narrative Hook - Staggered Sentences
+                  // Narrative Hooks
                   ...List.generate(_sentences.length, (index) {
                      return FutureBuilder(
                        future: Future.delayed(Duration(milliseconds: 2500 + (index * 3000))), 
@@ -165,12 +170,27 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
 
                   const Spacer(),
 
-                  // Navigation Buttons
+                  // 🛠️ NEW: Primary Action (Start Game)
                   WelcomeButton(
-                    label: "CONTINUE",
-                    onPressed: () => Get.offAllNamed(AppRoutes.home),
+                    label: "START GAME",
+                    icon: Icons.play_arrow,
+                    onPressed: () {
+                      _stateService.clearProgress(); // Logic to start fresh
+                      Get.offAllNamed(AppRoutes.home);
+                    },
                   ),
+
                   const SizedBox(height: 20),
+
+                  // 🛠️ NEW: Conditional Continue Button
+                  if (hasSavedProgress)
+                    WelcomeButton(
+                      label: "CONTINUE",
+                      onPressed: () => Get.offAllNamed(AppRoutes.home),
+                    ),
+
+                  const SizedBox(height: 20),
+
                   TextButton(
                     onPressed: () => Get.toNamed(AppRoutes.settings),
                     child: Text(
@@ -184,7 +204,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                   ),
                   const SizedBox(height: 30),
 
-                  // Ambient UI Pulse
                   _BottomPulse(),
                   const SizedBox(height: 10),
                 ],
@@ -199,10 +218,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
 
 class _BottomPulse extends StatefulWidget {
   @override
-  __BottomPulseState createState() => __BottomPulseState();
+  __BottomPulseState createState() => __PulseDotsState();
 }
 
-class __BottomPulseState extends State<_BottomPulse> with SingleTickerProviderStateMixin {
+class __PulseDotsState extends State<_BottomPulse> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   @override
   void initState() {
