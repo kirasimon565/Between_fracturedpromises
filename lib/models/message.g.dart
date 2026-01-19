@@ -14,6 +14,11 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       type: $enumDecodeNullable(_$MessageTypeEnumMap, json['type']) ??
           MessageType.text,
       delay: json['delay'] as int? ?? 1000,
+      orderIndex: json['order_index'] as int? ?? 0,
+      sceneId: json['scene_id'] as String?,
+      choices: (json['choices'] as List<dynamic>?)
+          ?.map((e) => Choice.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -23,6 +28,9 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'content': instance.content,
       'type': _$MessageTypeEnumMap[instance.type]!,
       'delay': instance.delay,
+      'order_index': instance.orderIndex,
+      'scene_id': instance.sceneId,
+      'choices': instance.choices?.map((e) => e.toJson()).toList(),
     };
 
 const _$SenderEnumMap = {

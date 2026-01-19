@@ -4,15 +4,16 @@ part 'choice.g.dart';
 
 @JsonSerializable()
 class Choice {
-  final String id;
   final String text;
-  final String nextSceneId;
+
+  @JsonKey(name: 'target_node')
+  final String targetNode;
+
   final Map<String, dynamic>? impact; // e.g. {'romance': 1, 'suspicion': 5}
 
   Choice({
-    required this.id,
     required this.text,
-    required this.nextSceneId,
+    required this.targetNode,
     this.impact,
   });
 
