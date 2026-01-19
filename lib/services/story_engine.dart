@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-// 🛠️ FIX 1: Add 'as rx' to prevent conflict with GetX 'Rx' types
 import 'package:rxdart/rxdart.dart' as rx; 
 import '../models/message.dart';
 import '../models/choice.dart';
 import 'firestore_service.dart';
 import 'state_service.dart';
+import 'audio_service.dart'; // 🔊 Added for Noir sounds
 import '../utils/delays.dart';
 
 class StoryEngine extends GetxService {
   final FirestoreService _firestore = Get.find<FirestoreService>();
   final StateService _stateService = Get.find<StateService>();
+  final AudioService _audioService = Get.find<AudioService>(); // 🔊 Found service
 
-  // 🛠️ FIX 2: Use rx.BehaviorSubject to specify the RxDart version
   final Map<String, rx.BehaviorSubject<List<Message>>> _visibleMessages = {};
   final RxMap<String, bool> isTyping = <String, bool>{}.obs;
 
@@ -38,9 +38,9 @@ class StoryEngine extends GetxService {
       if (episodeId != null) _startDiscoveringThreads(episodeId);
     });
 
-    if (_stateService.currentEpisodeId.value != null) {
-      _startDiscoveringThreads(_stateService.currentEpisodeId.value!);
-    }
+    // 🛠️ FIX: Null safety for starting threads
+    final initialEpisode = _stateService.currentEpisodeId.value ?? 'episode_1';
+    _startDiscoveringThreads(initialEpisode);
   }
 
   void loadEpisode(String episodeId) {
@@ -70,7 +70,6 @@ class StoryEngine extends GetxService {
 
   Stream<List<Message>> getMessagesStream(String threadId) {
     if (!_visibleMessages.containsKey(threadId)) {
-      // 🛠️ FIX 3: Updated to rx.BehaviorSubject
       _visibleMessages[threadId] = rx.BehaviorSubject<List<Message>>.seeded([]);
       _startListeningToThread(threadId);
     }
@@ -80,8 +79,8 @@ class StoryEngine extends GetxService {
   void _startListeningToThread(String threadId) {
     if (_subscriptions.containsKey(threadId)) return;
 
-    String? episodeId = _stateService.currentEpisodeId.value;
-    if (episodeId == null) return;
+    // 🛠️ FIX: Default to episode_1 if state is null
+    String episodeId = _stateService.currentEpisodeId.value ?? 'episode_1';
 
     _subscriptions[threadId] = _firestore.streamMessages(episodeId, threadId).listen((snapshot) {
       _handleFirestoreUpdate(threadId, snapshot);
@@ -97,7 +96,8 @@ class StoryEngine extends GetxService {
       return Message.fromJson(data);
     }).toList();
 
-    String currentSceneId = _stateService.currentSceneId.value;
+    // 🛠️ FIX: Resolve the "String?" to "String" build error
+    String currentSceneId = _stateService.currentSceneId.value ?? 'scene_1';
 
     final subject = _visibleMessages[threadId];
     if (subject == null) return;
@@ -130,8 +130,12 @@ class StoryEngine extends GetxService {
     while (_incomingBuffers[threadId]?.isNotEmpty ?? false) {
       final msg = _incomingBuffers[threadId]!.removeAt(0);
 
+      // Handle typing simulation
       if (msg.sender != Sender.nadia && msg.sender != Sender.system) {
         isTyping[threadId] = true;
+        // 🔊 Audio Trigger: Start typing sound
+        _audioService.playTyping();
+        
         int typeTime = msg.delay > 0 ? msg.delay : AppDelays.minTyping;
         await Future.delayed(Duration(milliseconds: typeTime));
         isTyping[threadId] = false;
@@ -141,6 +145,9 @@ class StoryEngine extends GetxService {
 
       final currentList = subject.value;
       subject.add([...currentList, msg]);
+      
+      // 🔊 Audio Trigger: Notification ping on message arrival
+      _audioService.playPing();
     }
 
     _isProcessingQueue[threadId] = false;
@@ -153,8 +160,14 @@ class StoryEngine extends GetxService {
       });
     }
 
+    // 🔊 Audio Trigger: Optional feedback sound for making a choice
+    _audioService.playVibrate();
+
     _stateService.recordChoice(choice.targetNode);
-    _stateService.updateProgress(_stateService.currentEpisodeId.value!, choice.targetNode);
+    
+    // 🛠️ FIX: Null safety for updating progress
+    final episodeId = _stateService.currentEpisodeId.value ?? 'episode_1';
+    _stateService.updateProgress(episodeId, choice.targetNode);
 
     isTyping.clear();
   }
