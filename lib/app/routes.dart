@@ -15,7 +15,6 @@ import '../screens/profile/profile_screen.dart';
 import '../screens/profile/profile_edit_screen.dart';
 import '../screens/gallery/gallery_screen.dart';
 import '../screens/endgame/endgame_screen.dart';
-import '../screens/secret/secret_chat_screen.dart';
 
 class AppRoutes {
   static const splash = '/splash';
