@@ -19,6 +19,9 @@ dependencies:
   firebase_auth: ^5.3.1
   cloud_firestore: ^5.4.4
 
+  # Audio
+  audioplayers: ^6.1.0  # Added to fix the build failure
+
   # Visuals, FX & Physics
   flutter_animate: ^4.5.0
   vector_math: ^2.1.4     # Core math for the physics-based shatter
