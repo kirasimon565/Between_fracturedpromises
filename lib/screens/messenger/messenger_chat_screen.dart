@@ -98,7 +98,8 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
               stream: _engine.getMessagesStream(threadId),
               builder: (context, snapshot) {
                 final messages = snapshot.data ?? [];
-                // Auto-scroll to bottom on new messages
+                
+                // Immersive auto-scroll
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (_scrollController.hasClients) {
                     _scrollController.animateTo(
@@ -139,7 +140,7 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
 
   Widget _buildChatInput(String threadId) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
       decoration: BoxDecoration(
         color: Colors.black,
         border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
@@ -153,6 +154,7 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withOpacity(0.05),
+                border: Border.all(color: Colors.white10),
               ),
               child: const Icon(Icons.history_edu_rounded, color: Colors.white70, size: 22),
             ),
@@ -167,7 +169,7 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
               ),
               child: const Text(
                 "Tap feather to respond...",
-                style: TextStyle(color: Colors.white24, fontSize: 13),
+                style: TextStyle(color: Colors.white24, fontSize: 13, letterSpacing: 0.5),
               ),
             ),
           ),
@@ -177,11 +179,12 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
   }
 
   void _showChoiceRope(String threadId) {
-    _audio.playVibrate(); // Tactile feedback for choices
+    _audio.playVibrate(); 
     Get.bottomSheet(
       _RopeChoiceOverlay(threadId: threadId),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      enterBottomSheetDuration: const Duration(milliseconds: 400),
     );
   }
 }
@@ -196,10 +199,15 @@ class _CloudTypingIndicator extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+            bottomLeft: Radius.circular(5),
+          ),
         ),
         child: const TypingIndicator(color: Colors.white38),
       ),
@@ -215,40 +223,55 @@ class _RopeChoiceOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final messages = _engine.getMessagesStream(threadId).val ?? [];
-      if (messages.isEmpty) return const SizedBox.shrink();
-      
-      final lastMsg = messages.last;
-      final hasChoices = (lastMsg.choices?.isNotEmpty ?? false) && lastMsg.sender != Sender.nadia;
+    // 🛠️ FIX: Using StreamBuilder instead of .val to avoid build errors
+    return StreamBuilder<List<Message>>(
+      stream: _engine.getMessagesStream(threadId),
+      builder: (context, snapshot) {
+        final messages = snapshot.data ?? [];
+        if (messages.isEmpty) return const SizedBox.shrink();
+        
+        final lastMsg = messages.last;
+        final hasChoices = (lastMsg.choices?.isNotEmpty ?? false) && lastMsg.sender != Sender.nadia;
 
-      return Container(
-        padding: const EdgeInsets.only(top: 20, bottom: 40),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.95),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 1, height: 30, color: Colors.white24), // The "Rope"
-            const SizedBox(height: 10),
-            const Text("CHOOSE YOUR PATH", style: TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 4)),
-            const SizedBox(height: 30),
-            if (!hasChoices)
-              const Center(child: Text("Waiting for response...", style: TextStyle(color: Colors.white24)))
-            else
-              ...lastMsg.choices!.map((choice) => _SwayingChoice(
-                text: choice.text,
-                onTap: () {
-                  _engine.makeChoice(choice);
-                  Get.back();
-                },
-              )).toList(),
-          ],
-        ),
-      );
-    });
+        return Container(
+          padding: const EdgeInsets.only(top: 20, bottom: 40),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.98),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+            border: Border.all(color: Colors.white.withOpacity(0.05)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 1, height: 40, color: Colors.white24), // The "Rope"
+              const SizedBox(height: 12),
+              const Text(
+                "CONSEQUENCE ACCESS", 
+                style: TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 5, fontWeight: FontWeight.bold)
+              ),
+              const SizedBox(height: 30),
+              if (!hasChoices)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
+                    child: Text("Encryption active. Waiting for signal...", 
+                      style: TextStyle(color: Colors.white12, fontSize: 12, fontStyle: FontStyle.italic)
+                    )
+                  ),
+                )
+              else
+                ...lastMsg.choices!.map((choice) => _SwayingChoice(
+                  text: choice.text,
+                  onTap: () {
+                    _engine.makeChoice(choice);
+                    Get.back();
+                  },
+                )).toList(),
+            ],
+          ),
+        );
+      }
+    );
   }
 }
 
@@ -267,7 +290,7 @@ class _SwayingChoiceState extends State<_SwayingChoice> with SingleTickerProvide
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat(reverse: true);
   }
 
   @override
@@ -282,7 +305,7 @@ class _SwayingChoiceState extends State<_SwayingChoice> with SingleTickerProvide
       animation: _controller,
       builder: (context, child) {
         return Transform.rotate(
-          angle: math.sin(_controller.value * math.pi) * 0.03, // Subtle swaying
+          angle: math.sin(_controller.value * 2 * math.pi) * 0.015, // Subtle swaying
           child: child,
         );
       },
@@ -290,17 +313,22 @@ class _SwayingChoiceState extends State<_SwayingChoice> with SingleTickerProvide
         onTap: widget.onTap,
         child: Container(
           width: double.infinity,
-          margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
-          padding: const EdgeInsets.all(18),
+          margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: Colors.white10),
+            color: Colors.white.withOpacity(0.03),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.08)),
           ),
           child: Text(
-            widget.text,
+            widget.text.toUpperCase(),
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w300),
+            style: const TextStyle(
+              color: Colors.white, 
+              fontSize: 13, 
+              fontWeight: FontWeight.w300, 
+              letterSpacing: 2
+            ),
           ),
         ),
       ),
