@@ -28,7 +28,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     
-    // 🔊 Start the Intro Theme music
+    // 🔊 Start the Intro Theme music from assets/music/
     _audioService.playIntroTheme();
 
     _bgController = AnimationController(
@@ -93,13 +93,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
           // Layer 2 - Content
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              padding: const EdgeInsets.symmetric(horizontal: 40.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Spacer(),
+                  const Spacer(flex: 3),
 
-                  // 🛠️ Logo Integration
+                  // 🛠️ Logo Integration (Fade in)
                   TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0.0, end: 1.0),
                     duration: const Duration(milliseconds: 2000),
@@ -111,98 +111,90 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                     },
                     child: Image.asset(
                       'assets/logo/logo.png', // Corrected path
-                      width: 220,
+                      width: 240,
                       fit: BoxFit.contain,
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  // 🛠️ REMOVED: "Fractured Promises" subtitle to clean up UI
 
-                  // Subtitle
-                  FutureBuilder(
-                    future: Future.delayed(const Duration(milliseconds: 800)),
-                    builder: (context, snapshot) {
-                      return AnimatedOpacity(
-                        duration: const Duration(milliseconds: 1200),
-                        opacity: snapshot.connectionState == ConnectionState.done ? 1.0 : 0.0,
-                        child: Text(
-                          "Fractured Promises",
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontStyle: FontStyle.italic,
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 16,
-                            letterSpacing: 2.5,
-                          ),
-                        ),
-                      );
-                    },
+                  const Spacer(flex: 1),
+
+                  // 🛠️ NEW: Narrative Hook Box (Glassmorphism Container)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white10, width: 0.5),
+                    ),
+                    child: Column(
+                      children: List.generate(_sentences.length, (index) {
+                        return FutureBuilder(
+                          future: Future.delayed(Duration(milliseconds: 1500 + (index * 2000))), 
+                          builder: (context, snapshot) {
+                            return AnimatedOpacity(
+                              duration: const Duration(milliseconds: 1500),
+                              opacity: snapshot.connectionState == ConnectionState.done ? 0.7 : 0.0,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                child: Text(
+                                  _sentences[index],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    height: 1.5,
+                                    fontWeight: FontWeight.w300,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }),
+                    ),
                   ),
 
-                  const SizedBox(height: 60),
+                  const Spacer(flex: 3),
 
-                  // Narrative Hooks
-                  ...List.generate(_sentences.length, (index) {
-                     return FutureBuilder(
-                       future: Future.delayed(Duration(milliseconds: 2500 + (index * 3000))), 
-                       builder: (context, snapshot) {
-                         return AnimatedOpacity(
-                           duration: const Duration(milliseconds: 2000),
-                           opacity: snapshot.connectionState == ConnectionState.done ? 0.7 : 0.0,
-                           child: Padding(
-                             padding: const EdgeInsets.only(bottom: 16),
-                             child: Text(
-                               _sentences[index],
-                               textAlign: TextAlign.center,
-                               style: const TextStyle(
-                                 color: Colors.white,
-                                 fontSize: 14,
-                                 height: 1.6,
-                                 fontWeight: FontWeight.w300,
-                                 letterSpacing: 0.5,
-                               ),
-                             ),
-                           ),
-                         );
-                       },
-                     );
-                  }),
-
-                  const Spacer(),
-
-                  // 🛠️ NEW: Primary Action (Start Game)
+                  // 🛠️ Primary Action (Start Game)
                   WelcomeButton(
                     label: "START GAME",
                     icon: Icons.play_arrow,
                     onPressed: () {
-                      _stateService.clearProgress(); // Logic to start fresh
+                      _stateService.clearProgress(); // Resets progress for fresh start
                       Get.offAllNamed(AppRoutes.home);
                     },
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-                  // 🛠️ NEW: Conditional Continue Button
+                  // 🛠️ Conditional Continue Button
                   if (hasSavedProgress)
                     WelcomeButton(
                       label: "CONTINUE",
                       onPressed: () => Get.offAllNamed(AppRoutes.home),
                     ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
-                  TextButton(
-                    onPressed: () => Get.toNamed(AppRoutes.settings),
+                  // Settings Link
+                  GestureDetector(
+                    onTap: () => Get.toNamed(AppRoutes.settings),
                     child: Text(
                       "SETTINGS",
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.4),
-                        fontSize: 12,
-                        letterSpacing: 1.5,
+                        color: Colors.white.withOpacity(0.3),
+                        fontSize: 11,
+                        letterSpacing: 2.0,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  
+                  const Spacer(flex: 1),
 
                   _BottomPulse(),
                   const SizedBox(height: 10),
@@ -218,10 +210,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
 
 class _BottomPulse extends StatefulWidget {
   @override
-  __BottomPulseState createState() => __BottomPulseState();
+  _BottomPulseState createState() => _BottomPulseState();
 }
 
-class __BottomPulseState extends State<_BottomPulse> with SingleTickerProviderStateMixin {
+// 🛠️ FIXED: Renamed to match the class name to prevent "Type not found" error
+class _BottomPulseState extends State<_BottomPulse> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   @override
   void initState() {
