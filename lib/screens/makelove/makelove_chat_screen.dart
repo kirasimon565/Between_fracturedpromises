@@ -6,137 +6,214 @@ import '../../models/message.dart';
 import '../../services/story_engine.dart';
 import '../../services/firestore_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/audio_service.dart';
 import '../../widgets/typing_indicator.dart';
 import '../../theme/colors.dart';
 import 'makelove_bubble.dart';
-import '../../widgets/chat_input_bar.dart';
-import '../../widgets/choice_overlay.dart';
-import '../../widgets/particles/digital_dust.dart';
+import 'dart:math' as math;
 
-class MakeloveChatScreen extends StatelessWidget {
+class MakeloveChatScreen extends StatefulWidget {
+  @override
+  _MakeloveChatScreenState createState() => _MakeloveChatScreenState();
+}
+
+class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
   final String partnerName;
   final StoryEngine _engine = Get.find<StoryEngine>();
+  final AudioService _audio = Get.find<AudioService>();
   final FirestoreService _firestore = Get.find<FirestoreService>();
   final AuthService _auth = Get.find<AuthService>();
+  final ScrollController _scrollController = ScrollController();
 
-  MakeloveChatScreen({Key? key})
-      : partnerName = Get.arguments ?? 'Unknown',
-        super(key: key);
+  _MakeloveChatScreenState() : partnerName = Get.arguments ?? 'Unknown';
 
   @override
   Widget build(BuildContext context) {
     final String threadId = partnerName.toLowerCase();
-    final String partnerId = threadId;
 
     return Scaffold(
-      backgroundColor: AppColors.makeloveBackground,
+      backgroundColor: const Color(0xFF050000), // Deeper, blood-tinted black
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.redAccent),
+          onPressed: () => Get.back(),
+        ),
         title: Column(
           children: [
-            StreamBuilder<DocumentSnapshot>(
-              stream: _firestore.streamUser(_auth.uid),
-              builder: (context, snapshot) {
-                String displayName = partnerName;
-                if (snapshot.hasData && snapshot.data!.exists) {
-                   final data = snapshot.data!.data() as Map<String, dynamic>?;
-                   if (data != null && data['contacts'] != null && data['contacts'][partnerId] != null) {
-                     displayName = data['contacts'][partnerId]['nickname'] ?? partnerName;
-                   }
-                }
-                return Text(
-                  displayName.toUpperCase(),
-                  style: const TextStyle(color: Colors.white, fontSize: 14, letterSpacing: 3)
-                );
-              },
+            Text(
+              partnerName.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white, 
+                fontSize: 16, 
+                letterSpacing: 5, 
+                fontFamily: 'Didot',
+                fontWeight: FontWeight.w200
+              )
             ),
             const SizedBox(height: 4),
+            // Pulsing "LIVE" Status
             StreamBuilder<DocumentSnapshot>(
-              stream: _firestore.streamCharacter(partnerId),
+              stream: _firestore.streamCharacter(threadId),
               builder: (context, snapshot) {
-                bool isOnline = false;
-                if (snapshot.hasData && snapshot.data!.exists) {
-                  final data = snapshot.data!.data() as Map<String, dynamic>?;
-                  isOnline = data?['is_online'] ?? false;
-                }
-
-                if (!isOnline) {
-                   return const SizedBox(height: 0);
-                }
-
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
+                    _LivePulseDot(),
                     const SizedBox(width: 6),
-                    const Text("LIVE", style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
+                    const Text(
+                      "LIVE", 
+                      style: TextStyle(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)
+                    ),
                   ],
                 );
               },
             ),
           ],
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.white54),
-          onPressed: () => Get.back(),
-        ),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Container(height: 1, color: AppColors.makelovePrimary.withOpacity(0.2)),
-          Expanded(
-            child: StreamBuilder<List<Message>>(
-              stream: _engine.getMessagesStream(threadId),
-              builder: (context, snapshot) {
-                final messages = snapshot.data ?? [];
-
-                return Obx(() {
-                  final isTyping = _engine.isTyping[threadId] ?? false;
-
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    itemCount: messages.length + (isTyping ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == messages.length) {
-                         return const Align(
-                           alignment: Alignment.centerLeft,
-                           child: Padding(
-                             padding: EdgeInsets.only(left: 20),
-                             child: TypingIndicator(color: Colors.redAccent),
-                           ),
-                         );
-                      }
-                      final msg = messages[index];
-                      return DigitalDust(
-                        key: ValueKey(msg.id),
-                        particleColor: Colors.red.withOpacity(0.5),
-                        child: MakeloveBubble(message: msg, isMe: msg.sender == Sender.nadia)
-                      );
-                    },
-                  );
-                });
-              },
+          // Background Gradient Overlay
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.red.withOpacity(0.05), Colors.transparent],
+              ),
             ),
           ),
-          StreamBuilder<List<Message>>(
-            stream: _engine.getMessagesStream(threadId),
-            builder: (context, snapshot) {
-              final messages = snapshot.data ?? [];
-              if (messages.isEmpty) return ChatInputBar();
+          Column(
+            children: [
+              Expanded(
+                child: StreamBuilder<List<Message>>(
+                  stream: _engine.getMessagesStream(threadId),
+                  builder: (context, snapshot) {
+                    final messages = snapshot.data ?? [];
+                    
+                    // Auto-scroll
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (_scrollController.hasClients) {
+                        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                      }
+                    });
 
-              final lastMsg = messages.last;
-              if ((lastMsg.choices?.isNotEmpty ?? false) && lastMsg.sender != Sender.nadia) {
-                 return ChoiceOverlay(
-                   choices: lastMsg.choices!.map((c) => c.text).toList(),
-                   onSelected: (index) => _engine.makeChoice(lastMsg.choices![index])
-                 );
-              }
-              return ChatInputBar();
-            }
+                    return Obx(() {
+                      final isTyping = _engine.isTyping[threadId] ?? false;
+
+                      return ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                        itemCount: messages.length + (isTyping ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == messages.length) {
+                             return const Align(
+                               alignment: Alignment.centerLeft,
+                               child: Padding(
+                                 padding: EdgeInsets.only(left: 10, bottom: 20),
+                                 child: TypingIndicator(color: Colors.redAccent),
+                               ),
+                             );
+                          }
+                          final msg = messages[index];
+                          // MakeloveBubble uses a sharper "Cloud" and red glow explosion
+                          return MakeloveBubble(
+                            message: msg, 
+                            isMe: msg.sender == Sender.nadia
+                          );
+                        },
+                      );
+                    });
+                  },
+                ),
+              ),
+              // Advanced Choice Input Bar
+              _buildMakeloveInput(threadId),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMakeloveInput(String threadId) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        border: Border(top: BorderSide(color: Colors.red.withOpacity(0.1))),
+      ),
+      child: Row(
+        children: [
+          // The Crimson Heart Icon for Choices
+          GestureDetector(
+            onTap: () => _showRopeChoices(threadId),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.red.withOpacity(0.1),
+                border: Border.all(color: Colors.red.withOpacity(0.2)),
+              ),
+              child: const Icon(Icons.favorite_rounded, color: Colors.redAccent, size: 22),
+            ),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.03),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Text(
+                "Whisper a response...",
+                style: TextStyle(color: Colors.white12, fontSize: 13, letterSpacing: 1),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRopeChoices(String threadId) {
+    _audio.playVibrate(); // Tactile feedback
+    Get.bottomSheet(
+      _MakeloveRopeOverlay(threadId: threadId),
+      isScrollControlled: true,
+    );
+  }
+}
+
+class _LivePulseDot extends StatefulWidget {
+  @override
+  __LivePulseDotState createState() => __LivePulseDotState();
+}
+
+class __LivePulseDotState extends State<_LivePulseDot> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
+  }
+  @override
+  void dispose() { _controller.dispose(); super.dispose(); }
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) => Container(
+        width: 6, height: 6,
+        decoration: BoxDecoration(
+          color: Colors.red,
+          shape: BoxShape.circle,
+          boxShadow: [BoxShadow(color: Colors.red.withOpacity(_controller.value), blurRadius: 4)],
+        ),
       ),
     );
   }
