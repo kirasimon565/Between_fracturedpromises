@@ -4,22 +4,45 @@ import 'package:shared_preferences/shared_preferences.dart';
 class StateService extends GetxService {
   late SharedPreferences _prefs;
 
-  // App State
-  final RxString currentEpisodeId = 'episode_1'.obs;
-  final RxString currentSceneId = 'scene_1'.obs;
+  // App State - Initialized as null to support the "Continue" button logic
+  final RxnString currentEpisodeId = RxnString();
+  final RxnString currentSceneId = RxnString();
 
   // Admin State
   final RxBool isAdminUnlocked = false.obs;
 
   Future<StateService> init() async {
     _prefs = await SharedPreferences.getInstance();
-    currentEpisodeId.value = _prefs.getString('current_episode') ?? 'episode_1';
-    currentSceneId.value = _prefs.getString('current_scene') ?? 'scene_1';
+    
+    // Load persisted state
+    currentEpisodeId.value = _prefs.getString('current_episode');
+    currentSceneId.value = _prefs.getString('current_scene');
     isAdminUnlocked.value = _prefs.getBool('admin_unlocked') ?? false;
+    
+    // Load variables (optional: implement loop to load all 'var_' keys)
     return this;
   }
 
   final RxMap<String, dynamic> variables = <String, dynamic>{}.obs;
+
+  // 🛠️ ADDED: Clear Progress for "Start Game" button
+  void clearProgress() {
+    currentEpisodeId.value = null;
+    currentSceneId.value = null;
+    variables.clear();
+    
+    // Clear SharedPreferences
+    _prefs.remove('current_episode');
+    _prefs.remove('current_scene');
+    
+    // Remove all stored variables
+    final keys = _prefs.getKeys();
+    for (String key in keys) {
+      if (key.startsWith('var_')) {
+        _prefs.remove(key);
+      }
+    }
+  }
 
   void updateProgress(String episodeId, String sceneId) {
     currentEpisodeId.value = episodeId;
@@ -30,12 +53,10 @@ class StateService extends GetxService {
 
   void setVariable(String key, dynamic value) {
     variables[key] = value;
-    // Simple persistence for variables (could be optimized)
     _prefs.setString('var_$key', value.toString());
   }
 
   void recordChoice(String choiceId) {
-    // Save choice history logic here
     print("Choice recorded: $choiceId");
   }
 
