@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:math';
 import '../../app/routes.dart';
 import '../../app/constants.dart';
 import '../../services/auth_service.dart';
@@ -7,7 +8,6 @@ import '../../services/state_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/story_engine.dart';
 import '../../widgets/effects/shatter_effect.dart';
-import 'dart:math'
 
 class SplashScreen extends StatefulWidget {
   @override
