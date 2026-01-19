@@ -7,6 +7,7 @@ import '../../services/state_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/story_engine.dart';
 import '../../widgets/effects/shatter_effect.dart';
+import 'dart:math'
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -139,7 +140,7 @@ class __PulseDotsState extends State<_PulseDots> with SingleTickerProviderStateM
           builder: (context, child) {
              // Staggered Opacity
              double offset = index * 0.3;
-             double value = sin((_controller.value * 2 * pi) - offset);
+             double value = math.sin((_controller.value * 2 * pi) - offset);
              double opacity = (value * 0.5 + 0.5).clamp(0.2, 1.0);
 
              return Container(
