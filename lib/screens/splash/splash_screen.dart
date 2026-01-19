@@ -6,6 +6,7 @@ import '../../services/auth_service.dart';
 import '../../services/state_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/story_engine.dart';
+import '../../services/audio_service.dart'; // Ensure this is imported
 import '../../widgets/effects/shatter_effect.dart';
 import 'dart:math' as math;
 
@@ -30,14 +31,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _initServices() async {
+    // Initialize core services
     await Get.putAsync(() => StateService().init());
     Get.put(AuthService());
     Get.put(FirestoreService());
     Get.put(StoryEngine());
+    Get.put(AudioService()); // Start the audio engine shell
   }
 
   void _onShatterComplete() {
-    // Fade Transition handled by PageRoute usually, but here we just go off
+    // Transition to welcome screen after the physics event
     Get.offAllNamed(AppRoutes.welcome);
   }
 
@@ -54,40 +57,43 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // 1. Living Environment (Background)
+          // 1. Living Environment (Background breathing effect)
           AnimatedBuilder(
             animation: _bgController,
             builder: (context, child) {
-              double scale = 1.0 + (_bgController.value * 0.08); // 1.0 -> 1.08
+              double scale = 1.0 + (_bgController.value * 0.08); // Subtle scale zoom
               return Transform.scale(
                 scale: scale,
                 child: child,
               );
             },
             child: Image.asset(
-              AppConstants.bgSplash,
+              AppConstants.bgSplash, // Check path in constants matches assets/backgrounds/
               fit: BoxFit.cover,
             ),
           ),
 
-          // 2. Logo Sequence (Center)
+          // 2. Logo Sequence (The Fracture Event)
           Center(
             child: ShatterEffect(
               onShatterComplete: _onShatterComplete,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                   const Text(
+              // FIX: Replaced Text widget with actual Logo image asset
+              child: Image.asset(
+                'assets/logo/logo.png', // Corrected path from your pubspec
+                width: 280,
+                fit: BoxFit.contain,
+                // Error builder prevents the "Text" ghosting if the image is missing
+                errorBuilder: (context, error, stackTrace) {
+                  return const Text(
                     "BETWEEN",
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 48, // Large
-                      fontWeight: FontWeight.bold, // Serif-like weight
-                      letterSpacing: 4.0,
-                      fontFamily: 'Didot', // Or standard Serif
+                      fontSize: 48,
+                      letterSpacing: 8.0,
+                      fontFamily: 'Didot',
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ),
@@ -138,7 +144,7 @@ class __PulseDotsState extends State<_PulseDots> with SingleTickerProviderStateM
         return AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
-             // Staggered Opacity
+             // Staggered Opacity math
              double offset = index * 0.3;
              double value = math.sin((_controller.value * 2 * math.pi) - offset);
              double opacity = (value * 0.5 + 0.5).clamp(0.2, 1.0);
