@@ -1,67 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'gallery_controller.dart';
 import 'gallery_viewer.dart';
+import '../../services/audio_service.dart';
 import '../../theme/colors.dart';
 
 class GalleryScreen extends StatelessWidget {
   final GalleryController controller = Get.put(GalleryController());
+  final AudioService _audio = Get.find<AudioService>(); // 🔊 Found service
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black, // Dark vault theme
       appBar: AppBar(
-        title: const Text("GALLERY", style: TextStyle(letterSpacing: 4, fontSize: 13)),
+        title: const Text(
+          "SECURE GALLERY", 
+          style: TextStyle(letterSpacing: 6, fontSize: 12, fontWeight: FontWeight.w300)
+        ),
         centerTitle: true,
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.white70),
           onPressed: () => Get.back(),
         ),
       ),
       body: Obx(() {
         if (controller.unlockedImages.isEmpty) {
           return Center(
-            child: Text(
-              "NO EVIDENCE FOUND",
-              style: TextStyle(color: Colors.white24, letterSpacing: 2, fontSize: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.photo_library_outlined, color: Colors.white.withOpacity(0.05), size: 64),
+                const SizedBox(height: 16),
+                Text(
+                  "NO EVIDENCE RECOVERED",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.2), 
+                    letterSpacing: 3, 
+                    fontSize: 10
+                  ),
+                ),
+              ],
             ),
           );
         }
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(15),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 4, // Tight spacing for a "fragmented" look
-            mainAxisSpacing: 4,
-          ),
+        // 🛠️ Using Staggered Grid for the "Asymmetric Paradox" design
+        return MasonryGridView.count(
+          padding: const EdgeInsets.all(20),
+          crossAxisCount: 2,
+          mainAxisSpacing: 15,
+          crossAxisSpacing: 15,
           itemCount: controller.unlockedImages.length,
           itemBuilder: (context, index) {
             final path = controller.unlockedImages[index];
-            return GestureDetector(
-              onTap: () => Get.to(() => GalleryViewer(imagePath: path), transition: Transition.fade),
-              child: Hero(
-                tag: path,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(2), // Sharp edges to match splash
-                    image: DecorationImage(
-                      image: AssetImage(path), 
-                      fit: BoxFit.cover,
-                      // Desaturate thumbnails slightly for a noir feel
-                      colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.2), BlendMode.darken),
-                    ),
-                  ),
-                ),
-              ),
-            );
+            
+            return _buildGalleryTile(path, index);
           },
         );
       }),
+    );
+  }
+
+  Widget _buildGalleryTile(String path, int index) {
+    return GestureDetector(
+      onTap: () {
+        _audio.playPing(); // 🔊 Play sound on open
+        Get.to(() => GalleryViewer(imagePath: path), transition: Transition.fadeIn);
+      },
+      child: Hero(
+        tag: path,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(15), // Rounded professional look
+            border: Border.all(
+              color: Colors.white.withOpacity(0.1),
+              width: 0.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              )
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Stack(
+              children: [
+                Image.asset(
+                  path,
+                  fit: BoxFit.cover,
+                  // Noir desaturation
+                  color: Colors.black.withOpacity(0.1),
+                  colorBlendMode: BlendMode.darken,
+                ),
+                // Subtle Glassmorphism gradient overlay
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.4),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
