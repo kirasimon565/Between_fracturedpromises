@@ -6,7 +6,7 @@ import '../../services/auth_service.dart';
 import '../../services/state_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/story_engine.dart';
-import '../../services/audio_service.dart'; // Ensure this is imported
+import '../../services/audio_service.dart'; 
 import '../../widgets/effects/shatter_effect.dart';
 import 'dart:math' as math;
 
@@ -17,6 +17,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _bgController;
+  // Get reference to the AudioService
+  late AudioService _audioService;
 
   @override
   void initState() {
@@ -36,7 +38,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     Get.put(AuthService());
     Get.put(FirestoreService());
     Get.put(StoryEngine());
-    Get.put(AudioService()); // Start the audio engine shell
+    
+    // Initialize and find the AudioService
+    _audioService = Get.put(AudioService()); 
+  }
+
+  void _onShatterStart() {
+    // 🔊 TRIGGER: Play the glass shatter FX from assets/fx/
+    _audioService.playShatter();
   }
 
   void _onShatterComplete() {
@@ -68,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               );
             },
             child: Image.asset(
-              AppConstants.bgSplash, // Check path in constants matches assets/backgrounds/
+              AppConstants.bgSplash, 
               fit: BoxFit.cover,
             ),
           ),
@@ -76,13 +85,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           // 2. Logo Sequence (The Fracture Event)
           Center(
             child: ShatterEffect(
+              // 🛠️ Audio Integration: play sound when shattering starts
+              onShatterStart: _onShatterStart, 
               onShatterComplete: _onShatterComplete,
-              // FIX: Replaced Text widget with actual Logo image asset
               child: Image.asset(
-                'assets/logo/logo.png', // Corrected path from your pubspec
+                'assets/logo/logo.png', // Path from your pubspec
                 width: 280,
                 fit: BoxFit.contain,
-                // Error builder prevents the "Text" ghosting if the image is missing
                 errorBuilder: (context, error, stackTrace) {
                   return const Text(
                     "BETWEEN",
