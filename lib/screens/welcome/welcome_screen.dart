@@ -218,10 +218,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
 
 class _BottomPulse extends StatefulWidget {
   @override
-  __BottomPulseState createState() => __PulseDotsState();
+  __BottomPulseState createState() => __BottomPulseState();
 }
 
-class __PulseDotsState extends State<_BottomPulse> with SingleTickerProviderStateMixin {
+class __BottomPulseState extends State<_BottomPulse> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   @override
   void initState() {
