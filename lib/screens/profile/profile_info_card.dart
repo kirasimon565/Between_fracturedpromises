@@ -5,30 +5,71 @@ class ProfileInfoCard extends StatelessWidget {
   final String content;
   final IconData icon;
 
-  const ProfileInfoCard({Key? key, required this.title, required this.content, required this.icon}) : super(key: key);
+  const ProfileInfoCard({
+    Key? key, 
+    required this.title, 
+    required this.content, 
+    required this.icon
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)), // Sleek thin separator
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white24, size: 18),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 1.5)),
-                const SizedBox(height: 4),
-                Text(content, style: const TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.w300)),
-              ],
-            ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          // Glassmorphism effect: subtle white tint with a blur feel
+          color: Colors.white.withOpacity(0.03),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.08), 
+            width: 0.5
           ),
-        ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Professional Icon Styling
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white54, size: 18),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Label style
+                  Text(
+                    title.toUpperCase(), 
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.3), 
+                      fontSize: 9, 
+                      letterSpacing: 2.0,
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
+                  const SizedBox(height: 6),
+                  // Content style
+                  Text(
+                    content, 
+                    style: const TextStyle(
+                      color: Colors.white, 
+                      fontSize: 14, 
+                      fontWeight: FontWeight.w300,
+                      height: 1.4
+                    )
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
