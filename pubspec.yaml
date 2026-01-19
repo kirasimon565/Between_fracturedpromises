@@ -10,20 +10,27 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # State Management
+  # State Management & Reactivity
   get: ^4.6.6
+  rxdart: ^0.27.7  # Essential for the StoryEngine "Drip" and buffer logic
 
   # Firebase
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.1
   cloud_firestore: ^5.4.4
 
+  # Visuals, FX & Physics
+  flutter_animate: ^4.5.0
+  vector_math: ^2.1.4     # Required for the Physics-based Shatter math
+  path_drawing: ^1.0.1    # Required for the "Rope" and "Cloud" CustomPainters
+  fragment_shader: ^1.0.2 # For the "Luminance Bloom" and "Glitch" effects
+
   # Utils
   shared_preferences: ^2.3.2
   google_fonts: ^6.1.0
   intl: ^0.19.0
   uuid: ^4.2.2
-  flutter_animate: ^4.5.0
+  cached_network_image: ^3.3.0 # For the "Breathing World" parallax backgrounds
 
   # JSON
   json_annotation: ^4.9.0
@@ -47,5 +54,4 @@ flutter:
     - assets/gallery/
     - assets/fx/
     - assets/music/
-    - data/cache/
-    - data/saves/
+    # Note: Ensure the logo is inside assets/logo/ as logo.png
