@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 class ShatterEffect extends StatefulWidget {
   final Widget child;
   final VoidCallback onShatterComplete;
+  // 🛠️ ADDED: Callback for the moment the audio should play
+  final VoidCallback? onShatterStart; 
 
   const ShatterEffect({
     Key? key,
     required this.child,
     required this.onShatterComplete,
+    this.onShatterStart, // Initialize optional parameter
   }) : super(key: key);
 
   @override
@@ -48,16 +51,21 @@ class _ShatterEffectState extends State<ShatterEffect> with TickerProviderStateM
     // 1. Bloom
     await _bloomController.forward();
 
+    // 🔊 TRIGGER: Signal the SplashScreen to play 'glass_shatter.mp3'
+    widget.onShatterStart?.call();
+
     // 2. Prepare Shards
     _createShards();
-    setState(() => _isShattered = true);
+    if (mounted) {
+      setState(() => _isShattered = true);
+    }
 
     // 3. Explode
     _shatterController.forward();
   }
 
   void _createShards() {
-    // Generate ~60 shards
+    // Generate ~60 shards for the physics event
     for (int i = 0; i < 60; i++) {
       double angle = _random.nextDouble() * 2 * pi;
       double force = _random.nextDouble() * 10 + 2;
@@ -110,13 +118,12 @@ class _ShatterEffectState extends State<ShatterEffect> with TickerProviderStateM
     return AnimatedBuilder(
       animation: _bloomController,
       builder: (context, child) {
-        // Luminance Bloom: Brightness ramp
-        // We simulate "Too Bright" by mixing with white
+        // Luminance Bloom: simulate "Too Bright" by additive white blending
         double value = _bloomController.value;
         return ColorFiltered(
           colorFilter: ColorFilter.mode(
             Colors.white.withOpacity(value.clamp(0.0, 1.0)),
-            BlendMode.plus, // Additive blend for "bloom"
+            BlendMode.plus, 
           ),
           child: widget.child,
         );
@@ -155,12 +162,12 @@ class _ShatterPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
       ..style = PaintingStyle.fill
-      ..color = Colors.white; // Logo color assumed white
+      ..color = Colors.white; 
 
     final center = Offset(size.width / 2, size.height / 2);
 
     for (var shard in shards) {
-      double t = progress * 15; // Time multiplier
+      double t = progress * 15; // Time multiplier for physics calc
 
       // Physics: x = x0 + vt, y = y0 + vt + 0.5gt^2
       Offset currentPos = center + (shard.velocity * t);
