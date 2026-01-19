@@ -6,21 +6,23 @@ import '../models/message.dart';
 import '../models/choice.dart';
 import 'firestore_service.dart';
 import 'state_service.dart';
-import 'audio_service.dart'; // 🔊 Added for Noir sounds
+import 'audio_service.dart'; 
 import '../utils/delays.dart';
 
 class StoryEngine extends GetxService {
   final FirestoreService _firestore = Get.find<FirestoreService>();
   final StateService _stateService = Get.find<StateService>();
-  final AudioService _audioService = Get.find<AudioService>(); // 🔊 Found service
+  final AudioService _audioService = Get.find<AudioService>(); 
 
   final Map<String, rx.BehaviorSubject<List<Message>>> _visibleMessages = {};
   final RxMap<String, bool> isTyping = <String, bool>{}.obs;
+  
+  // 🛠️ FIX: Added for Gallery persistence
+  final RxList<String> unlockedGlobalSecrets = <String>[].obs;
 
   RxList<String> activeThreadIds = <String>[].obs;
 
   Rx<String?> get currentEpisode => _stateService.currentEpisodeId;
-  List<dynamic> get activeThreads => activeThreadIds.map((id) => _ThreadWrapper(id)).toList();
 
   final Map<String, StreamSubscription> _subscriptions = {};
   final Map<String, List<Message>> _incomingBuffers = {};
@@ -38,17 +40,25 @@ class StoryEngine extends GetxService {
       if (episodeId != null) _startDiscoveringThreads(episodeId);
     });
 
-    // 🛠️ FIX: Null safety for starting threads
     final initialEpisode = _stateService.currentEpisodeId.value ?? 'episode_1';
     _startDiscoveringThreads(initialEpisode);
   }
 
-  void loadEpisode(String episodeId) {
-    _stateService.currentEpisodeId.value = episodeId;
+  // 🛠️ FIX: Added for EndingController logic
+  bool hasCompletedThread(String threadId) {
+    // Logic: If the thread is active and contains messages, we consider it "interacted with"
+    return activeThreadIds.contains(threadId);
   }
 
-  Stream<List<Message>> getMessagesForThread(String threadId) {
-    return getMessagesStream(threadId);
+  // 🛠️ FIX: Added for EndingController metadata
+  String? getMetadata(String key) {
+    // This allows the engine to pull specific story flags from StateService
+    // e.g., 'final_ending_id'
+    return _stateService.variables[key]?.toString();
+  }
+
+  void loadEpisode(String episodeId) {
+    _stateService.currentEpisodeId.value = episodeId;
   }
 
   void _startDiscoveringThreads(String episodeId) {
@@ -78,8 +88,6 @@ class StoryEngine extends GetxService {
 
   void _startListeningToThread(String threadId) {
     if (_subscriptions.containsKey(threadId)) return;
-
-    // 🛠️ FIX: Default to episode_1 if state is null
     String episodeId = _stateService.currentEpisodeId.value ?? 'episode_1';
 
     _subscriptions[threadId] = _firestore.streamMessages(episodeId, threadId).listen((snapshot) {
@@ -96,14 +104,11 @@ class StoryEngine extends GetxService {
       return Message.fromJson(data);
     }).toList();
 
-    // 🛠️ FIX: Resolve the "String?" to "String" build error
     String currentSceneId = _stateService.currentSceneId.value ?? 'scene_1';
-
     final subject = _visibleMessages[threadId];
     if (subject == null) return;
 
     final currentVisible = subject.value;
-
     final relevantMessages = allMessages.where((m) => m.sceneId == currentSceneId).toList();
     relevantMessages.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
 
@@ -130,10 +135,8 @@ class StoryEngine extends GetxService {
     while (_incomingBuffers[threadId]?.isNotEmpty ?? false) {
       final msg = _incomingBuffers[threadId]!.removeAt(0);
 
-      // Handle typing simulation
       if (msg.sender != Sender.nadia && msg.sender != Sender.system) {
         isTyping[threadId] = true;
-        // 🔊 Audio Trigger: Start typing sound
         _audioService.playTyping();
         
         int typeTime = msg.delay > 0 ? msg.delay : AppDelays.minTyping;
@@ -145,9 +148,14 @@ class StoryEngine extends GetxService {
 
       final currentList = subject.value;
       subject.add([...currentList, msg]);
-      
-      // 🔊 Audio Trigger: Notification ping on message arrival
       _audioService.playPing();
+
+      // 🛠️ Track "Secrets" for Gallery automatically
+      if (msg.metadata?['is_secret'] == true && msg.metadata?['image_url'] != null) {
+        if (!unlockedGlobalSecrets.contains(msg.metadata!['image_url'])) {
+          unlockedGlobalSecrets.add(msg.metadata!['image_url']);
+        }
+      }
     }
 
     _isProcessingQueue[threadId] = false;
@@ -160,12 +168,9 @@ class StoryEngine extends GetxService {
       });
     }
 
-    // 🔊 Audio Trigger: Optional feedback sound for making a choice
     _audioService.playVibrate();
-
     _stateService.recordChoice(choice.targetNode);
     
-    // 🛠️ FIX: Null safety for updating progress
     final episodeId = _stateService.currentEpisodeId.value ?? 'episode_1';
     _stateService.updateProgress(episodeId, choice.targetNode);
 
@@ -179,9 +184,4 @@ class StoryEngine extends GetxService {
     _visibleMessages.values.forEach((subject) => subject.close());
     super.onClose();
   }
-}
-
-class _ThreadWrapper {
-  final String id;
-  _ThreadWrapper(this.id);
 }
