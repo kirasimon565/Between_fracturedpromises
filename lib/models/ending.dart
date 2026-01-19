@@ -1,4 +1,4 @@
-enum EndingType { fractured, loyal, broken, alone }
+enum EndingType { fractured, loyal, broken, alone, perfect, neutral }
 
 class Ending {
   final String id;
