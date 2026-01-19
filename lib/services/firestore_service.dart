@@ -46,6 +46,23 @@ class FirestoreService extends GetxService {
         .snapshots();
   }
 
+  // Listen to Available Threads
+  Stream<List<String>> streamActiveThreadIds(String episodeId) {
+    // Note: Firestore does not support streaming a list of subcollections natively.
+    // However, if we structure data such that 'threads' are documents in a collection, we can stream them.
+    // In our Upload logic, we write to `.../threads/{threadId}/messages/...`.
+    // This implies `threads/{threadId}` is a document.
+    // If the Admin Uploader writes a dummy doc to `threads/{threadId}` it will show up.
+    // Let's ensure Uploader writes the thread doc too.
+
+    return _db
+      .collection('episodes')
+      .doc(episodeId)
+      .collection('threads')
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
+  }
+
   // Episode Fetching
   Future<Map<String, dynamic>?> fetchEpisode(String episodeId) async {
     try {
@@ -81,8 +98,6 @@ class FirestoreService extends GetxService {
         for (int i = 0; i < scene.messages.length; i++) {
           final Message originalMsg = scene.messages[i];
 
-          // Determine Thread ID
-          // If Nadia sends, thread is recipient. If partner sends, thread is partner.
           String threadId = 'unknown';
           if (originalMsg.sender == Sender.nadia) {
             threadId = originalMsg.recipient?.toLowerCase() ?? 'unknown';
@@ -90,13 +105,15 @@ class FirestoreService extends GetxService {
             threadId = originalMsg.sender.name.toLowerCase();
           }
 
-          // Check if this is the last message of the scene AND if the scene has choices
+          // ENSURE THREAD DOCUMENT EXISTS
+          final threadRef = _db.collection('episodes').doc(episodeId).collection('threads').doc(threadId);
+          batch.set(threadRef, {'last_updated': FieldValue.serverTimestamp()}, SetOptions(merge: true));
+
           List<Choice>? choicesForMsg = originalMsg.choices;
           if (i == scene.messages.length - 1 && (scene.choices?.isNotEmpty ?? false)) {
             choicesForMsg = scene.choices;
           }
 
-          // Create new Message object with SceneID, OrderIndex, and potentially injected Choices
           final Message newMsg = Message(
             id: originalMsg.id,
             sender: originalMsg.sender,
@@ -104,19 +121,12 @@ class FirestoreService extends GetxService {
             content: originalMsg.content,
             type: originalMsg.type,
             delay: originalMsg.delay,
-            orderIndex: i, // Order within the scene
+            orderIndex: i,
             sceneId: scene.id,
             choices: choicesForMsg
           );
 
-          final msgRef = _db
-              .collection('episodes')
-              .doc(episodeId)
-              .collection('threads')
-              .doc(threadId)
-              .collection('messages')
-              .doc(newMsg.id); // Use ID from JSON if available, or auto-id if empty? Assumed ID exists.
-
+          final msgRef = threadRef.collection('messages').doc(newMsg.id);
           batch.set(msgRef, newMsg.toJson());
         }
       }
@@ -130,7 +140,6 @@ class FirestoreService extends GetxService {
     }
   }
 
-  // Admin Upload (Legacy - kept for reference if needed, but replaced by above)
   Future<void> uploadEpisode(String episodeId, Map<String, dynamic> data) async {
     await _db.collection('episodes').doc(episodeId).set(data);
   }

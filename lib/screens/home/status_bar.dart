@@ -33,19 +33,29 @@ class _StatusBarState extends State<StatusBar> {
 
   @override
   Widget build(BuildContext context) {
+    // "Fake OS" look - Mundane, intrusive, real
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(_timeString, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w400)),
+          Text(
+            _timeString,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Inter',
+            )
+          ),
           const Row(
             children: [
-              Icon(Icons.signal_cellular_alt, color: Colors.white, size: 14),
+              Icon(Icons.signal_cellular_alt_rounded, color: Colors.white, size: 16),
               SizedBox(width: 6),
-              Icon(Icons.wifi, color: Colors.white, size: 14),
+              Icon(Icons.wifi_rounded, color: Colors.white, size: 16),
               SizedBox(width: 6),
-              Icon(Icons.battery_4_bar, color: Colors.white, size: 14),
+              // Battery
+              Icon(Icons.battery_5_bar_rounded, color: Colors.white, size: 16),
             ],
           ),
         ],

@@ -1,30 +1,66 @@
 import 'package:flutter/material.dart';
+import 'dart:ui'; // For ImageFilter
 
-class WelcomeButton extends StatelessWidget {
+class WelcomeButton extends StatefulWidget {
   final String label;
   final VoidCallback onPressed;
 
   const WelcomeButton({Key? key, required this.label, required this.onPressed}) : super(key: key);
 
   @override
+  _WelcomeButtonState createState() => _WelcomeButtonState();
+}
+
+class _WelcomeButtonState extends State<WelcomeButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton( // Outlined looks more like a "Hacker/System" interface
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.white54, width: 1),
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero), // Sharp edges for "Fractured" feel
-          backgroundColor: Colors.white.withOpacity(0.05),
-        ),
-        onPressed: onPressed,
-        child: Text(
-          label.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            letterSpacing: 4,
-            fontWeight: FontWeight.w300,
+    return ScaleTransition(
+      scale: Tween<double>(begin: 1.0, end: 0.98).animate(_controller),
+      child: GestureDetector(
+        onTapDown: (_) => _controller.forward(),
+        onTapUp: (_) {
+           _controller.reverse();
+           widget.onPressed();
+        },
+        onTapCancel: () => _controller.reverse(),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30), // Rounded pill
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Glassmorphism
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1), // Semi-transparent white
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5), // Thin border
+              ),
+              child: Center(
+                child: Text(
+                  widget.label.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

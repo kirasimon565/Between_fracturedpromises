@@ -17,14 +17,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (_tapCount >= 5) {
       _tapCount = 0;
       // Secretly navigates to the Dialpad
-      Get.toNamed(AppRoutes.adminDialpad);
+      // We trigger a haptic feedback or snackbar here usually
+      Get.snackbar("SYSTEM", "SECURE GATEWAY DETECTED",
+        colorText: Colors.red, backgroundColor: Colors.black,
+        snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 1));
+
+      Future.delayed(const Duration(seconds: 1), () {
+        Get.toNamed(AppRoutes.adminDialpad);
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.messengerBackground,
+      backgroundColor: const Color(0xFF0A0A0A), // Very dark grey
       appBar: AppBar(
         title: const Text("SETTINGS", style: TextStyle(letterSpacing: 2, fontSize: 14)),
         backgroundColor: Colors.black,
@@ -34,23 +41,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 20),
         children: [
+          _buildSectionHeader("ACCOUNT"),
           _buildSettingsItem(Icons.person_outline, "Account Profile", () => Get.toNamed(AppRoutes.profile)),
-          _buildSettingsItem(Icons.notifications_none, "System Notifications", () {}),
           _buildSettingsItem(Icons.lock_outline, "Privacy & Security", () {}),
-          _buildSettingsItem(Icons.palette_outlined, "Interface Theme", () {}),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Divider(color: Colors.white10),
-          ),
+
+          _buildSectionHeader("SYSTEM"),
+          _buildSettingsItem(Icons.notifications_none, "Notifications", () {}, trailing: _buildSwitch(true)),
+          _buildSettingsItem(Icons.volume_up_outlined, "Sound Effects", () {}, trailing: _buildSwitch(true)),
+          _buildSettingsItem(Icons.music_note_outlined, "Ambient Music", () {}, trailing: _buildSwitch(false)),
+
+          const SizedBox(height: 30),
+          const Divider(color: Colors.white10),
+
           // THE SECRET GATEWAY
           ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 25),
-            title: const Text("System Version", style: TextStyle(color: Colors.white, fontSize: 15)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+            title: const Text("System Version", style: TextStyle(color: Colors.white54, fontSize: 14)),
             subtitle: Text(
               "${AppConstants.version} (Build ${AppConstants.buildNumber})", 
-              style: const TextStyle(color: Colors.white38, fontSize: 12)
+              style: const TextStyle(color: Colors.white24, fontSize: 12, fontFamily: 'monospace')
             ),
-            trailing: const Icon(Icons.chevron_right, color: Colors.white24),
             onTap: _handleVersionTap,
           ),
         ],
@@ -58,13 +68,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingsItem(IconData icon, String title, VoidCallback onTap) {
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(25, 20, 25, 10),
+      child: Text(
+        title,
+        style: const TextStyle(color: Colors.white38, fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.bold)
+      ),
+    );
+  }
+
+  Widget _buildSettingsItem(IconData icon, String title, VoidCallback onTap, {Widget? trailing}) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 4),
-      leading: Icon(icon, color: Colors.white70, size: 22),
-      title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 15)),
-      trailing: const Icon(Icons.chevron_right, color: Colors.white12, size: 18),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 0),
+      leading: Icon(icon, color: Colors.white70, size: 20),
+      title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w300)),
+      trailing: trailing ?? const Icon(Icons.chevron_right, color: Colors.white12, size: 18),
       onTap: onTap,
+    );
+  }
+
+  Widget _buildSwitch(bool value) {
+    return Switch(
+      value: value,
+      onChanged: (v) {},
+      activeColor: Colors.white,
+      activeTrackColor: Colors.white24,
+      inactiveThumbColor: Colors.grey,
+      inactiveTrackColor: Colors.white10,
     );
   }
 }
