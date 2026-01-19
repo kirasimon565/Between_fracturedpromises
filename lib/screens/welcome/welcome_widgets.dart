@@ -4,8 +4,15 @@ import 'dart:ui'; // For ImageFilter
 class WelcomeButton extends StatefulWidget {
   final String label;
   final VoidCallback onPressed;
+  // 🛠️ ADDED: Optional icon parameter to fix build error
+  final IconData? icon; 
 
-  const WelcomeButton({Key? key, required this.label, required this.onPressed}) : super(key: key);
+  const WelcomeButton({
+    Key? key, 
+    required this.label, 
+    required this.onPressed,
+    this.icon, // Initialize optional icon
+  }) : super(key: key);
 
   @override
   _WelcomeButtonState createState() => _WelcomeButtonState();
@@ -49,16 +56,28 @@ class _WelcomeButtonState extends State<WelcomeButton> with SingleTickerProvider
                 borderRadius: BorderRadius.circular(30),
                 border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5), // Thin border
               ),
-              child: Center(
-                child: Text(
-                  widget.label.toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.w400,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // 🛠️ Icon Integration: Show only if icon is provided
+                  if (widget.icon != null) ...[
+                    Icon(
+                      widget.icon,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 10), // Spacing between icon and text
+                  ],
+                  Text(
+                    widget.label.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
