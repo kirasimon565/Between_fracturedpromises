@@ -32,7 +32,7 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
     final String threadId = partnerName.toLowerCase();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF050000), // Deeper, blood-tinted black
+      backgroundColor: const Color(0xFF050000),
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
@@ -54,7 +54,6 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
               )
             ),
             const SizedBox(height: 4),
-            // Pulsing "LIVE" Status
             StreamBuilder<DocumentSnapshot>(
               stream: _firestore.streamCharacter(threadId),
               builder: (context, snapshot) {
@@ -76,7 +75,6 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
       ),
       body: Stack(
         children: [
-          // Background Gradient Overlay
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -94,7 +92,6 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
                   builder: (context, snapshot) {
                     final messages = snapshot.data ?? [];
                     
-                    // Auto-scroll
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (_scrollController.hasClients) {
                         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
@@ -119,7 +116,6 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
                              );
                           }
                           final msg = messages[index];
-                          // MakeloveBubble uses a sharper "Cloud" and red glow explosion
                           return MakeloveBubble(
                             message: msg, 
                             isMe: msg.sender == Sender.nadia
@@ -130,7 +126,6 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
                   },
                 ),
               ),
-              // Advanced Choice Input Bar
               _buildMakeloveInput(threadId),
             ],
           ),
@@ -148,7 +143,6 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
       ),
       child: Row(
         children: [
-          // The Crimson Heart Icon for Choices
           GestureDetector(
             onTap: () => _showRopeChoices(threadId),
             child: Container(
@@ -181,10 +175,75 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
   }
 
   void _showRopeChoices(String threadId) {
-    _audio.playVibrate(); // Tactile feedback
+    _audio.playVibrate();
     Get.bottomSheet(
       _MakeloveRopeOverlay(threadId: threadId),
       isScrollControlled: true,
+    );
+  }
+}
+
+// 🛠️ ADDED: Missing Rope Overlay class for Makelove
+class _MakeloveRopeOverlay extends StatelessWidget {
+  final String threadId;
+  final StoryEngine _engine = Get.find<StoryEngine>();
+
+  _MakeloveRopeOverlay({required this.threadId});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Message>>(
+      stream: _engine.getMessagesStream(threadId),
+      builder: (context, snapshot) {
+        final messages = snapshot.data ?? [];
+        if (messages.isEmpty) return const SizedBox.shrink();
+
+        final lastMsg = messages.last;
+        final choices = lastMsg.choices ?? [];
+
+        if (choices.isEmpty) {
+          return Container(
+            height: 100,
+            color: Colors.black,
+            child: const Center(child: Text("WAITING FOR SIGNAL...", style: TextStyle(color: Colors.red, letterSpacing: 2))),
+          );
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 40),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.95),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+            border: Border.all(color: Colors.red.withOpacity(0.2)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: choices.map((choice) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
+              child: GestureDetector(
+                onTap: () {
+                  _engine.makeChoice(choice);
+                  Get.back();
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.05),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    choice.text.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, letterSpacing: 2, fontSize: 12),
+                  ),
+                ),
+              ),
+            )).toList(),
+          ),
+        );
+      }
     );
   }
 }
