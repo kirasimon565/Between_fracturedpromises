@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'dart:ui';
 import '../../app/routes.dart';
 import '../../app/constants.dart';
+import '../../services/audio_service.dart';
 import 'welcome_widgets.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -12,6 +13,7 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProviderStateMixin {
   late AnimationController _bgController;
+  final AudioService _audioService = Get.find<AudioService>();
 
   // Narrative Hook sentences
   final List<String> _sentences = [
@@ -23,9 +25,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
+    
+    // Start the Ambient Noir Theme from assets/music/
+    _audioService.playTheme('noir_ambient.mp3');
+
     _bgController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 40), // 40-second loop Ken Burns
+      duration: const Duration(seconds: 40), // 40-second Ken Burns effect loop
     )..repeat(reverse: true);
   }
 
@@ -42,11 +48,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Layer 0 - Background (Ken Burns)
+          // Layer 0 - Background (Ken Burns effect on rainy window asset)
           AnimatedBuilder(
             animation: _bgController,
             builder: (context, child) {
-              // Pan and Scale slightly
               double scale = 1.0 + (_bgController.value * 0.1);
               double offsetX = (_bgController.value - 0.5) * 20;
               return Transform.translate(
@@ -54,7 +59,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                 child: Transform.scale(
                   scale: scale,
                   child: Image.asset(
-                    AppConstants.bgWelcome, // Rainy window asset
+                    AppConstants.bgWelcome, 
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -63,19 +68,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
           ),
           
           // Layer 1 - Memory Overlay (Vignette + Blur)
-          // We apply blur to the background
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
             child: Container(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   center: Alignment.center,
-                  radius: 1.0,
+                  radius: 1.2,
                   colors: [
-                    Colors.black.withOpacity(0.2), // Slight center clarity
-                    Colors.black.withOpacity(0.8), // Dark edges
+                    Colors.black.withOpacity(0.1), // Center clarity
+                    Colors.black.withOpacity(0.9), // Deep dark edges
                   ],
-                  stops: const [0.3, 1.0],
+                  stops: const [0.2, 1.0],
                 ),
               ),
             ),
@@ -90,43 +94,40 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                 children: [
                   const Spacer(),
 
-                  // Main Title
+                  // 🛠️ FIX: Replaced Main Title Text with the Gold Ring Logo
                   TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0.0, end: 1.0),
-                    duration: const Duration(milliseconds: 1500),
+                    duration: const Duration(milliseconds: 2000),
                     builder: (context, value, child) {
                        return Opacity(
                          opacity: value,
                          child: child,
                        );
                     },
-                    child: const Text(
-                      "BETWEEN",
-                      style: TextStyle(
-                        fontFamily: 'Didot', // Serif
-                        color: Colors.white,
-                        fontSize: 42,
-                        letterSpacing: 2.0,
-                        shadows: [Shadow(color: Colors.white54, blurRadius: 10)],
-                      ),
+                    child: Image.asset(
+                      'assets/logo/logo.png', // Corrected path from your pubspec
+                      width: 220,
+                      fit: BoxFit.contain,
                     ),
                   ),
 
-                  // Subtitle
+                  const SizedBox(height: 10),
+
+                  // Subtitle: Fractured Promises
                   FutureBuilder(
-                    future: Future.delayed(const Duration(milliseconds: 500)),
+                    future: Future.delayed(const Duration(milliseconds: 800)),
                     builder: (context, snapshot) {
                       return AnimatedOpacity(
-                        duration: const Duration(milliseconds: 1000),
+                        duration: const Duration(milliseconds: 1200),
                         opacity: snapshot.connectionState == ConnectionState.done ? 1.0 : 0.0,
                         child: Text(
                           "Fractured Promises",
                           style: TextStyle(
-                            fontFamily: 'Inter', // Sans-serif
+                            fontFamily: 'Inter',
                             fontStyle: FontStyle.italic,
-                            color: Colors.white.withOpacity(0.6),
-                            fontSize: 14,
-                            letterSpacing: 1.2,
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 16,
+                            letterSpacing: 2.5,
                           ),
                         ),
                       );
@@ -138,7 +139,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                   // Narrative Hook - Staggered Sentences
                   ...List.generate(_sentences.length, (index) {
                      return FutureBuilder(
-                       future: Future.delayed(Duration(milliseconds: 2000 + (index * 2500))), // Slow stagger
+                       future: Future.delayed(Duration(milliseconds: 2500 + (index * 3000))), 
                        builder: (context, snapshot) {
                          return AnimatedOpacity(
                            duration: const Duration(milliseconds: 2000),
@@ -151,8 +152,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                style: const TextStyle(
                                  color: Colors.white,
                                  fontSize: 14,
-                                 height: 1.5,
+                                 height: 1.6,
                                  fontWeight: FontWeight.w300,
+                                 letterSpacing: 0.5,
                                ),
                              ),
                            ),
@@ -163,7 +165,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
 
                   const Spacer(),
 
-                  // Buttons
+                  // Navigation Buttons
                   WelcomeButton(
                     label: "CONTINUE",
                     onPressed: () => Get.offAllNamed(AppRoutes.home),
@@ -182,7 +184,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                   ),
                   const SizedBox(height: 30),
 
-                  // Bottom Pulse
+                  // Ambient UI Pulse
                   _BottomPulse(),
                   const SizedBox(height: 10),
                 ],
