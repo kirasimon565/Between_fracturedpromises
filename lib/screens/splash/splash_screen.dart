@@ -17,13 +17,17 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _bgController;
-  // Get reference to the AudioService
-  late AudioService _audioService;
+  
+  // 🛠️ FIX: Use Get.find() because these are now initialized in main.dart.
+  // This prevents the "late initialization error" or silent crashes.
+  final AudioService _audioService = Get.find<AudioService>();
 
   @override
   void initState() {
     super.initState();
-    _initServices();
+    
+    // Check if other non-critical services need registration
+    _ensureServicesRegistered();
 
     // Breathing World Animation (30s loop)
     _bgController = AnimationController(
@@ -32,19 +36,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     )..repeat(reverse: true);
   }
 
-  Future<void> _initServices() async {
-    // Initialize core services
-    await Get.putAsync(() => StateService().init());
-    Get.put(AuthService());
-    Get.put(FirestoreService());
-    Get.put(StoryEngine());
-    
-    // Initialize and find the AudioService
-    _audioService = Get.put(AudioService()); 
+  void _ensureServicesRegistered() {
+    // Only put things here that are NOT in your main.dart
+    if (!Get.isRegistered<AuthService>()) Get.put(AuthService());
+    if (!Get.isRegistered<FirestoreService>()) Get.put(FirestoreService());
+    if (!Get.isRegistered<StoryEngine>()) Get.put(StoryEngine());
   }
 
   void _onShatterStart() {
-    // 🔊 TRIGGER: Play the glass shatter FX from assets/fx/
+    // 🔊 This will now play immediately because the service is ready
     _audioService.playShatter();
   }
 
@@ -79,19 +79,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             child: Image.asset(
               AppConstants.bgSplash, 
               fit: BoxFit.cover,
+              // Fallback to prevent blank screen if asset loading flickers
+              errorBuilder: (context, error, stackTrace) => Container(color: Colors.black),
             ),
           ),
 
           // 2. Logo Sequence (The Fracture Event)
           Center(
             child: ShatterEffect(
-              // 🛠️ Audio Integration: play sound when shattering starts
               onShatterStart: _onShatterStart, 
               onShatterComplete: _onShatterComplete,
               child: Image.asset(
-                'assets/logo/logo.png', // Path from your pubspec
+                'assets/logo/logo.png', // Verified path from pubspec
                 width: 280,
                 fit: BoxFit.contain,
+                // If logo fails to load, use the styled text as a backup
                 errorBuilder: (context, error, stackTrace) {
                   return const Text(
                     "BETWEEN",
