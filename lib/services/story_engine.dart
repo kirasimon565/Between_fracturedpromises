@@ -16,6 +16,11 @@ class StoryEngine extends GetxService {
   final Map<String, BehaviorSubject<List<Message>>> _visibleMessages = {};
   final RxMap<String, bool> isTyping = <String, bool>{}.obs;
 
+  // New: Active Threads Stream for List Screens
+  // We will expose a stream of "ThreadMetadata" or just IDs.
+  // For simplicity, just IDs.
+  RxList<String> activeThreadIds = <String>[].obs;
+
   // --- Internal State ---
   final Map<String, StreamSubscription> _subscriptions = {};
   final Map<String, List<Message>> _incomingBuffers = {};
@@ -24,22 +29,44 @@ class StoryEngine extends GetxService {
   // Cache the last snapshot to re-process on scene change
   final Map<String, QuerySnapshot> _lastSnapshots = {};
 
+  StreamSubscription? _threadsSubscription;
+
   @override
   void onInit() {
     super.onInit();
     // Listen to scene changes to re-evaluate visible messages
     ever(_stateService.currentSceneId, (_) => _recheckAllThreads());
+
+    // Listen to Episode changes to discover threads
+    ever(_stateService.currentEpisodeId, (episodeId) => _startDiscoveringThreads(episodeId));
+
+    // Initial start
+    _startDiscoveringThreads(_stateService.currentEpisodeId.value);
+  }
+
+  void _startDiscoveringThreads(String episodeId) {
+    _threadsSubscription?.cancel();
+    _threadsSubscription = _firestore.streamActiveThreadIds(episodeId).listen((threads) {
+      activeThreadIds.assignAll(threads);
+      // Automatically subscribe to discovered threads to prepare buffers?
+      // Optional, but might be good for background updating.
+      // For now, let's lazy load.
+    });
   }
 
   void _recheckAllThreads() {
-    // If the scene changes, we need to check if we have buffered messages for the NEW scene
-    // in our _lastSnapshots.
     _lastSnapshots.forEach((threadId, snapshot) {
       _handleFirestoreUpdate(threadId, snapshot);
     });
   }
 
   // --- Public API ---
+
+  // Helper to get the last message for a thread (for List preview)
+  // This needs to be reactive.
+  Stream<Message?> getLastMessageStream(String threadId) {
+     return getMessagesStream(threadId).map((list) => list.isNotEmpty ? list.last : null);
+  }
 
   Stream<List<Message>> getMessagesStream(String threadId) {
     if (!_visibleMessages.containsKey(threadId)) {
@@ -62,9 +89,8 @@ class StoryEngine extends GetxService {
   // --- Logic ---
 
   void _handleFirestoreUpdate(String threadId, QuerySnapshot snapshot) {
-    _lastSnapshots[threadId] = snapshot; // Cache for reactivity
+    _lastSnapshots[threadId] = snapshot;
 
-    // 1. Parse all messages
     List<Message> allMessages = snapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
       data['id'] = doc.id;
@@ -73,12 +99,7 @@ class StoryEngine extends GetxService {
 
     String currentSceneId = _stateService.currentSceneId.value;
 
-    // 2. Identify New Messages for the CURRENT SCENE
     final currentVisible = _visibleMessages[threadId]?.value ?? [];
-
-    // We only want messages that match the current scene ID.
-    // Note: Past messages from previous scenes remain in `currentVisible` (history).
-    // We append new ones.
 
     final relevantMessages = allMessages.where((m) => m.sceneId == currentSceneId).toList();
     relevantMessages.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
@@ -100,7 +121,6 @@ class StoryEngine extends GetxService {
     while (_incomingBuffers[threadId]?.isNotEmpty ?? false) {
       final msg = _incomingBuffers[threadId]!.removeAt(0);
 
-      // 1. Typing Indicator
       if (msg.sender != Sender.nadia && msg.sender != Sender.system) {
         isTyping[threadId] = true;
         int typeTime = msg.delay > 0 ? msg.delay : AppDelays.minTyping;
@@ -110,7 +130,6 @@ class StoryEngine extends GetxService {
         await Future.delayed(Duration(milliseconds: AppDelays.messageGap));
       }
 
-      // 2. Add to Visible
       final currentList = _visibleMessages[threadId]?.value ?? [];
       _visibleMessages[threadId]?.add([...currentList, msg]);
     }
@@ -118,7 +137,6 @@ class StoryEngine extends GetxService {
     _isProcessingQueue[threadId] = false;
   }
 
-  // Handle Choice Selection
   void makeChoice(Choice choice) {
     if (choice.impact != null) {
       choice.impact!.forEach((key, value) {
@@ -130,6 +148,12 @@ class StoryEngine extends GetxService {
     _stateService.updateProgress(_stateService.currentEpisodeId.value, choice.targetNode);
 
     isTyping.clear();
-    // The `ever` listener on currentSceneId will trigger _recheckAllThreads automatically.
+  }
+
+  @override
+  void onClose() {
+    _threadsSubscription?.cancel();
+    _subscriptions.values.forEach((s) => s.cancel());
+    super.onClose();
   }
 }
