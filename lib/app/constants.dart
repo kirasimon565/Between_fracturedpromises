@@ -4,7 +4,7 @@ class AppConstants {
   static const int buildNumber = 101; 
   static const String contactEmail = "support@between.com";
 
-  // Assets - Avatars (Master Portraits for Face Swap)
+  // Assets - Avatars
   static const String avatarClaire = 'assets/avatars/claire.png';
   static const String avatarDaniel = 'assets/avatars/daniel.png';
   static const String avatarEthan = 'assets/avatars/ethan.png';
@@ -24,7 +24,7 @@ class AppConstants {
   static const String badgeBlue = 'assets/badges/badge_blue.png';
   static const String badgeOrange = 'assets/badges/badge_orange.png';
   static const String badgeCustom = 'assets/badges/badge_custom.png';
-  static const String badgeVerified = 'assets/badges/badge_custom.png'; // Added for profile verification
+  static const String badgeVerified = 'assets/badges/badge_custom.png'; 
 
   // Assets - FX
   static const String fxShatter = 'assets/fx/glass_shatter.mp3';
@@ -41,12 +41,14 @@ class AppConstants {
   static const String galleryNadia = 'assets/gallery/nadia/main.png';
   static const String galleryOlivia = 'assets/gallery/olivia/main.png';
   
-  // Missing constants flagged by the compiler
+  // 🛠️ FIX: Added missing ending and secret constants
   static const String gallerySecret1 = 'assets/gallery/claire/main.png'; 
   static const String gallerySecret2 = 'assets/gallery/olivia/main.png';
   static const String galleryEndingFractured = 'assets/backgrounds/bg_endgame.jpg';
+  static const String galleryEndingPerfect = 'assets/backgrounds/bg_endgame.jpg'; // Mapped to bgEndgame
+  static const String galleryEndingNeutral = 'assets/backgrounds/bg_endgame.jpg'; // Mapped to bgEndgame
 
-  // Assets - Icons (Simulation Apps & UI)
+  // Assets - Icons
   static const String iconMessenger = 'assets/icons/app_messenger.png';
   static const String iconMakelove = 'assets/icons/app_makelove.png';
   static const String iconSettings = 'assets/icons/settings_icon.png';
@@ -54,7 +56,7 @@ class AppConstants {
   static const String iconNotifBlue = 'assets/icons/notif_dot_blue.png';
   static const String iconNotifRed = 'assets/icons/notif_dot_red.png';
   
-  // Dock Icons flagged by the compiler
+  // Dock Icons
   static const String iconGallery = 'assets/icons/app_messenger.png'; 
   static const String iconCamera = 'assets/icons/app_makelove.png';   
   static const String iconPhone = 'assets/icons/app_messenger.png';    
@@ -71,7 +73,6 @@ class AppConstants {
   static const String musicChat = 'assets/music/theme_chat.mp3';
   static const String musicTragedy = 'assets/music/theme_tragedy.mp3';
 
-  /// Helper to get avatar path dynamically
   static String getAvatarPath(String name) {
     switch (name.toLowerCase()) {
       case 'claire': return avatarClaire;
@@ -84,7 +85,6 @@ class AppConstants {
     }
   }
 
-  /// Helper to get the single gallery snapshot for a character
   static String getGallerySnapshot(String name) {
     switch (name.toLowerCase()) {
       case 'claire': return galleryClaire;
