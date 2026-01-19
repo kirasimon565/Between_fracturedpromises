@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart'; // Fixed: Moved import to top
+import 'package:intl/intl.dart';
 import '../../app/constants.dart';
 import '../../app/routes.dart';
 import 'app_icon.dart';
 import 'status_bar.dart';
 import '../../theme/colors.dart';
+import '../../services/audio_service.dart';
 
 class HomeScreen extends StatelessWidget {
+  // Use Get.find since services are initialized globally in main.dart
+  final AudioService _audioService = Get.find<AudioService>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,12 +19,13 @@ class HomeScreen extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Wallpaper
+          // Layer 0: Wallpaper
           Image.asset(
             AppConstants.bgHome,
             fit: BoxFit.cover,
           ),
-          // Darken for contrast
+          
+          // Layer 1: Noir Darken Overlay
           Container(color: Colors.black.withOpacity(0.2)),
 
           SafeArea(
@@ -28,7 +33,8 @@ class HomeScreen extends StatelessWidget {
               children: [
                 StatusBar(),
                 const SizedBox(height: 20),
-                // Clock Widget (Optional, but adds to "Phone" feel)
+                
+                // Clock Widget (Atmospheric "Phone" Feel)
                 const _ClockWidget(),
 
                 Expanded(
@@ -40,33 +46,45 @@ class HomeScreen extends StatelessWidget {
                       AppIcon(
                         label: "Messenger",
                         assetPath: AppConstants.iconMessenger,
-                        onTap: () => Get.toNamed(AppRoutes.messenger)
+                        onTap: () {
+                          _audioService.playPing(); // 🔊 Sound feedback
+                          Get.toNamed(AppRoutes.messenger);
+                        }
                       ),
                       AppIcon(
                         label: "Makelove",
                         assetPath: AppConstants.iconMakelove,
-                        onTap: () => Get.toNamed(AppRoutes.makelove)
+                        onTap: () {
+                          _audioService.playPing();
+                          Get.toNamed(AppRoutes.makelove);
+                        }
                       ),
                       AppIcon(
                         label: "Gallery",
                         assetPath: AppConstants.iconGallery,
-                        onTap: () => Get.toNamed(AppRoutes.gallery)
+                        onTap: () {
+                          _audioService.playPing();
+                          Get.toNamed(AppRoutes.gallery);
+                        }
                       ),
                       AppIcon(
                         label: "Settings",
                         assetPath: AppConstants.iconSettings,
-                        onTap: () => Get.toNamed(AppRoutes.settings)
+                        onTap: () {
+                          _audioService.playPing();
+                          Get.toNamed(AppRoutes.settings);
+                        }
                       ),
                     ],
                   ),
                 ),
 
-                // Dock
+                // Lower Dock
                 _buildDock(),
 
                 const SizedBox(height: 10),
 
-                // Ambient Typing Dots ("Someone is waiting")
+                // Ambient Design Dots (Strictly for UI aesthetic)
                 const Padding(
                   padding: EdgeInsets.only(bottom: 20),
                   child: _AmbientDots(),
@@ -94,25 +112,32 @@ class HomeScreen extends StatelessWidget {
         children: [
            _dockItem(AppConstants.iconPhone),
            _dockItem(AppConstants.iconBrowser),
-           _dockItem(AppConstants.iconMessenger), // Maybe duplicate logic or just an asset
-           _dockItem(AppConstants.iconApp), // Music/Other
+           _dockItem(AppConstants.iconMessenger, route: AppRoutes.messenger),
+           _dockItem(AppConstants.iconApp), 
         ],
       ),
     );
   }
 
-  Widget _dockItem(String asset) {
-    // Dock items usually don't have labels
-    return Container(
-       width: 55, height: 55,
-       decoration: BoxDecoration(
-         borderRadius: BorderRadius.circular(12),
-         boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0,2))]
-       ),
-       child: ClipRRect(
-         borderRadius: BorderRadius.circular(12),
-         child: Image.asset(asset, fit: BoxFit.cover),
-       ),
+  Widget _dockItem(String asset, {String? route}) {
+    return GestureDetector(
+      onTap: () {
+        _audioService.playPing(); // 🔊 Interaction sound
+        if (route != null) Get.toNamed(route);
+      },
+      child: Container(
+         width: 55, height: 55,
+         decoration: BoxDecoration(
+           borderRadius: BorderRadius.circular(12),
+           boxShadow: const [
+             BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
+           ]
+         ),
+         child: ClipRRect(
+           borderRadius: BorderRadius.circular(12),
+           child: Image.asset(asset, fit: BoxFit.cover),
+         ),
+      ),
     );
   }
 }
@@ -122,7 +147,6 @@ class _ClockWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Static for now or use Timer
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 40),
       child: Column(
