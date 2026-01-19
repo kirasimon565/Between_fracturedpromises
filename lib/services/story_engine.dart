@@ -17,16 +17,17 @@ class StoryEngine extends GetxService {
   final RxMap<String, bool> isTyping = <String, bool>{}.obs;
 
   // New: Active Threads Stream for List Screens
-  // We will expose a stream of "ThreadMetadata" or just IDs.
-  // For simplicity, just IDs.
   RxList<String> activeThreadIds = <String>[].obs;
+
+  // --- Compatibility Getters (Fixes UI Errors) ---
+  // These allow the MessengerListScreen and MakeloveListScreen to work
+  Rx<String?> get currentEpisode => _stateService.currentEpisodeId;
+  List<dynamic> get activeThreads => activeThreadIds.map((id) => _ThreadWrapper(id)).toList();
 
   // --- Internal State ---
   final Map<String, StreamSubscription> _subscriptions = {};
   final Map<String, List<Message>> _incomingBuffers = {};
   final Map<String, bool> _isProcessingQueue = {};
-
-  // Cache the last snapshot to re-process on scene change
   final Map<String, QuerySnapshot> _lastSnapshots = {};
 
   StreamSubscription? _threadsSubscription;
@@ -38,19 +39,31 @@ class StoryEngine extends GetxService {
     ever(_stateService.currentSceneId, (_) => _recheckAllThreads());
 
     // Listen to Episode changes to discover threads
-    ever(_stateService.currentEpisodeId, (episodeId) => _startDiscoveringThreads(episodeId));
+    ever(_stateService.currentEpisodeId, (episodeId) {
+      if (episodeId != null) _startDiscoveringThreads(episodeId);
+    });
 
     // Initial start
-    _startDiscoveringThreads(_stateService.currentEpisodeId.value);
+    if (_stateService.currentEpisodeId.value != null) {
+      _startDiscoveringThreads(_stateService.currentEpisodeId.value!);
+    }
   }
+
+  // --- Compatibility Methods (Fixes UI Errors) ---
+  void loadEpisode(String episodeId) {
+    _stateService.currentEpisodeId.value = episodeId;
+  }
+
+  Stream<List<Message>> getMessagesForThread(String threadId) {
+    return getMessagesStream(threadId);
+  }
+
+  // --- Core Logic ---
 
   void _startDiscoveringThreads(String episodeId) {
     _threadsSubscription?.cancel();
     _threadsSubscription = _firestore.streamActiveThreadIds(episodeId).listen((threads) {
       activeThreadIds.assignAll(threads);
-      // Automatically subscribe to discovered threads to prepare buffers?
-      // Optional, but might be good for background updating.
-      // For now, let's lazy load.
     });
   }
 
@@ -60,10 +73,7 @@ class StoryEngine extends GetxService {
     });
   }
 
-  // --- Public API ---
-
   // Helper to get the last message for a thread (for List preview)
-  // This needs to be reactive.
   Stream<Message?> getLastMessageStream(String threadId) {
      return getMessagesStream(threadId).map((list) => list.isNotEmpty ? list.last : null);
   }
@@ -79,14 +89,13 @@ class StoryEngine extends GetxService {
   void _startListeningToThread(String threadId) {
     if (_subscriptions.containsKey(threadId)) return;
 
-    String episodeId = _stateService.currentEpisodeId.value;
+    String? episodeId = _stateService.currentEpisodeId.value;
+    if (episodeId == null) return;
 
     _subscriptions[threadId] = _firestore.streamMessages(episodeId, threadId).listen((snapshot) {
       _handleFirestoreUpdate(threadId, snapshot);
     });
   }
-
-  // --- Logic ---
 
   void _handleFirestoreUpdate(String threadId, QuerySnapshot snapshot) {
     _lastSnapshots[threadId] = snapshot;
@@ -99,8 +108,12 @@ class StoryEngine extends GetxService {
 
     String currentSceneId = _stateService.currentSceneId.value;
 
-    final currentVisible = _visibleMessages[threadId]?.value ?? [];
+    final subject = _visibleMessages[threadId];
+    if (subject == null) return;
 
+    final currentVisible = subject.value;
+
+    // Filter messages for current scene and sort by order
     final relevantMessages = allMessages.where((m) => m.sceneId == currentSceneId).toList();
     relevantMessages.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
 
@@ -118,9 +131,16 @@ class StoryEngine extends GetxService {
     if (_isProcessingQueue[threadId] == true) return;
     _isProcessingQueue[threadId] = true;
 
+    final subject = _visibleMessages[threadId];
+    if (subject == null) {
+      _isProcessingQueue[threadId] = false;
+      return;
+    }
+
     while (_incomingBuffers[threadId]?.isNotEmpty ?? false) {
       final msg = _incomingBuffers[threadId]!.removeAt(0);
 
+      // Trigger "Typing" animation for characters
       if (msg.sender != Sender.nadia && msg.sender != Sender.system) {
         isTyping[threadId] = true;
         int typeTime = msg.delay > 0 ? msg.delay : AppDelays.minTyping;
@@ -130,8 +150,9 @@ class StoryEngine extends GetxService {
         await Future.delayed(Duration(milliseconds: AppDelays.messageGap));
       }
 
-      final currentList = _visibleMessages[threadId]?.value ?? [];
-      _visibleMessages[threadId]?.add([...currentList, msg]);
+      // Add to visible stream - this triggers the Digital Dust in the UI
+      final currentList = subject.value;
+      subject.add([...currentList, msg]);
     }
 
     _isProcessingQueue[threadId] = false;
@@ -145,7 +166,7 @@ class StoryEngine extends GetxService {
     }
 
     _stateService.recordChoice(choice.targetNode);
-    _stateService.updateProgress(_stateService.currentEpisodeId.value, choice.targetNode);
+    _stateService.updateProgress(_stateService.currentEpisodeId.value!, choice.targetNode);
 
     isTyping.clear();
   }
@@ -154,6 +175,13 @@ class StoryEngine extends GetxService {
   void onClose() {
     _threadsSubscription?.cancel();
     _subscriptions.values.forEach((s) => s.cancel());
+    _visibleMessages.values.forEach((subject) => subject.close());
     super.onClose();
   }
+}
+
+// Simple wrapper to help the UI list screens find the thread ID
+class _ThreadWrapper {
+  final String id;
+  _ThreadWrapper(this.id);
 }
