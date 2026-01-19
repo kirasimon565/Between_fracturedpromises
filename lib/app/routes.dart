@@ -16,6 +16,8 @@ import '../screens/profile/profile_edit_screen.dart';
 import '../screens/gallery/gallery_screen.dart';
 import '../screens/endgame/endgame_screen.dart';
 
+// 🛠️ REMOVED: import '../screens/secret/secret_chat_screen.dart';
+
 class AppRoutes {
   static const splash = '/splash';
   static const welcome = '/welcome';
@@ -33,7 +35,7 @@ class AppRoutes {
   static const profileEdit = '/profile/edit';
   static const gallery = '/gallery';
   static const endgame = '/endgame';
-  static const secret = '/secret';
+  // 🛠️ REMOVED: static const secret = '/secret';
 
   static final routes = [
     GetPage(
@@ -113,11 +115,6 @@ class AppRoutes {
       page: () => EndgameScreen(),
       transition: Transition.cupertino,
     ),
-    GetPage(
-      name: secret,
-      page: () => SecretChatScreen(),
-      transition: Transition.fade,
-      transitionDuration: Duration(milliseconds: 800),
-    ),
+    // 🛠️ REMOVED: GetPage for secret chat
   ];
 }
