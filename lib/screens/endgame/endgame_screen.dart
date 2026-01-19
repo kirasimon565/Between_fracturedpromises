@@ -18,7 +18,6 @@ class _EndgameScreenState extends State<EndgameScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    // 🔊 Stop all ambient game music and play a low, final drone or silence
     _audio.stopAll(); 
     
     _fadeController = AnimationController(
@@ -42,7 +41,6 @@ class _EndgameScreenState extends State<EndgameScreen> with SingleTickerProvider
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            // Subtle red pulse gradient for the "Noir" conclusion
             gradient: RadialGradient(
               center: const Alignment(0, -0.2),
               colors: [
@@ -56,26 +54,24 @@ class _EndgameScreenState extends State<EndgameScreen> with SingleTickerProvider
             children: [
               const Spacer(flex: 4),
               
-              // 🧪 The Final Summary (Fractured Truth)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Obx(() => EndingSummary(
-                  ending: controller.ending.value,
-                  // We add a 'glitch' effect trigger inside EndingSummary
-                )),
+                child: Obx(() {
+                  // 🛠️ FIX: Added null check for the summary
+                  if (controller.ending.value == null) return const SizedBox.shrink();
+                  return EndingSummary(
+                    ending: controller.ending.value!,
+                  );
+                }),
               ),
 
               const Spacer(flex: 3),
-
-              // 🛠️ The "Post-Mortem" Stats (Optional, adds professional feel)
               _buildFinalStats(),
-
               const Spacer(flex: 2),
 
-              // 🏁 System Reset (The only way out)
               GestureDetector(
                 onTap: () {
-                  _audio.playVibrate(); // 🔊 Tactile feedback for reset
+                  _audio.playVibrate();
                   Get.offAllNamed('/home');
                 },
                 child: Column(
@@ -107,10 +103,10 @@ class _EndgameScreenState extends State<EndgameScreen> with SingleTickerProvider
   }
 
   Widget _buildFinalStats() {
-    return Column(
+    return Obx(() => Column(
       children: [
         Text(
-          "TRUTH REVEALED: ${controller.truthPercentage}%",
+          "TRUTH REVEALED: ${controller.truthPercentage.value}%",
           style: TextStyle(
             color: Colors.white.withOpacity(0.15),
             fontSize: 9,
@@ -120,7 +116,8 @@ class _EndgameScreenState extends State<EndgameScreen> with SingleTickerProvider
         ),
         const SizedBox(height: 8),
         Text(
-          "PARADOX RESOLVED: ${controller.paradoxResolved ? 'YES' : 'NO'}",
+          // 🛠️ FIX: Added .value to RxBool
+          "PARADOX RESOLVED: ${controller.paradoxResolved.value ? 'YES' : 'NO'}",
           style: TextStyle(
             color: Colors.white.withOpacity(0.15),
             fontSize: 9,
@@ -129,6 +126,6 @@ class _EndgameScreenState extends State<EndgameScreen> with SingleTickerProvider
           ),
         ),
       ],
-    );
+    ));
   }
 }
