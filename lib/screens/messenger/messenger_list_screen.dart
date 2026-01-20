@@ -64,19 +64,29 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
                 // 3. Thread List
                 Expanded(
                   child: Obx(() {
+                    // 🛠️ Now uses the filtered list from StoryEngine
+                    // We also ensure only 'messenger' characters show up here if needed, 
+                    // though filtering by scene usually handles this.
                     final threads = _engine.activeThreadIds
                         .where((id) => id.toLowerCase() != 'system')
                         .toList();
 
                     if (threads.isEmpty) {
                       return Center(
-                         child: Text(
-                           "NO SECURE CONNECTIONS",
-                           style: TextStyle(
-                             color: Colors.white.withOpacity(0.2), 
-                             letterSpacing: 3, 
-                             fontSize: 10
-                           )
+                         child: Column(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             Icon(Icons.cloud_off, color: Colors.white.withOpacity(0.05), size: 40),
+                             const SizedBox(height: 16),
+                             Text(
+                               "NO SECURE CONNECTIONS",
+                               style: TextStyle(
+                                 color: Colors.white.withOpacity(0.2), 
+                                 letterSpacing: 3, 
+                                 fontSize: 10
+                               )
+                             ),
+                           ],
                          ),
                       );
                     }
@@ -102,7 +112,6 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
     return AnimatedBuilder(
       animation: _swayController,
       builder: (context, child) {
-        // Subtle sway rotation
         double angle = 0.015 * sin(_swayController.value * 2 * pi);
         return Transform.rotate(
           angle: angle,
@@ -139,91 +148,102 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
   }
 
   Widget _buildConversationTile(String threadId, int index) {
+    // 🛠️ Sanitizing the name for display
     final String name = threadId[0].toUpperCase() + threadId.substring(1);
 
     return StreamBuilder<Message?>(
       stream: _engine.getLastMessageStream(threadId),
       builder: (context, snapshot) {
         final lastMsg = snapshot.data;
-        final content = lastMsg?.content ?? "Encryption active...";
+        
+        // 🛠️ Show "Typing..." if the engine detects activity
+        return Obx(() {
+          bool isTyping = _engine.isTyping[threadId] ?? false;
+          final content = isTyping ? "Typing..." : (lastMsg?.content ?? "Encryption active...");
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 15),
-          child: GestureDetector(
-            onTap: () {
-              _audio.playPing(); // 🔊 Sound feedback
-              Get.toNamed('/messenger/chat', arguments: name);
-            },
-            child: Container(
-              height: 90,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.04),
-                // ☁️ Cloud-inspired organic borders
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(35),
-                  bottomRight: const Radius.circular(35),
-                  topRight: Radius.circular(index.isEven ? 10 : 35),
-                  bottomLeft: Radius.circular(index.isEven ? 35 : 10),
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 15),
+            child: GestureDetector(
+              onTap: () {
+                _audio.playPing(); 
+                // We pass the name so the chat screen knows who to load
+                Get.toNamed('/messenger/chat', arguments: name);
+              },
+              child: Container(
+                height: 90,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.04),
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(35),
+                    bottomRight: const Radius.circular(35),
+                    topRight: Radius.circular(index.isEven ? 10 : 35),
+                    bottomLeft: Radius.circular(index.isEven ? 35 : 10),
+                  ),
+                  border: Border.all(
+                    color: isTyping ? Colors.greenAccent.withOpacity(0.3) : Colors.white.withOpacity(0.08), 
+                    width: 0.5
+                  ),
                 ),
-                border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.5),
-              ),
-              child: Row(
-                children: [
-                  const SizedBox(width: 15),
-                  // Avatar with professional border
-                  Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white10),
-                    ),
-                    child: CircleAvatar(
-                      radius: 28,
-                      backgroundColor: Colors.white.withOpacity(0.05),
-                      backgroundImage: AssetImage(AppConstants.getAvatarPath(name)),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name, 
-                          style: const TextStyle(
-                            color: Colors.white, 
-                            fontSize: 15, 
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: 0.5
-                          )
+                child: Row(
+                  children: [
+                    const SizedBox(width: 15),
+                    Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isTyping ? Colors.greenAccent : Colors.white10,
+                          width: isTyping ? 1.5 : 1
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          content,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.4), 
-                            fontSize: 12,
-                            fontWeight: FontWeight.w300
+                      ),
+                      child: CircleAvatar(
+                        radius: 28,
+                        backgroundColor: Colors.white.withOpacity(0.05),
+                        backgroundImage: AssetImage(AppConstants.getAvatarPath(name)),
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name, 
+                            style: const TextStyle(
+                              color: Colors.white, 
+                              fontSize: 15, 
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: 0.5
+                            )
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            content,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: isTyping ? Colors.greenAccent : Colors.white.withOpacity(0.4), 
+                              fontSize: 12,
+                              fontWeight: FontWeight.w300,
+                              fontStyle: isTyping ? FontStyle.italic : FontStyle.normal,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  // Unread indicator or arrow
-                  Icon(
-                    Icons.chevron_right_rounded, 
-                    color: Colors.white.withOpacity(0.1), 
-                    size: 18
-                  ),
-                  const SizedBox(width: 15),
-                ],
+                    Icon(
+                      Icons.chevron_right_rounded, 
+                      color: Colors.white.withOpacity(0.1), 
+                      size: 18
+                    ),
+                    const SizedBox(width: 15),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
+          );
+        });
       },
     );
   }
