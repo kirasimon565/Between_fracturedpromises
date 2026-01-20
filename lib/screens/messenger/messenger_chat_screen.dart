@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../app/constants.dart';
 import '../../models/message.dart';
+import '../../models/choice.dart'; // 🛠️ Explicitly import Choice model
 import '../../services/story_engine.dart';
 import '../../services/firestore_service.dart';
 import '../../services/auth_service.dart';
@@ -223,7 +224,6 @@ class _RopeChoiceOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 🛠️ FIX: Using StreamBuilder instead of .val to avoid build errors
     return StreamBuilder<List<Message>>(
       stream: _engine.getMessagesStream(threadId),
       builder: (context, snapshot) {
@@ -260,7 +260,8 @@ class _RopeChoiceOverlay extends StatelessWidget {
                   ),
                 )
               else
-                ...lastMsg.choices!.map((choice) => _SwayingChoice(
+                // 🛠️ FIX: Added explicit 'Choice choice' type to the map function
+                ...lastMsg.choices!.map((Choice choice) => _SwayingChoice(
                   text: choice.text,
                   onTap: () {
                     _engine.makeChoice(choice);
