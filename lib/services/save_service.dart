@@ -1,25 +1,21 @@
 import 'package:get/get.dart';
 import 'firestore_service.dart';
 import 'state_service.dart';
+import 'auth_service.dart';
 
 class SaveService extends GetxService {
   final FirestoreService _firestore = Get.find<FirestoreService>();
   final StateService _state = Get.find<StateService>();
+  final AuthService _auth = Get.find<AuthService>();
 
-  // Facade to handle saving to both local state and cloud
+  /// Syncs the player's choices and current position to the cloud
   Future<void> saveGame(String episodeId, String sceneId, Map<String, dynamic> choices) async {
-    // 1. Save Local
+    if (_auth.uid.isEmpty) return;
+
+    // 1. Update the local UI state immediately
     _state.updateProgress(episodeId, sceneId);
 
-    // 2. Sync Cloud
+    // 2. Transmit to Firestore so the player can switch devices
     await _firestore.saveProgress(episodeId, sceneId, choices);
-
-    print("Game saved: $episodeId / $sceneId");
-  }
-
-  // Example method to load a specific save slot (simulated)
-  Future<void> loadSaveSlot(int slotIndex) async {
-    // In a real app, read from ApplicationDocumentsDirectory/save_$slotIndex.json
-    print("Loading save slot $slotIndex...");
   }
 }
