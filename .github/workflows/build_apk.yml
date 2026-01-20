@@ -30,40 +30,27 @@ jobs:
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # 🛠️ Step 1: Create the Keystore in a specific, known location
-      - name: Create Permanent Keystore
-        run: |
-          keytool -genkeypair -v \
-            -keystore android/app/release.jks \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -alias "between_production" \
-            -storepass "Snowhellom290" \
-            -keypass "Snowhellom290" \
-            -dname "CN=Between Dev, O=NoirSim, C=US"
-
-      # 🛠️ Step 2: Build using the RELATIVE path from the android folder
+      # 🛠️ Step 1: Build the APK using the file you uploaded to android/app
       - name: Build Signed APK
         run: |
           cd android
           gradle wrapper --gradle-version 8.9 --distribution-type all
           chmod +x gradlew
           
-          # Using "app/release.jks" ensures Gradle finds it relative to the android/ folder
+          # We point directly to release.jks which is already in the app folder
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=app/release.jks \
+            -Pandroid.injected.signing.store.file=release.jks \
             -Pandroid.injected.signing.store.password=Snowhellom290 \
             -Pandroid.injected.signing.key.alias=between_production \
             -Pandroid.injected.signing.key.password=Snowhellom290
 
-      - name: Organize APKs
+      - name: Organize APKs for Download
         run: |
           mkdir -p build/app/outputs/flutter-apk/
           find android/app/build/outputs/apk/release/ -name "*.apk" -exec cp {} build/app/outputs/flutter-apk/ \;
 
-      - name: Upload Package
+      - name: Upload Signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: Between-Production-Package
-          path: |
-            build/app/outputs/flutter-apk/*.apk
-            android/app/release.jks
+          name: Between-Production-APK
+          path: build/app/outputs/flutter-apk/*.apk
