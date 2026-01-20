@@ -30,17 +30,15 @@ jobs:
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # 🛠️ FIXED: Using the :env modifier ensures keytool gets the FULL password
+      # 🛠️ THE ULTIMATE FIX: Piping the password into stdin
       - name: Create Permanent Keystore
-        env:
-          PASS_SECRET: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          ALIAS_SECRET: ${{ secrets.RELEASE_KEY_ALIAS }}
         run: |
-          keytool -genkeypair -v -keystore android/app/release.jks \
+          echo "${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" | keytool -genkeypair -v \
+            -keystore android/app/release.jks \
             -keyalg RSA -keysize 2048 -validity 10000 \
-            -alias "$ALIAS_SECRET" \
-            -storepass:env PASS_SECRET \
-            -keypass:env PASS_SECRET \
+            -alias "${{ secrets.RELEASE_KEY_ALIAS }}" \
+            -storepass:stdin \
+            -keypass:stdin \
             -dname "CN=Between Dev, O=NoirSim, C=US"
 
       - name: Build Signed APK
