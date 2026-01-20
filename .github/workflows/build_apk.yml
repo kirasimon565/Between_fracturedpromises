@@ -27,18 +27,21 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # 🛠️ Ensures your custom icons are baked into the build
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # 🛠️ Creates your permanent digital signature
+      # 🛠️ FIXED: Uses environment variables to pass the full password safely
       - name: Create Permanent Keystore
+        env:
+          STORE_PASS: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
         run: |
-          keytool -genkey -v -keystore android/app/release.jks \
+          keytool -genkeypair -v -keystore android/app/release.jks \
             -keyalg RSA -keysize 2048 -validity 10000 \
-            -alias "${{ secrets.RELEASE_KEY_ALIAS }}" \
-            -storepass "${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" \
-            -keypass "${{ secrets.RELEASE_KEY_PASSWORD }}" \
+            -alias "$ALIAS" \
+            -storepass "$STORE_PASS" \
+            -keypass "$KEY_PASS" \
             -dname "CN=Between Dev, O=NoirSim, C=US"
 
       - name: Build Signed APK
@@ -48,7 +51,6 @@ jobs:
           KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
           cd android
-          # Generate fresh wrapper for the runner
           gradle wrapper --gradle-version 8.9 --distribution-type all
           chmod +x gradlew
           
@@ -64,7 +66,6 @@ jobs:
           mkdir -p build/app/outputs/flutter-apk/
           find android/app/build/outputs/apk/release/ -name "*.apk" -exec cp {} build/app/outputs/flutter-apk/ \;
 
-      # 📦 UPLOADS BOTH THE APK AND THE KEYSTORE
       - name: Upload Production Package
         uses: actions/upload-artifact@v4
         with:
