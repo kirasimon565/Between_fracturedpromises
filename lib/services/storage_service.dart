@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
 
 class StorageService extends GetxService {
-  // Placeholder for Firebase Storage logic
-  // e.g. uploadProfileImage, downloadAsset
-
-  Future<String> getDownloadUrl(String path) async {
-    // In real app: return FirebaseStorage.instance.ref(path).getDownloadURL();
-    return "https://placeholder.com/$path";
+  
+  /// In the future, this will link to Firebase Storage to download 
+  /// evidence images, audio clips, or Daniel's "Makelove" photos.
+  Future<String> getAssetPath(String fileName) async {
+    // For now, it returns the local path where your images live
+    return "assets/images/evidence/$fileName";
   }
 }
