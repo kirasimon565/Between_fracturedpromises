@@ -18,6 +18,8 @@ class StoryEngine extends GetxService {
   final RxMap<String, bool> isTyping = <String, bool>{}.obs;
   
   final RxList<String> unlockedGlobalSecrets = <String>[].obs;
+
+  // 🛠️ NEW: This now strictly tracks characters who have messages in the CURRENT scene
   RxList<String> activeThreadIds = <String>[].obs;
 
   Rx<String?> get currentEpisode => _stateService.currentEpisodeId;
@@ -33,17 +35,38 @@ class StoryEngine extends GetxService {
   void onInit() {
     super.onInit();
     
-    // Refresh UI if scene changes
-    ever(_stateService.currentSceneId, (_) => _recheckAllThreads());
+    // Refresh list and messages if scene changes
+    ever(_stateService.currentSceneId, (_) {
+      _updateActiveThreads();
+      _recheckAllThreads();
+    });
 
     // Switch thread listeners if episode changes
     ever(_stateService.currentEpisodeId, (episodeId) {
       if (episodeId != null) _startDiscoveringThreads(episodeId);
     });
 
-    // 🛠️ FIX: Default to ep1_the_spark to match your uploader
     final initialEpisode = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
     _startDiscoveringThreads(initialEpisode);
+  }
+
+  /// 🛠️ Helper to see if a thread should be visible in the Chat List
+  void _updateActiveThreads() {
+    // This logic ensures that if Nadia is in 'scene_2', 
+    // characters from 'scene_1' who aren't in 'scene_2' disappear (unless they have history).
+    _lastSnapshots.forEach((threadId, snapshot) {
+      final messages = snapshot.docs;
+      String currentScene = _stateService.currentSceneId.value ?? 'scene_1';
+      
+      bool hasMessagesInCurrentScene = messages.any((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return data['sceneId'] == currentScene;
+      });
+
+      if (hasMessagesInCurrentScene && !activeThreadIds.contains(threadId)) {
+        activeThreadIds.add(threadId);
+      }
+    });
   }
 
   bool hasCompletedThread(String threadId) {
@@ -61,7 +84,11 @@ class StoryEngine extends GetxService {
   void _startDiscoveringThreads(String episodeId) {
     _threadsSubscription?.cancel();
     _threadsSubscription = _firestore.streamActiveThreadIds(episodeId).listen((threads) {
-      activeThreadIds.assignAll(threads);
+      // We don't assign all immediately anymore. 
+      // We wait for _handleFirestoreUpdate to confirm they have scene-relevant messages.
+      for (var id in threads) {
+        _startListeningToThread(id);
+      }
     });
   }
 
@@ -85,7 +112,6 @@ class StoryEngine extends GetxService {
 
   void _startListeningToThread(String threadId) {
     if (_subscriptions.containsKey(threadId)) return;
-    // 🛠️ FIX: Ensure path matches ep1_the_spark
     String episodeId = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
 
     _subscriptions[threadId] = _firestore.streamMessages(episodeId, threadId).listen((snapshot) {
@@ -102,17 +128,23 @@ class StoryEngine extends GetxService {
       return Message.fromJson(data);
     }).toList();
 
-    // 🛠️ IMPROVEMENT: If sceneId is null in DB, we still want to show it for testing
-    String? currentSceneId = _stateService.currentSceneId.value;
+    String currentSceneId = _stateService.currentSceneId.value ?? 'scene_1';
+    
+    // 🛠️ Check if this character should now appear in the Chat List
+    bool shouldBeActive = allMessages.any((m) => m.sceneId == currentSceneId);
+    if (shouldBeActive && !activeThreadIds.contains(threadId)) {
+      activeThreadIds.add(threadId);
+    }
+
     final subject = _visibleMessages[threadId];
     if (subject == null) return;
 
     final currentVisible = subject.value;
     
-    // Filter messages that belong to the current scene OR have no scene assigned (for testing)
-    final relevantMessages = allMessages.where((m) {
-      return currentSceneId == null || m.sceneId == null || m.sceneId == currentSceneId;
-    }).toList();
+    // Filter: Only show messages for the current scene (or null for universal/system msgs)
+    final relevantMessages = allMessages.where((m) => 
+      m.sceneId == currentSceneId || m.sceneId == null
+    ).toList();
     
     relevantMessages.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
 
@@ -175,6 +207,8 @@ class StoryEngine extends GetxService {
     }
 
     _audioService.playVibrate();
+    
+    // When a choice is made, we record it and move to the target node (new scene)
     _stateService.recordChoice(choice.targetNode);
     
     final episodeId = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
