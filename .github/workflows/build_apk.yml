@@ -30,12 +30,13 @@ jobs:
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # 🛠️ FIXED: Uses environment variables to pass the full password safely
+      # 🛠️ FIXED: Wrapped secrets in single quotes to prevent character loss
       - name: Create Permanent Keystore
         env:
-          STORE_PASS: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          KEY_PASS: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          # Use single quotes to ensure the runner reads the full string
+          STORE_PASS: '${{ secrets.RELEASE_KEYSTORE_PASSWORD }}'
+          KEY_PASS: '${{ secrets.RELEASE_KEY_PASSWORD }}'
+          ALIAS: '${{ secrets.RELEASE_KEY_ALIAS }}'
         run: |
           keytool -genkeypair -v -keystore android/app/release.jks \
             -keyalg RSA -keysize 2048 -validity 10000 \
@@ -46,15 +47,14 @@ jobs:
 
       - name: Build Signed APK
         env:
-          KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          # Same single-quote protection for the build step
+          KEYSTORE_PASSWORD: '${{ secrets.RELEASE_KEYSTORE_PASSWORD }}'
+          KEY_ALIAS: '${{ secrets.RELEASE_KEY_ALIAS }}'
+          KEY_PASSWORD: '${{ secrets.RELEASE_KEY_PASSWORD }}'
         run: |
           cd android
           gradle wrapper --gradle-version 8.9 --distribution-type all
           chmod +x gradlew
-          
-          # Build release while injecting the new signing info
           ./gradlew assembleRelease \
             -Pandroid.injected.signing.store.file=release.jks \
             -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
