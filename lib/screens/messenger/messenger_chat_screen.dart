@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../app/constants.dart';
 import '../../models/message.dart';
-import '../../models/choice.dart'; // 🛠️ Explicitly import Choice model
+import '../../models/choice.dart'; 
 import '../../services/story_engine.dart';
 import '../../services/firestore_service.dart';
 import '../../services/auth_service.dart';
@@ -30,6 +30,7 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 🛠️ Lowercase threadId to match Firestore document IDs created by uploader
     final String threadId = partnerName.toLowerCase();
 
     return Scaffold(
@@ -100,7 +101,6 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
               builder: (context, snapshot) {
                 final messages = snapshot.data ?? [];
                 
-                // Immersive auto-scroll
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (_scrollController.hasClients) {
                     _scrollController.animateTo(
@@ -110,6 +110,12 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
                     );
                   }
                 });
+
+                if (messages.isEmpty) {
+                  return const Center(
+                    child: Text("NO SIGNAL FOUND", style: TextStyle(color: Colors.white10, letterSpacing: 2)),
+                  );
+                }
 
                 return Obx(() {
                   final isTyping = _engine.isTyping[threadId] ?? false;
@@ -190,32 +196,6 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
   }
 }
 
-// --- SUPPORTING WIDGETS ---
-
-class _CloudTypingIndicator extends StatelessWidget {
-  const _CloudTypingIndicator();
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-            bottomRight: Radius.circular(20),
-            bottomLeft: Radius.circular(5),
-          ),
-        ),
-        child: const TypingIndicator(color: Colors.white38),
-      ),
-    );
-  }
-}
-
 class _RopeChoiceOverlay extends StatelessWidget {
   final String threadId;
   final StoryEngine _engine = Get.find<StoryEngine>();
@@ -243,7 +223,7 @@ class _RopeChoiceOverlay extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 1, height: 40, color: Colors.white24), // The "Rope"
+              Container(width: 1, height: 40, color: Colors.white24),
               const SizedBox(height: 12),
               const Text(
                 "CONSEQUENCE ACCESS", 
@@ -260,7 +240,6 @@ class _RopeChoiceOverlay extends StatelessWidget {
                   ),
                 )
               else
-                // 🛠️ FIX: Added explicit 'Choice choice' type to the map function
                 ...lastMsg.choices!.map((Choice choice) => _SwayingChoice(
                   text: choice.text,
                   onTap: () {
@@ -306,7 +285,7 @@ class _SwayingChoiceState extends State<_SwayingChoice> with SingleTickerProvide
       animation: _controller,
       builder: (context, child) {
         return Transform.rotate(
-          angle: math.sin(_controller.value * 2 * math.pi) * 0.015, // Subtle swaying
+          angle: math.sin(_controller.value * 2 * math.pi) * 0.015,
           child: child,
         );
       },
@@ -332,6 +311,30 @@ class _SwayingChoiceState extends State<_SwayingChoice> with SingleTickerProvide
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _CloudTypingIndicator extends StatelessWidget {
+  const _CloudTypingIndicator();
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+            bottomLeft: Radius.circular(5),
+          ),
+        ),
+        child: const TypingIndicator(color: Colors.white38),
       ),
     );
   }
