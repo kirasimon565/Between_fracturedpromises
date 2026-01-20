@@ -41,27 +41,26 @@ class AppConstants {
   static const String galleryNadia = 'assets/gallery/nadia/main.png';
   static const String galleryOlivia = 'assets/gallery/olivia/main.png';
   
-  // 🛠️ FIX: Added missing ending and secret constants
   static const String gallerySecret1 = 'assets/gallery/claire/main.png'; 
   static const String gallerySecret2 = 'assets/gallery/olivia/main.png';
   static const String galleryEndingFractured = 'assets/backgrounds/bg_endgame.jpg';
-  static const String galleryEndingPerfect = 'assets/backgrounds/bg_endgame.jpg'; // Mapped to bgEndgame
-  static const String galleryEndingNeutral = 'assets/backgrounds/bg_endgame.jpg'; // Mapped to bgEndgame
+  static const String galleryEndingPerfect = 'assets/backgrounds/bg_endgame.jpg'; 
+  static const String galleryEndingNeutral = 'assets/backgrounds/bg_endgame.jpg'; 
 
-  // Assets - Icons
+  // Assets - Icons (Main Grid)
   static const String iconMessenger = 'assets/icons/app_messenger.png';
   static const String iconMakelove = 'assets/icons/app_makelove.png';
+  static const String iconGallery = 'assets/icons/app_gallery.png'; // 🛠️ Updated
   static const String iconSettings = 'assets/icons/settings_icon.png';
   static const String iconBack = 'assets/icons/back_arrow.png';
   static const String iconNotifBlue = 'assets/icons/notif_dot_blue.png';
   static const String iconNotifRed = 'assets/icons/notif_dot_red.png';
   
-  // Dock Icons
-  static const String iconGallery = 'assets/icons/app_messenger.png'; 
-  static const String iconCamera = 'assets/icons/app_makelove.png';   
-  static const String iconPhone = 'assets/icons/app_messenger.png';    
-  static const String iconBrowser = 'assets/icons/app_messenger.png';  
-  static const String iconApp = 'assets/icons/settings_icon.png';      
+  // Dock Icons (Lower Bar)
+  static const String iconPhone = 'assets/icons/dock_phone.png';     // 🛠️ Updated
+  static const String iconBrowser = 'assets/icons/dock_browser.png'; // 🛠️ Updated
+  static const String iconCamera = 'assets/icons/dock_camera.png';   // 🛠️ Updated
+  static const String iconApp = 'assets/icons/dock_apps_menu.png';   // 🛠️ Updated
 
   // Assets - Logo
   static const String logoMain = 'assets/logo/logo.png';
@@ -73,6 +72,7 @@ class AppConstants {
   static const String musicChat = 'assets/music/theme_chat.mp3';
   static const String musicTragedy = 'assets/music/theme_tragedy.mp3';
 
+  // Helper Methods
   static String getAvatarPath(String name) {
     switch (name.toLowerCase()) {
       case 'claire': return avatarClaire;
