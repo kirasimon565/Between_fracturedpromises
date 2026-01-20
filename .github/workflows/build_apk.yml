@@ -27,6 +27,10 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # 🛠️ ADDED: Generate custom launcher icons before building the APK
+      - name: Generate Launcher Icons
+        run: dart run flutter_launcher_icons
+
       - name: Create debug keystore
         run: |
           keytool -genkey -v -keystore android/app/debug.keystore \
@@ -43,14 +47,14 @@ jobs:
           # 2. Make it executable
           chmod +x gradlew
           
-          # 3. Build the APKs (This handles SDK 36 via your gradle.properties)
+          # 3. Build the APKs
           ./gradlew assembleRelease --no-daemon
 
       - name: Organize APKs for Upload
         run: |
           mkdir -p build/app/outputs/flutter-apk/
           
-          # Use find to locate APKs regardless of which subfolder they landed in
+          # Locate APKs regardless of which subfolder they landed in
           echo "Finding APKs..."
           find android/app/build/outputs/apk/release/ -name "*.apk" -exec cp {} build/app/outputs/flutter-apk/ \;
           
