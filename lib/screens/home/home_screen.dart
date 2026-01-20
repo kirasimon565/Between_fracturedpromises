@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                const StatusBar(),
+                StatusBar(),
                 const SizedBox(height: 20),
                 
                 // Clock Widget
