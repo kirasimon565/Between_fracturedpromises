@@ -19,6 +19,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       choices: (json['choices'] as List<dynamic>?)
           ?.map((e) => Choice.fromJson(e as Map<String, dynamic>))
           .toList(),
+      metadata: json['metadata'] as Map<String, dynamic>?, // 🛠️ ADDED
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -31,6 +32,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'order_index': instance.orderIndex,
       'scene_id': instance.sceneId,
       'choices': instance.choices?.map((e) => e.toJson()).toList(),
+      'metadata': instance.metadata, // 🛠️ ADDED
     };
 
 const _$SenderEnumMap = {
