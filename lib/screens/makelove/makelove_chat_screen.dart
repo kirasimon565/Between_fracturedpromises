@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../app/constants.dart';
 import '../../models/message.dart';
+import '../../models/choice.dart'; // 🛠️ Added import
 import '../../services/story_engine.dart';
 import '../../services/firestore_service.dart';
 import '../../services/auth_service.dart';
@@ -29,6 +30,7 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 🛠️ Ensures the ID matches the lowercase "threads" doc in Firestore
     final String threadId = partnerName.toLowerCase();
 
     return Scaffold(
@@ -54,21 +56,16 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
               )
             ),
             const SizedBox(height: 4),
-            StreamBuilder<DocumentSnapshot>(
-              stream: _firestore.streamCharacter(threadId),
-              builder: (context, snapshot) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _LivePulseDot(),
-                    const SizedBox(width: 6),
-                    const Text(
-                      "LIVE", 
-                      style: TextStyle(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)
-                    ),
-                  ],
-                );
-              },
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _LivePulseDot(),
+                const SizedBox(width: 6),
+                const Text(
+                  "LIVE", 
+                  style: TextStyle(color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)
+                ),
+              ],
             ),
           ],
         ),
@@ -94,7 +91,11 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
                     
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (_scrollController.hasClients) {
-                        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                        _scrollController.animateTo(
+                          _scrollController.position.maxScrollExtent,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
                       }
                     });
 
@@ -179,11 +180,12 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
     Get.bottomSheet(
       _MakeloveRopeOverlay(threadId: threadId),
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      enterBottomSheetDuration: const Duration(milliseconds: 400),
     );
   }
 }
 
-// 🛠️ ADDED: Missing Rope Overlay class for Makelove
 class _MakeloveRopeOverlay extends StatelessWidget {
   final String threadId;
   final StoryEngine _engine = Get.find<StoryEngine>();
@@ -199,48 +201,60 @@ class _MakeloveRopeOverlay extends StatelessWidget {
         if (messages.isEmpty) return const SizedBox.shrink();
 
         final lastMsg = messages.last;
-        final choices = lastMsg.choices ?? [];
-
-        if (choices.isEmpty) {
-          return Container(
-            height: 100,
-            color: Colors.black,
-            child: const Center(child: Text("WAITING FOR SIGNAL...", style: TextStyle(color: Colors.red, letterSpacing: 2))),
-          );
-        }
+        // Check if the last message has choices and isn't from Nadia
+        final hasChoices = (lastMsg.choices?.isNotEmpty ?? false) && lastMsg.sender != Sender.nadia;
 
         return Container(
           padding: const EdgeInsets.symmetric(vertical: 40),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.95),
+            color: Colors.black.withOpacity(0.98),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
             border: Border.all(color: Colors.red.withOpacity(0.2)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: choices.map((choice) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
-              child: GestureDetector(
-                onTap: () {
-                  _engine.makeChoice(choice);
-                  Get.back();
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.05),
-                    border: Border.all(color: Colors.red.withOpacity(0.3)),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    choice.text.toUpperCase(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white, letterSpacing: 2, fontSize: 12),
-                  ),
-                ),
+            children: [
+              Container(width: 1, height: 40, color: Colors.red.withOpacity(0.3)),
+              const SizedBox(height: 12),
+              const Text(
+                "DESIRE ACCESS", 
+                style: TextStyle(color: Colors.redAccent, fontSize: 10, letterSpacing: 5, fontWeight: FontWeight.bold)
               ),
-            )).toList(),
+              const SizedBox(height: 30),
+              if (!hasChoices)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
+                    child: Text("Waiting for a heartbeat...", 
+                      style: TextStyle(color: Colors.white12, fontSize: 12, fontStyle: FontStyle.italic)
+                    )
+                  ),
+                )
+              else
+                ...lastMsg.choices!.map((Choice choice) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
+                  child: GestureDetector(
+                    onTap: () {
+                      _engine.makeChoice(choice);
+                      Get.back();
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.05),
+                        border: Border.all(color: Colors.red.withOpacity(0.3)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        choice.text.toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.white, letterSpacing: 3, fontSize: 12, fontWeight: FontWeight.w300),
+                      ),
+                    ),
+                  ),
+                )).toList(),
+            ],
           ),
         );
       }
