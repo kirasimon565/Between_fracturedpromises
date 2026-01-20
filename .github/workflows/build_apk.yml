@@ -30,38 +30,28 @@ jobs:
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # 🛠️ THE FIX: Write secrets to a file so keytool can't miss them
+      # 🛠️ HARDCODED FIX: Bypass GitHub Secrets to ensure keytool sees the full password
       - name: Create Permanent Keystore
         run: |
-          # Create a temp file with the password
-          echo "${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" > pass.txt
-          
-          # Use the password from the file
           keytool -genkeypair -v \
             -keystore android/app/release.jks \
             -keyalg RSA -keysize 2048 -validity 10000 \
-            -alias "${{ secrets.RELEASE_KEY_ALIAS }}" \
-            -storepass:file pass.txt \
-            -keypass:file pass.txt \
+            -alias "between_production" \
+            -storepass "Snowhellom290" \
+            -keypass "Snowhellom290" \
             -dname "CN=Between Dev, O=NoirSim, C=US"
-          
-          # Immediately delete the password file for security
-          rm pass.txt
 
+      # 🛠️ HARDCODED SIGNING: Ensuring the APK is signed with the same credentials
       - name: Build Signed APK
-        env:
-          KEY_PASS: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          STORE_PASS: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
         run: |
           cd android
           gradle wrapper --gradle-version 8.9 --distribution-type all
           chmod +x gradlew
           ./gradlew assembleRelease \
             -Pandroid.injected.signing.store.file=release.jks \
-            -Pandroid.injected.signing.store.password=$STORE_PASS \
-            -Pandroid.injected.signing.key.alias=$ALIAS \
-            -Pandroid.injected.signing.key.password=$KEY_PASS
+            -Pandroid.injected.signing.store.password=Snowhellom290 \
+            -Pandroid.injected.signing.key.alias=between_production \
+            -Pandroid.injected.signing.key.password=Snowhellom290
 
       - name: Organize APKs
         run: |
