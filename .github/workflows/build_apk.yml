@@ -30,7 +30,7 @@ jobs:
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # 🛠️ HARDCODED FIX: Bypass GitHub Secrets to ensure keytool sees the full password
+      # 🛠️ Step 1: Create the Keystore in a specific, known location
       - name: Create Permanent Keystore
         run: |
           keytool -genkeypair -v \
@@ -41,14 +41,16 @@ jobs:
             -keypass "Snowhellom290" \
             -dname "CN=Between Dev, O=NoirSim, C=US"
 
-      # 🛠️ HARDCODED SIGNING: Ensuring the APK is signed with the same credentials
+      # 🛠️ Step 2: Build using the RELATIVE path from the android folder
       - name: Build Signed APK
         run: |
           cd android
           gradle wrapper --gradle-version 8.9 --distribution-type all
           chmod +x gradlew
+          
+          # Using "app/release.jks" ensures Gradle finds it relative to the android/ folder
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=release.jks \
+            -Pandroid.injected.signing.store.file=app/release.jks \
             -Pandroid.injected.signing.store.password=Snowhellom290 \
             -Pandroid.injected.signing.key.alias=between_production \
             -Pandroid.injected.signing.key.password=Snowhellom290
