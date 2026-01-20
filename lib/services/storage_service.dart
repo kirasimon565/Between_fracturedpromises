@@ -6,6 +6,6 @@ class StorageService extends GetxService {
   /// evidence images, audio clips, or Daniel's "Makelove" photos.
   Future<String> getAssetPath(String fileName) async {
     // For now, it returns the local path where your images live
-    return "assets/images/evidence/$fileName";
+    return "assets/gallery/$fileName";
   }
 }
