@@ -48,15 +48,15 @@ dev_dependencies:
   flutter_lints: ^3.0.0
   build_runner: ^2.4.6
   json_serializable: ^6.8.0
-  # 🛠️ ADDED: Tool to generate your custom launcher icons
+  # Tool to generate your custom launcher icons
   flutter_launcher_icons: ^0.14.4
 
 # 🎨 CUSTOM LAUNCHER CONFIGURATION
 flutter_launcher_icons:
   android: "launcher_icon"
-  ios: true
+  ios: false # 🛠️ FIXED: Set to false to prevent iOS path errors
   image_path: "assets/icons/launcher_icon.png"
-  # Optional: Adaptive background for modern Android devices
+  # Adaptive icons ensure your icon looks perfect on modern Android
   adaptive_icon_background: "#000000" 
   adaptive_icon_foreground: "assets/icons/launcher_icon.png"
 
