@@ -17,7 +17,7 @@ class StoryEngine extends GetxService {
   final Map<String, rx.BehaviorSubject<List<Message>>> _visibleMessages = {};
   final RxMap<String, bool> isTyping = <String, bool>{}.obs;
   
-  // 🛠️ FIX: Added for Gallery persistence
+  // 🛠️ Track discovered secrets across all threads
   final RxList<String> unlockedGlobalSecrets = <String>[].obs;
 
   RxList<String> activeThreadIds = <String>[].obs;
@@ -34,8 +34,11 @@ class StoryEngine extends GetxService {
   @override
   void onInit() {
     super.onInit();
+    
+    // Refresh UI if scene changes
     ever(_stateService.currentSceneId, (_) => _recheckAllThreads());
 
+    // Switch thread listeners if episode changes
     ever(_stateService.currentEpisodeId, (episodeId) {
       if (episodeId != null) _startDiscoveringThreads(episodeId);
     });
@@ -44,16 +47,13 @@ class StoryEngine extends GetxService {
     _startDiscoveringThreads(initialEpisode);
   }
 
-  // 🛠️ FIX: Added for EndingController logic
+  /// 🛠️ Check if a specific story thread has been started
   bool hasCompletedThread(String threadId) {
-    // Logic: If the thread is active and contains messages, we consider it "interacted with"
     return activeThreadIds.contains(threadId);
   }
 
-  // 🛠️ FIX: Added for EndingController metadata
+  /// 🛠️ Pull narrative flags (like ending IDs) from StateService
   String? getMetadata(String key) {
-    // This allows the engine to pull specific story flags from StateService
-    // e.g., 'final_ending_id'
     return _stateService.variables[key]?.toString();
   }
 
@@ -122,6 +122,7 @@ class StoryEngine extends GetxService {
     }
   }
 
+  /// 🛠️ Core Simulation Logic: Handles typing, delays, and gallery unlocks
   void _processQueue(String threadId) async {
     if (_isProcessingQueue[threadId] == true) return;
     _isProcessingQueue[threadId] = true;
@@ -135,6 +136,7 @@ class StoryEngine extends GetxService {
     while (_incomingBuffers[threadId]?.isNotEmpty ?? false) {
       final msg = _incomingBuffers[threadId]!.removeAt(0);
 
+      // 1. Handle Typing Simulation
       if (msg.sender != Sender.nadia && msg.sender != Sender.system) {
         isTyping[threadId] = true;
         _audioService.playTyping();
@@ -146,14 +148,19 @@ class StoryEngine extends GetxService {
         await Future.delayed(Duration(milliseconds: AppDelays.messageGap));
       }
 
+      // 2. Add Message to UI
       final currentList = subject.value;
       subject.add([...currentList, msg]);
       _audioService.playPing();
 
-      // 🛠️ Track "Secrets" for Gallery automatically
-      if (msg.metadata?['is_secret'] == true && msg.metadata?['image_url'] != null) {
-        if (!unlockedGlobalSecrets.contains(msg.metadata!['image_url'])) {
-          unlockedGlobalSecrets.add(msg.metadata!['image_url']);
+      // 3. 🛠️ Robust Metadata Check for Gallery Unlocks
+      final meta = msg.metadata;
+      if (meta != null && meta['is_secret'] == true) {
+        final String? imageUrl = meta['image_url'];
+        if (imageUrl != null && !unlockedGlobalSecrets.contains(imageUrl)) {
+          unlockedGlobalSecrets.add(imageUrl);
+          // Trigger a vibration for finding a secret
+          _audioService.playVibrate(); 
         }
       }
     }
@@ -174,6 +181,7 @@ class StoryEngine extends GetxService {
     final episodeId = _stateService.currentEpisodeId.value ?? 'episode_1';
     _stateService.updateProgress(episodeId, choice.targetNode);
 
+    // Clear typing states when player responds
     isTyping.clear();
   }
 
