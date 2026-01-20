@@ -1,7 +1,7 @@
 import '../models/message.dart';
 
 class ChatThread {
-  final String id; // usually sender name for now
+  final String id; 
   final List<Message> messages;
   final bool isUnread;
 
@@ -15,5 +15,15 @@ class ChatThread {
       ? messages.last
       : Message(id: '0', sender: Sender.system, content: '', type: MessageType.text);
 
-  DateTime get lastUpdated => DateTime.now(); // Placeholder for sorting
+  DateTime get lastUpdated => DateTime.now(); 
+
+  factory ChatThread.fromJson(Map<String, dynamic> json) {
+    return ChatThread(
+      id: json['id']?.toString() ?? 'Unknown',
+      isUnread: json['isUnread'] as bool? ?? false,
+      messages: (json['messages'] as List?)
+              ?.map((e) => Message.fromJson(e as Map<String, dynamic>))
+              .toList() ?? [],
+    );
+  }
 }
