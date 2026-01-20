@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // 🛠️ Added for copying UID to clipboard
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../app/routes.dart';
 import '../../app/constants.dart';
 import '../../theme/colors.dart';
 import '../../services/audio_service.dart';
+import '../../services/auth_service.dart'; // 🛠️ Added to access UID
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -13,9 +15,9 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final AudioService _audioService = Get.find<AudioService>();
+  final AuthService _authService = Get.find<AuthService>(); // 🛠️ Find AuthService
   int _tapCount = 0;
   
-  // Local state for toggles
   bool _isSoundFxEnabled = true;
   bool _isMusicEnabled = true;
   bool _isNotificationsEnabled = true;
@@ -26,7 +28,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSettings();
   }
 
-  // Load saved preferences from disk
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -36,7 +37,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  // Save preference and update the AudioService immediately
   Future<void> _toggleSetting(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
@@ -45,11 +45,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (key == 'settings_sfx') _isSoundFxEnabled = value;
       if (key == 'settings_music') {
         _isMusicEnabled = value;
-        // 🔊 Logic to stop/start theme music instantly
         if (!value) {
           _audioService.stopAll(); 
         } else {
-          _audioService.playIntroTheme(); // Resume theme
+          _audioService.playIntroTheme(); 
         }
       }
       if (key == 'settings_notif') _isNotificationsEnabled = value;
@@ -60,7 +59,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _tapCount++;
     if (_tapCount >= 5) {
       _tapCount = 0;
-      // 🔊 Audio feedback for secret unlock
       _audioService.playVibrate(); 
       
       Get.snackbar(
@@ -75,6 +73,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Get.toNamed(AppRoutes.adminDialpad);
       });
     }
+  }
+
+  // 🛠️ Helper to copy UID for your Firebase Rules
+  void _copyUid() {
+    Clipboard.setData(ClipboardData(text: _authService.uid));
+    Get.snackbar(
+      "ENCRYPTION", "USER ID COPIED TO KEYBOARD",
+      colorText: Colors.white70,
+      backgroundColor: Colors.black54,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 1),
+    );
   }
 
   @override
@@ -96,7 +106,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           _buildSectionHeader("ACCOUNT"),
           _buildSettingsItem(Icons.person_outline, "Account Profile", () => Get.toNamed(AppRoutes.profile)),
-          _buildSettingsItem(Icons.lock_outline, "Privacy & Security", () {}),
+          
+          // 🛠️ NEW: DISPLAY USER ID SECTION
+          _buildSectionHeader("SECURITY CLEARANCE"),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 25),
+            leading: const Icon(Icons.fingerprint, color: Colors.white70, size: 20),
+            title: const Text("Device Identifier", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w300)),
+            subtitle: Text(
+              _authService.uid.isEmpty ? "Generating key..." : _authService.uid,
+              style: const TextStyle(color: Colors.white24, fontSize: 11, fontFamily: 'monospace'),
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.copy, size: 16, color: Colors.white12),
+              onPressed: _copyUid,
+            ),
+          ),
 
           _buildSectionHeader("SYSTEM"),
           _buildSettingsItem(
@@ -121,7 +146,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 30),
           const Divider(color: Colors.white10),
 
-          // THE SECRET GATEWAY
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
             title: const Text("System Version", style: TextStyle(color: Colors.white54, fontSize: 14)),
@@ -159,7 +183,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSwitch(bool value, ValueChanged<bool> onChanged) {
     return Switch(
       value: value,
-      onChanged: onChanged, // 🛠️ Now triggers the save logic
+      onChanged: onChanged,
       activeColor: Colors.white,
       activeTrackColor: Colors.white24,
       inactiveThumbColor: Colors.grey,
