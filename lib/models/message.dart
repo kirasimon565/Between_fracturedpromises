@@ -1,3 +1,5 @@
+import 'choice.dart'; // 👈 ADD THIS IMPORT
+
 enum MessageType { text, image, choice }
 enum Sender { nadia, ethan, claire, olivia, daniel, liam, system }
 
