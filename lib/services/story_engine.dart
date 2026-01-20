@@ -17,9 +17,7 @@ class StoryEngine extends GetxService {
   final Map<String, rx.BehaviorSubject<List<Message>>> _visibleMessages = {};
   final RxMap<String, bool> isTyping = <String, bool>{}.obs;
   
-  // 🛠️ Track discovered secrets across all threads
   final RxList<String> unlockedGlobalSecrets = <String>[].obs;
-
   RxList<String> activeThreadIds = <String>[].obs;
 
   Rx<String?> get currentEpisode => _stateService.currentEpisodeId;
@@ -43,16 +41,15 @@ class StoryEngine extends GetxService {
       if (episodeId != null) _startDiscoveringThreads(episodeId);
     });
 
-    final initialEpisode = _stateService.currentEpisodeId.value ?? 'episode_1';
+    // 🛠️ FIX: Default to ep1_the_spark to match your uploader
+    final initialEpisode = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
     _startDiscoveringThreads(initialEpisode);
   }
 
-  /// 🛠️ Check if a specific story thread has been started
   bool hasCompletedThread(String threadId) {
     return activeThreadIds.contains(threadId);
   }
 
-  /// 🛠️ Pull narrative flags (like ending IDs) from StateService
   String? getMetadata(String key) {
     return _stateService.variables[key]?.toString();
   }
@@ -88,7 +85,8 @@ class StoryEngine extends GetxService {
 
   void _startListeningToThread(String threadId) {
     if (_subscriptions.containsKey(threadId)) return;
-    String episodeId = _stateService.currentEpisodeId.value ?? 'episode_1';
+    // 🛠️ FIX: Ensure path matches ep1_the_spark
+    String episodeId = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
 
     _subscriptions[threadId] = _firestore.streamMessages(episodeId, threadId).listen((snapshot) {
       _handleFirestoreUpdate(threadId, snapshot);
@@ -104,12 +102,18 @@ class StoryEngine extends GetxService {
       return Message.fromJson(data);
     }).toList();
 
-    String currentSceneId = _stateService.currentSceneId.value ?? 'scene_1';
+    // 🛠️ IMPROVEMENT: If sceneId is null in DB, we still want to show it for testing
+    String? currentSceneId = _stateService.currentSceneId.value;
     final subject = _visibleMessages[threadId];
     if (subject == null) return;
 
     final currentVisible = subject.value;
-    final relevantMessages = allMessages.where((m) => m.sceneId == currentSceneId).toList();
+    
+    // Filter messages that belong to the current scene OR have no scene assigned (for testing)
+    final relevantMessages = allMessages.where((m) {
+      return currentSceneId == null || m.sceneId == null || m.sceneId == currentSceneId;
+    }).toList();
+    
     relevantMessages.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
 
     final visibleIds = currentVisible.map((m) => m.id).toSet();
@@ -122,7 +126,6 @@ class StoryEngine extends GetxService {
     }
   }
 
-  /// 🛠️ Core Simulation Logic: Handles typing, delays, and gallery unlocks
   void _processQueue(String threadId) async {
     if (_isProcessingQueue[threadId] == true) return;
     _isProcessingQueue[threadId] = true;
@@ -136,7 +139,6 @@ class StoryEngine extends GetxService {
     while (_incomingBuffers[threadId]?.isNotEmpty ?? false) {
       final msg = _incomingBuffers[threadId]!.removeAt(0);
 
-      // 1. Handle Typing Simulation
       if (msg.sender != Sender.nadia && msg.sender != Sender.system) {
         isTyping[threadId] = true;
         _audioService.playTyping();
@@ -148,18 +150,15 @@ class StoryEngine extends GetxService {
         await Future.delayed(Duration(milliseconds: AppDelays.messageGap));
       }
 
-      // 2. Add Message to UI
       final currentList = subject.value;
       subject.add([...currentList, msg]);
       _audioService.playPing();
 
-      // 3. 🛠️ Robust Metadata Check for Gallery Unlocks
       final meta = msg.metadata;
       if (meta != null && meta['is_secret'] == true) {
         final String? imageUrl = meta['image_url'];
         if (imageUrl != null && !unlockedGlobalSecrets.contains(imageUrl)) {
           unlockedGlobalSecrets.add(imageUrl);
-          // Trigger a vibration for finding a secret
           _audioService.playVibrate(); 
         }
       }
@@ -178,10 +177,9 @@ class StoryEngine extends GetxService {
     _audioService.playVibrate();
     _stateService.recordChoice(choice.targetNode);
     
-    final episodeId = _stateService.currentEpisodeId.value ?? 'episode_1';
+    final episodeId = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
     _stateService.updateProgress(episodeId, choice.targetNode);
 
-    // Clear typing states when player responds
     isTyping.clear();
   }
 
