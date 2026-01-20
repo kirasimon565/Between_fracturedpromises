@@ -1,15 +1,7 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'choice.g.dart';
-
-@JsonSerializable()
 class Choice {
   final String text;
-
-  @JsonKey(name: 'target_node')
   final String targetNode;
-
-  final Map<String, dynamic>? impact; // e.g. {'romance': 1, 'suspicion': 5}
+  final Map<String, dynamic>? impact;
 
   Choice({
     required this.text,
@@ -17,6 +9,17 @@ class Choice {
     this.impact,
   });
 
-  factory Choice.fromJson(Map<String, dynamic> json) => _$ChoiceFromJson(json);
-  Map<String, dynamic> toJson() => _$ChoiceToJson(this);
+  factory Choice.fromJson(Map<String, dynamic> json) {
+    return Choice(
+      text: json['text']?.toString() ?? '',
+      targetNode: json['target_node']?.toString() ?? json['targetNode']?.toString() ?? '',
+      impact: json['impact'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'text': text,
+    'target_node': targetNode,
+    'impact': impact,
+  };
 }
