@@ -30,16 +30,16 @@ jobs:
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # 🛠️ Step 1: Build the APK using the file you uploaded to android/app
+      # 🛠️ Step 1: Build using the ABSOLUTE path to your Termux-generated key
       - name: Build Signed APK
         run: |
           cd android
           gradle wrapper --gradle-version 8.9 --distribution-type all
           chmod +x gradlew
           
-          # We point directly to release.jks which is already in the app folder
+          # We use $GITHUB_WORKSPACE to point to the exact physical location of the file
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=release.jks \
+            -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android/app/release.jks \
             -Pandroid.injected.signing.store.password=Snowhellom290 \
             -Pandroid.injected.signing.key.alias=between_production \
             -Pandroid.injected.signing.key.password=Snowhellom290
@@ -54,3 +54,4 @@ jobs:
         with:
           name: Between-Production-APK
           path: build/app/outputs/flutter-apk/*.apk
+          
