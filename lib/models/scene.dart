@@ -1,15 +1,11 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'message.dart';
 import 'choice.dart';
 
-part 'scene.g.dart';
-
-@JsonSerializable()
 class Scene {
   final String id;
   final List<Message> messages;
   final List<Choice>? choices;
-  final String? defaultNextScene; // If no choices, go here. If null and no choices, end episode.
+  final String? defaultNextScene;
 
   Scene({
     required this.id,
@@ -18,6 +14,23 @@ class Scene {
     this.defaultNextScene,
   });
 
-  factory Scene.fromJson(Map<String, dynamic> json) => _$SceneFromJson(json);
-  Map<String, dynamic> toJson() => _$SceneToJson(this);
+  factory Scene.fromJson(Map<String, dynamic> json) {
+    return Scene(
+      id: json['id']?.toString() ?? '',
+      messages: (json['messages'] as List?)
+              ?.map((e) => Message.fromJson(e as Map<String, dynamic>))
+              .toList() ?? [],
+      choices: (json['choices'] as List?)
+          ?.map((e) => Choice.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      defaultNextScene: json['defaultNextScene']?.toString() ?? json['default_next_scene']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'messages': messages.map((e) => e.toJson()).toList(),
+    'choices': choices?.map((e) => e.toJson()).toList(),
+    'defaultNextScene': defaultNextScene,
+  };
 }
