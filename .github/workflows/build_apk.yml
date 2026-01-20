@@ -30,16 +30,23 @@ jobs:
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # 🛠️ THE ULTIMATE FIX: Piping the password into stdin
+      # 🛠️ THE FIX: Write secrets to a file so keytool can't miss them
       - name: Create Permanent Keystore
         run: |
-          echo "${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" | keytool -genkeypair -v \
+          # Create a temp file with the password
+          echo "${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" > pass.txt
+          
+          # Use the password from the file
+          keytool -genkeypair -v \
             -keystore android/app/release.jks \
             -keyalg RSA -keysize 2048 -validity 10000 \
             -alias "${{ secrets.RELEASE_KEY_ALIAS }}" \
-            -storepass:stdin \
-            -keypass:stdin \
+            -storepass:file pass.txt \
+            -keypass:file pass.txt \
             -dname "CN=Between Dev, O=NoirSim, C=US"
+          
+          # Immediately delete the password file for security
+          rm pass.txt
 
       - name: Build Signed APK
         env:
