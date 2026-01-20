@@ -21,3 +21,4 @@ A Flutter + Firebase Live Episode System.
 
 ## Admin Access
 - Go to Settings -> Tap Version 5 times -> Enter `*#77*#`.
+ 
