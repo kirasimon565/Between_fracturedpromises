@@ -30,43 +30,40 @@ jobs:
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # 🛠️ FIXED: Wrapped secrets in single quotes to prevent character loss
+      # 🛠️ FIXED: Using the :env modifier ensures keytool gets the FULL password
       - name: Create Permanent Keystore
         env:
-          # Use single quotes to ensure the runner reads the full string
-          STORE_PASS: '${{ secrets.RELEASE_KEYSTORE_PASSWORD }}'
-          KEY_PASS: '${{ secrets.RELEASE_KEY_PASSWORD }}'
-          ALIAS: '${{ secrets.RELEASE_KEY_ALIAS }}'
+          PASS_SECRET: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          ALIAS_SECRET: ${{ secrets.RELEASE_KEY_ALIAS }}
         run: |
           keytool -genkeypair -v -keystore android/app/release.jks \
             -keyalg RSA -keysize 2048 -validity 10000 \
-            -alias "$ALIAS" \
-            -storepass "$STORE_PASS" \
-            -keypass "$KEY_PASS" \
+            -alias "$ALIAS_SECRET" \
+            -storepass:env PASS_SECRET \
+            -keypass:env PASS_SECRET \
             -dname "CN=Between Dev, O=NoirSim, C=US"
 
       - name: Build Signed APK
         env:
-          # Same single-quote protection for the build step
-          KEYSTORE_PASSWORD: '${{ secrets.RELEASE_KEYSTORE_PASSWORD }}'
-          KEY_ALIAS: '${{ secrets.RELEASE_KEY_ALIAS }}'
-          KEY_PASSWORD: '${{ secrets.RELEASE_KEY_PASSWORD }}'
+          KEY_PASS: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          STORE_PASS: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
         run: |
           cd android
           gradle wrapper --gradle-version 8.9 --distribution-type all
           chmod +x gradlew
           ./gradlew assembleRelease \
             -Pandroid.injected.signing.store.file=release.jks \
-            -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
-            -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
-            -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+            -Pandroid.injected.signing.store.password=$STORE_PASS \
+            -Pandroid.injected.signing.key.alias=$ALIAS \
+            -Pandroid.injected.signing.key.password=$KEY_PASS
 
-      - name: Organize APKs for Upload
+      - name: Organize APKs
         run: |
           mkdir -p build/app/outputs/flutter-apk/
           find android/app/build/outputs/apk/release/ -name "*.apk" -exec cp {} build/app/outputs/flutter-apk/ \;
 
-      - name: Upload Production Package
+      - name: Upload Package
         uses: actions/upload-artifact@v4
         with:
           name: Between-Production-Package
