@@ -1,4 +1,4 @@
-name: Build Flutter APK
+name: Production Build
 
 on:
   push:
@@ -27,48 +27,48 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # 🛠️ ADDED: Generate custom launcher icons before building the APK
+      # 🛠️ Ensures your custom icons are baked into the build
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      - name: Create debug keystore
+      # 🛠️ Creates your permanent digital signature
+      - name: Create Permanent Keystore
         run: |
-          keytool -genkey -v -keystore android/app/debug.keystore \
-            -storepass android -alias androiddebugkey -keypass android \
+          keytool -genkey -v -keystore android/app/release.jks \
             -keyalg RSA -keysize 2048 -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
+            -alias "${{ secrets.RELEASE_KEY_ALIAS }}" \
+            -storepass "${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" \
+            -keypass "${{ secrets.RELEASE_KEY_PASSWORD }}" \
+            -dname "CN=Between Dev, O=NoirSim, C=US"
 
-      - name: Build with Gradle Directly
+      - name: Build Signed APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
           cd android
-          # 1. Generate a fresh wrapper since the JAR is missing in the repo
+          # Generate fresh wrapper for the runner
           gradle wrapper --gradle-version 8.9 --distribution-type all
-          
-          # 2. Make it executable
           chmod +x gradlew
           
-          # 3. Build the APKs
-          ./gradlew assembleRelease --no-daemon
+          # Build release while injecting the new signing info
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=release.jks \
+            -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$KEY_PASSWORD
 
       - name: Organize APKs for Upload
         run: |
           mkdir -p build/app/outputs/flutter-apk/
-          
-          # Locate APKs regardless of which subfolder they landed in
-          echo "Finding APKs..."
           find android/app/build/outputs/apk/release/ -name "*.apk" -exec cp {} build/app/outputs/flutter-apk/ \;
-          
-          echo "Final check of output folder:"
-          ls -R build/app/outputs/
 
-      - name: Upload arm64 APK
+      # 📦 UPLOADS BOTH THE APK AND THE KEYSTORE
+      - name: Upload Production Package
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-arm64
-          path: build/app/outputs/flutter-apk/*.apk
-
-      - name: Upload armeabi APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-armeabi
-          path: build/app/outputs/flutter-apk/*.apk
+          name: Between-Production-Package
+          path: |
+            build/app/outputs/flutter-apk/*.apk
+            android/app/release.jks
