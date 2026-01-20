@@ -9,8 +9,9 @@ import '../../theme/colors.dart';
 import '../../services/audio_service.dart';
 
 class HomeScreen extends StatelessWidget {
-  // Use Get.find since services are initialized globally in main.dart
   final AudioService _audioService = Get.find<AudioService>();
+
+  HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,65 +27,54 @@ class HomeScreen extends StatelessWidget {
           ),
           
           // Layer 1: Noir Darken Overlay
-          Container(color: Colors.black.withOpacity(0.2)),
+          Container(color: Colors.black.withOpacity(0.3)),
 
           SafeArea(
             child: Column(
               children: [
-                StatusBar(),
+                const StatusBar(),
                 const SizedBox(height: 20),
                 
-                // Clock Widget (Atmospheric "Phone" Feel)
+                // Clock Widget
                 const _ClockWidget(),
 
                 Expanded(
                   child: GridView.count(
-                    crossAxisCount: 4,
+                    crossAxisCount: 4, // 4 apps per row as seen in mobile home screens
                     padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
-                    mainAxisSpacing: 25,
+                    mainAxisSpacing: 35, // Space between rows
+                    crossAxisSpacing: 20, // Space between icons
                     children: [
-                      AppIcon(
+                      _buildMainApp(
                         label: "Messenger",
-                        assetPath: AppConstants.iconMessenger,
-                        onTap: () {
-                          _audioService.playPing(); // 🔊 Sound feedback
-                          Get.toNamed(AppRoutes.messenger);
-                        }
+                        asset: AppConstants.iconMessenger,
+                        route: AppRoutes.messenger,
                       ),
-                      AppIcon(
+                      _buildMainApp(
                         label: "Makelove",
-                        assetPath: AppConstants.iconMakelove,
-                        onTap: () {
-                          _audioService.playPing();
-                          Get.toNamed(AppRoutes.makelove);
-                        }
+                        asset: AppConstants.iconMakelove,
+                        route: AppRoutes.makelove,
                       ),
-                      AppIcon(
+                      _buildMainApp(
                         label: "Gallery",
-                        assetPath: AppConstants.iconGallery,
-                        onTap: () {
-                          _audioService.playPing();
-                          Get.toNamed(AppRoutes.gallery);
-                        }
+                        asset: AppConstants.iconGallery,
+                        route: AppRoutes.gallery,
                       ),
-                      AppIcon(
+                      _buildMainApp(
                         label: "Settings",
-                        assetPath: AppConstants.iconSettings,
-                        onTap: () {
-                          _audioService.playPing();
-                          Get.toNamed(AppRoutes.settings);
-                        }
+                        asset: AppConstants.iconSettings,
+                        route: AppRoutes.settings,
                       ),
                     ],
                   ),
                 ),
 
-                // Lower Dock
+                // Lower Dock (Glassmorphism effect)
                 _buildDock(),
 
                 const SizedBox(height: 10),
 
-                // Ambient Design Dots (Strictly for UI aesthetic)
+                // Ambient Design Dots
                 const Padding(
                   padding: EdgeInsets.only(bottom: 20),
                   child: _AmbientDots(),
@@ -97,14 +87,26 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // Helper to build main grid apps with labels
+  Widget _buildMainApp({required String label, required String asset, required String route}) {
+    return AppIcon(
+      label: label,
+      assetPath: asset,
+      onTap: () {
+        _audioService.playPing();
+        Get.toNamed(route); // Named navigation using GetX
+      },
+    );
+  }
+
   Widget _buildDock() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15),
-      height: 90,
+      height: 95,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15), // Glassmorphism dock
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 0.5),
+        color: Colors.white.withOpacity(0.12), // Translucent glass effect
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: Colors.white.withOpacity(0.15), width: 0.8),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -122,19 +124,19 @@ class HomeScreen extends StatelessWidget {
   Widget _dockItem(String asset, {String? route}) {
     return GestureDetector(
       onTap: () {
-        _audioService.playPing(); // 🔊 Interaction sound
+        _audioService.playPing();
         if (route != null) Get.toNamed(route);
       },
       child: Container(
-         width: 55, height: 55,
+         width: 60, height: 60,
          decoration: BoxDecoration(
-           borderRadius: BorderRadius.circular(12),
+           borderRadius: BorderRadius.circular(16),
            boxShadow: const [
-             BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
+             BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 3))
            ]
          ),
          child: ClipRRect(
-           borderRadius: BorderRadius.circular(12),
+           borderRadius: BorderRadius.circular(16),
            child: Image.asset(asset, fit: BoxFit.cover),
          ),
       ),
@@ -148,24 +150,25 @@ class _ClockWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40),
+      padding: const EdgeInsets.only(top: 30, bottom: 20),
       child: Column(
         children: [
           Text(
             DateFormat('HH:mm').format(DateTime.now()),
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 60,
-              fontWeight: FontWeight.w200,
+              fontSize: 72, // Larger atmospheric font
+              fontWeight: FontWeight.w100, // Ultra thin for Noir feel
               fontFamily: 'Inter',
             ),
           ),
+          const SizedBox(height: 5),
           Text(
             DateFormat('EEEE, MMMM d').format(DateTime.now()).toUpperCase(),
             style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-              letterSpacing: 2,
+              color: Colors.white60,
+              fontSize: 13,
+              letterSpacing: 3,
             ),
           ),
         ],
@@ -187,7 +190,7 @@ class __AmbientDotsState extends State<_AmbientDots> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))..repeat();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2000))..repeat();
   }
 
   @override
@@ -200,16 +203,19 @@ class __AmbientDotsState extends State<_AmbientDots> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: List.generate(3, (index) {
+      children: List.generate(2, (index) { // Reduced to 2 dots to match common UI indicators
         return FadeTransition(
           opacity: CurvedAnimation(
             parent: _controller,
-            curve: Interval(index * 0.2, 0.6 + (index * 0.2), curve: Curves.easeInOut),
+            curve: Interval(index * 0.3, 0.7 + (index * 0.3), curve: Curves.easeInOut),
           ),
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-            width: 4, height: 4,
-            decoration: const BoxDecoration(color: Colors.white54, shape: BoxShape.circle),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: 6, height: 6,
+            decoration: BoxDecoration(
+              color: index == 0 ? Colors.white : Colors.white24, // First dot active
+              shape: BoxShape.circle
+            ),
           ),
         );
       }),
