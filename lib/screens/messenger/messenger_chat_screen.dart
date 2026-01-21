@@ -23,76 +23,27 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
   final StoryEngine _engine = Get.find<StoryEngine>();
   final AudioService _audio = Get.find<AudioService>();
   final FirestoreService _firestore = Get.find<FirestoreService>();
-  final AuthService _auth = Get.find<AuthService>();
   final ScrollController _scrollController = ScrollController();
+  
+  // 🛠️ Sanitized threadId for reliable Firestore pathing
+  late final String threadId;
 
-  _MessengerChatScreenState() : partnerName = Get.arguments ?? 'Unknown';
+  _MessengerChatScreenState() : partnerName = Get.arguments ?? 'Unknown' {
+    // 🛠️ Force lowercase and trim to ensure "Ethan" matches "ethan" in DB exactly
+    threadId = partnerName.toLowerCase().trim();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // 🛠️ Lowercase threadId to match Firestore document IDs created by uploader
-    final String threadId = partnerName.toLowerCase();
-
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.9),
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.white70),
-          onPressed: () => Get.back(),
-        ),
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              partnerName.toUpperCase(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                letterSpacing: 4,
-                fontWeight: FontWeight.w200,
-                fontFamily: 'Didot',
-              ),
-            ),
-            const SizedBox(height: 4),
-            StreamBuilder<DocumentSnapshot>(
-              stream: _firestore.streamCharacter(threadId),
-              builder: (context, snapshot) {
-                bool isOnline = true;
-                if (snapshot.hasData && snapshot.data!.exists) {
-                  final data = snapshot.data!.data() as Map<String, dynamic>?;
-                  isOnline = data?['is_online'] ?? true;
-                }
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: isOnline ? Colors.greenAccent : Colors.white24,
-                        shape: BoxShape.circle,
-                        boxShadow: isOnline ? [const BoxShadow(color: Colors.greenAccent, blurRadius: 4)] : [],
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      isOnline ? "online" : "offline",
-                      style: TextStyle(
-                        fontSize: 9,
-                        color: isOnline ? Colors.greenAccent.withOpacity(0.7) : Colors.white24,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      appBar: _buildAppBar(),
       body: Column(
         children: [
           Expanded(
@@ -101,19 +52,27 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
               builder: (context, snapshot) {
                 final messages = snapshot.data ?? [];
                 
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (_scrollController.hasClients) {
-                    _scrollController.animateTo(
-                      _scrollController.position.maxScrollExtent,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOut,
-                    );
-                  }
-                });
+                // Auto-scroll logic for mobile devices
+                if (messages.isNotEmpty) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_scrollController.hasClients) {
+                      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                    }
+                  });
+                }
 
-                if (messages.isEmpty) {
+                if (messages.isEmpty && snapshot.connectionState == ConnectionState.active) {
                   return const Center(
-                    child: Text("NO SIGNAL FOUND", style: TextStyle(color: Colors.white10, letterSpacing: 2)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.blur_on, color: Colors.white10, size: 30),
+                        SizedBox(height: 10),
+                        Text("NO SIGNAL FOUND", 
+                          style: TextStyle(color: Colors.white10, letterSpacing: 2, fontSize: 10)
+                        ),
+                      ],
+                    ),
                   );
                 }
 
@@ -145,9 +104,73 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
     );
   }
 
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.black.withOpacity(0.9),
+      elevation: 0,
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.white70),
+        onPressed: () => Get.back(),
+      ),
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            partnerName.toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              letterSpacing: 4,
+              fontWeight: FontWeight.w200,
+              fontFamily: 'Didot',
+            ),
+          ),
+          const SizedBox(height: 4),
+          _buildOnlineStatus(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOnlineStatus() {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: _firestore.streamCharacter(threadId),
+      builder: (context, snapshot) {
+        bool isOnline = true;
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>?;
+          isOnline = data?['is_online'] ?? true;
+        }
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(
+                color: isOnline ? Colors.greenAccent : Colors.white24,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              isOnline ? "online" : "offline",
+              style: TextStyle(
+                fontSize: 8,
+                color: isOnline ? Colors.greenAccent.withOpacity(0.5) : Colors.white24,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildChatInput(String threadId) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 40),
       decoration: BoxDecoration(
         color: Colors.black,
         border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
@@ -157,26 +180,26 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
           GestureDetector(
             onTap: () => _showChoiceRope(threadId),
             child: Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withOpacity(0.05),
                 border: Border.all(color: Colors.white10),
               ),
-              child: const Icon(Icons.history_edu_rounded, color: Colors.white70, size: 22),
+              child: const Icon(Icons.history_edu_rounded, color: Colors.white70, size: 24),
             ),
           ),
           const SizedBox(width: 15),
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(30),
               ),
               child: const Text(
-                "Tap feather to respond...",
-                style: TextStyle(color: Colors.white24, fontSize: 13, letterSpacing: 0.5),
+                "Awaiting signal...",
+                style: TextStyle(color: Colors.white24, fontSize: 12, letterSpacing: 0.5),
               ),
             ),
           ),
@@ -191,7 +214,6 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
       _RopeChoiceOverlay(threadId: threadId),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      enterBottomSheetDuration: const Duration(milliseconds: 400),
     );
   }
 }
@@ -208,39 +230,40 @@ class _RopeChoiceOverlay extends StatelessWidget {
       stream: _engine.getMessagesStream(threadId),
       builder: (context, snapshot) {
         final messages = snapshot.data ?? [];
-        if (messages.isEmpty) return const SizedBox.shrink();
+        final lastMsg = messages.isNotEmpty ? messages.last : null;
         
-        final lastMsg = messages.last;
-        final hasChoices = (lastMsg.choices?.isNotEmpty ?? false) && lastMsg.sender != Sender.nadia;
+        final bool hasChoices = lastMsg != null && 
+                                (lastMsg.choices?.isNotEmpty ?? false) && 
+                                lastMsg.sender != Sender.nadia;
 
         return Container(
-          padding: const EdgeInsets.only(top: 20, bottom: 40),
+          padding: const EdgeInsets.only(top: 20, bottom: 60),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.98),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+            color: const Color(0xFF0A0A0A),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
             border: Border.all(color: Colors.white.withOpacity(0.05)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 1, height: 40, color: Colors.white24),
-              const SizedBox(height: 12),
+              Container(width: 1, height: 50, color: Colors.white12),
+              const SizedBox(height: 15),
               const Text(
-                "CONSEQUENCE ACCESS", 
-                style: TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 5, fontWeight: FontWeight.bold)
+                "FRACTURED PROMISES", 
+                style: TextStyle(color: Colors.white24, fontSize: 9, letterSpacing: 6, fontWeight: FontWeight.bold)
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
               if (!hasChoices)
                 const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
+                  padding: EdgeInsets.symmetric(vertical: 30),
                   child: Center(
-                    child: Text("Encryption active. Waiting for signal...", 
-                      style: TextStyle(color: Colors.white12, fontSize: 12, fontStyle: FontStyle.italic)
+                    child: Text("The connection is silent...", 
+                      style: TextStyle(color: Colors.white12, fontSize: 13, fontStyle: FontStyle.italic)
                     )
                   ),
                 )
               else
-                ...lastMsg.choices!.map((Choice choice) => _SwayingChoice(
+                ...lastMsg.choices!.map((choice) => _SwayingChoice(
                   text: choice.text,
                   onTap: () {
                     _engine.makeChoice(choice);
