@@ -1,6 +1,6 @@
 # Between: Fractured Promises
 
-A Flutter + Firebase Live Episode System.
+interactive story game
 
 ## Getting Started
 
