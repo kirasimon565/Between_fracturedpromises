@@ -50,6 +50,11 @@ class StoryEngine extends GetxService {
     _startDiscoveringThreads(initialEpisode);
   }
 
+  /// 🛠️ RESTORED: Required by EndingController to determine player outcomes
+  String? getMetadata(String key) {
+    return _stateService.variables[key]?.toString();
+  }
+
   void _updateActiveThreads() {
     _lastSnapshots.forEach((threadId, snapshot) {
       final messages = snapshot.docs;
@@ -57,7 +62,7 @@ class StoryEngine extends GetxService {
       
       bool hasMessagesInCurrentScene = messages.any((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        // 🛠️ FIX: Allow messages with NO sceneId to show up during testing
+        // 🛠️ Resilience: Allow messages with NO sceneId to show up during testing
         return data['sceneId'] == currentScene || data['sceneId'] == null;
       });
 
@@ -76,10 +81,10 @@ class StoryEngine extends GetxService {
   }
 
   void _startDiscoveringThreads(String episodeId) {
-    print("DEBUG: Starting thread discovery for episode: $episodeId");
+    print("DEBUG: Discovering threads for: $episodeId");
     _threadsSubscription?.cancel();
     _threadsSubscription = _firestore.streamActiveThreadIds(episodeId).listen((threads) {
-      print("DEBUG: Firestore returned thread IDs: $threads");
+      print("DEBUG: Threads found in DB: $threads");
       for (var id in threads) {
         _startListeningToThread(id);
       }
@@ -108,7 +113,7 @@ class StoryEngine extends GetxService {
     if (_subscriptions.containsKey(threadId)) return;
     String episodeId = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
 
-    print("DEBUG: Listening to thread: $threadId in episode: $episodeId");
+    print("DEBUG: Subscribing to $threadId in $episodeId");
     _subscriptions[threadId] = _firestore.streamMessages(episodeId, threadId).listen((snapshot) {
       _handleFirestoreUpdate(threadId, snapshot);
     });
@@ -116,7 +121,7 @@ class StoryEngine extends GetxService {
 
   void _handleFirestoreUpdate(String threadId, QuerySnapshot snapshot) {
     _lastSnapshots[threadId] = snapshot;
-    print("DEBUG: Received ${snapshot.docs.length} messages for thread: $threadId");
+    print("DEBUG: Received ${snapshot.docs.length} docs for $threadId");
 
     List<Message> allMessages = snapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
@@ -126,7 +131,7 @@ class StoryEngine extends GetxService {
 
     String currentSceneId = _stateService.currentSceneId.value ?? 'scene_1';
     
-    // 🛠️ FIX: Logic to ensure character appears in list if they have ANY valid messages
+    // Character list logic: show if they have messages for current scene OR null sceneId
     bool shouldBeActive = allMessages.any((m) => m.sceneId == currentSceneId || m.sceneId == null);
     if (shouldBeActive && !activeThreadIds.contains(threadId)) {
       activeThreadIds.add(threadId);
@@ -137,7 +142,7 @@ class StoryEngine extends GetxService {
 
     final currentVisible = subject.value;
     
-    // 🛠️ FIX: Added fallback so messages show up even if sceneId is missing in Firebase
+    // Filter relevant messages
     final relevantMessages = allMessages.where((m) {
       return m.sceneId == currentSceneId || m.sceneId == null;
     }).toList();
@@ -148,6 +153,7 @@ class StoryEngine extends GetxService {
     final newMessages = relevantMessages.where((m) => !visibleIds.contains(m.id)).toList();
 
     if (newMessages.isNotEmpty) {
+      print("DEBUG: Adding ${newMessages.length} new messages to $threadId queue");
       if (_incomingBuffers[threadId] == null) _incomingBuffers[threadId] = [];
       _incomingBuffers[threadId]!.addAll(newMessages);
       _processQueue(threadId);
