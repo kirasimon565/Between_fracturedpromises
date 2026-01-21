@@ -2,13 +2,13 @@
 
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../models/message.dart';
 import '../../services/story_engine.dart';
 import '../../services/firestore_service.dart';
 import '../../services/audio_service.dart';
 import '../../widgets/typing_indicator.dart';
-import '../../app/constants.dart';
 import 'messenger_bubble.dart';
 import 'dart:math' as math;
 
@@ -23,15 +23,16 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
   final FirestoreService _firestore = Get.find<FirestoreService>();
   final ScrollController _scrollController = ScrollController();
 
-  late final String threadId;     // ✅ lowercase/trim for engine + firestore
-  late final String partnerName;  // ✅ display name only
+  late final String threadId; // ✅ lowercase/trim for engine + firestore
+  late final String partnerName; // ✅ display name only
 
   @override
   void initState() {
     super.initState();
 
     final arg = Get.arguments;
-    final raw = (arg is String && arg.trim().isNotEmpty) ? arg.trim() : 'Unknown';
+    final raw =
+        (arg is String && arg.trim().isNotEmpty) ? arg.trim() : 'Unknown';
 
     threadId = raw.toLowerCase().trim();
     partnerName = _toDisplayName(raw);
@@ -40,7 +41,6 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
   String _toDisplayName(String raw) {
     final s = raw.trim();
     if (s.isEmpty) return "Unknown";
-    // Messenger display style: "Ethan"
     final lower = s.toLowerCase();
     return lower[0].toUpperCase() + lower.substring(1);
   }
@@ -86,9 +86,10 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
                         Text(
                           "NO SIGNAL FOUND",
                           style: TextStyle(
-                              color: Colors.white10,
-                              letterSpacing: 2,
-                              fontSize: 10),
+                            color: Colors.white10,
+                            letterSpacing: 2,
+                            fontSize: 10,
+                          ),
                         ),
                       ],
                     ),
@@ -96,12 +97,15 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
                 }
 
                 return Obx(() {
+                  // ✅ Use sanitized key for typing state too
                   final typing = _engine.isTyping[threadId] ?? false;
 
                   return ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.symmetric(
-                        vertical: 30, horizontal: 20),
+                      vertical: 30,
+                      horizontal: 20,
+                    ),
                     itemCount: messages.length + (typing ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (typing && index == messages.length) {
@@ -130,8 +134,11 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new,
-            size: 18, color: Colors.white70),
+        icon: const Icon(
+          Icons.arrow_back_ios_new,
+          size: 18,
+          color: Colors.white70,
+        ),
         onPressed: () => Get.back(),
       ),
       title: Column(
@@ -154,17 +161,19 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
     );
   }
 
+  // ✅ FIXED: typed StreamBuilder + null-safe access for release builds
   Widget _buildOnlineStatus() {
-    return StreamBuilder(
+    return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.streamCharacter(threadId),
       builder: (context, snapshot) {
         bool isOnline = true;
-        if (snapshot.hasData) {
-          final doc = snapshot.data;
-          // doc might be a DocumentSnapshot; keep your original logic if your service returns typed snapshots
-          if (doc is dynamic && doc.exists == true) {
-            final data = doc.data() as Map<String, dynamic>?;
-            isOnline = data?['is_online'] ?? true;
+
+        final DocumentSnapshot? doc = snapshot.data;
+
+        if (doc != null && doc.exists) {
+          final data = doc.data() as Map<String, dynamic>?;
+          if (data != null && data.containsKey('is_online')) {
+            isOnline = data['is_online'] == true;
           }
         }
 
@@ -214,8 +223,11 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
                 color: Colors.white.withOpacity(0.05),
                 border: Border.all(color: Colors.white10),
               ),
-              child: const Icon(Icons.history_edu_rounded,
-                  color: Colors.white70, size: 24),
+              child: const Icon(
+                Icons.history_edu_rounded,
+                color: Colors.white70,
+                size: 24,
+              ),
             ),
           ),
           const SizedBox(width: 15),
@@ -229,7 +241,10 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
               child: const Text(
                 "Awaiting signal...",
                 style: TextStyle(
-                    color: Colors.white24, fontSize: 12, letterSpacing: 0.5),
+                  color: Colors.white24,
+                  fontSize: 12,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
           ),
@@ -281,10 +296,11 @@ class _RopeChoiceOverlay extends StatelessWidget {
               const Text(
                 "FRACTURED PROMISES",
                 style: TextStyle(
-                    color: Colors.white24,
-                    fontSize: 9,
-                    letterSpacing: 6,
-                    fontWeight: FontWeight.bold),
+                  color: Colors.white24,
+                  fontSize: 9,
+                  letterSpacing: 6,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 40),
               if (!hasChoices)
@@ -294,9 +310,10 @@ class _RopeChoiceOverlay extends StatelessWidget {
                     child: Text(
                       "The connection is silent...",
                       style: TextStyle(
-                          color: Colors.white12,
-                          fontSize: 13,
-                          fontStyle: FontStyle.italic),
+                        color: Colors.white12,
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ),
                 )
