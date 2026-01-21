@@ -302,7 +302,7 @@ class _MakeloveRopeOverlay extends StatelessWidget {
                         const EdgeInsets.symmetric(vertical: 8, horizontal: 40),
                     child: GestureDetector(
                       onTap: () {
-                        _engine.makeChoice(choice);
+                        _engine.makeChoice(threadId, choice);
                         Get.back();
                       },
                       child: Container(
