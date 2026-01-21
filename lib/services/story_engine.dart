@@ -35,7 +35,7 @@ class StoryEngine extends GetxService {
     
     // Refresh list and messages if scene changes
     ever(_stateService.currentSceneId, (sceneId) {
-      print("DEBUG: Scene changed to: $sceneId");
+      print("ENGINE DEBUG: Scene transition to: $sceneId");
       _updateActiveThreads();
       _recheckAllThreads();
     });
@@ -45,16 +45,17 @@ class StoryEngine extends GetxService {
       if (episodeId != null) _startDiscoveringThreads(episodeId);
     });
 
-    // Default to the specific episode ID used in uploader
+    // Default startup
     final initialEpisode = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
     _startDiscoveringThreads(initialEpisode);
   }
 
-  /// 🛠️ RESTORED: Required by EndingController to determine player outcomes
+  /// RESTORED: Needed for EndingController
   String? getMetadata(String key) {
     return _stateService.variables[key]?.toString();
   }
 
+  /// Determines which characters appear in the Chat List
   void _updateActiveThreads() {
     _lastSnapshots.forEach((threadId, snapshot) {
       final messages = snapshot.docs;
@@ -62,7 +63,7 @@ class StoryEngine extends GetxService {
       
       bool hasMessagesInCurrentScene = messages.any((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        // 🛠️ Resilience: Allow messages with NO sceneId to show up during testing
+        // Show if matches scene OR if it's a test message with no scene assigned
         return data['sceneId'] == currentScene || data['sceneId'] == null;
       });
 
@@ -81,10 +82,11 @@ class StoryEngine extends GetxService {
   }
 
   void _startDiscoveringThreads(String episodeId) {
-    print("DEBUG: Discovering threads for: $episodeId");
+    print("ENGINE DEBUG: Searching for threads in episode: $episodeId");
     _threadsSubscription?.cancel();
     _threadsSubscription = _firestore.streamActiveThreadIds(episodeId).listen((threads) {
-      print("DEBUG: Threads found in DB: $threads");
+      print("ENGINE DEBUG: Threads found: $threads");
+      activeThreadIds.assignAll(threads);
       for (var id in threads) {
         _startListeningToThread(id);
       }
@@ -102,27 +104,31 @@ class StoryEngine extends GetxService {
   }
 
   Stream<List<Message>> getMessagesStream(String threadId) {
-    if (!_visibleMessages.containsKey(threadId)) {
-      _visibleMessages[threadId] = rx.BehaviorSubject<List<Message>>.seeded([]);
-      _startListeningToThread(threadId);
+    // Sanitize threadId (ethan vs Ethan)
+    final sanitizedId = threadId.toLowerCase().trim();
+    
+    if (!_visibleMessages.containsKey(sanitizedId)) {
+      _visibleMessages[sanitizedId] = rx.BehaviorSubject<List<Message>>.seeded([]);
+      _startListeningToThread(sanitizedId);
     }
-    return _visibleMessages[threadId]!.stream;
+    return _visibleMessages[sanitizedId]!.stream;
   }
 
   void _startListeningToThread(String threadId) {
-    if (_subscriptions.containsKey(threadId)) return;
+    final sanitizedId = threadId.toLowerCase().trim();
+    if (_subscriptions.containsKey(sanitizedId)) return;
+    
     String episodeId = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
 
-    print("DEBUG: Subscribing to $threadId in $episodeId");
-    _subscriptions[threadId] = _firestore.streamMessages(episodeId, threadId).listen((snapshot) {
-      _handleFirestoreUpdate(threadId, snapshot);
+    print("ENGINE DEBUG: Subscribing to messages for: $sanitizedId");
+    _subscriptions[sanitizedId] = _firestore.streamMessages(episodeId, sanitizedId).listen((snapshot) {
+      _handleFirestoreUpdate(sanitizedId, snapshot);
     });
   }
 
   void _handleFirestoreUpdate(String threadId, QuerySnapshot snapshot) {
     _lastSnapshots[threadId] = snapshot;
-    print("DEBUG: Received ${snapshot.docs.length} docs for $threadId");
-
+    
     List<Message> allMessages = snapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
       data['id'] = doc.id;
@@ -131,9 +137,8 @@ class StoryEngine extends GetxService {
 
     String currentSceneId = _stateService.currentSceneId.value ?? 'scene_1';
     
-    // Character list logic: show if they have messages for current scene OR null sceneId
-    bool shouldBeActive = allMessages.any((m) => m.sceneId == currentSceneId || m.sceneId == null);
-    if (shouldBeActive && !activeThreadIds.contains(threadId)) {
+    // 🛠️ Updated logic: Show character in list if they have any content
+    if (allMessages.isNotEmpty && !activeThreadIds.contains(threadId)) {
       activeThreadIds.add(threadId);
     }
 
@@ -142,9 +147,11 @@ class StoryEngine extends GetxService {
 
     final currentVisible = subject.value;
     
-    // Filter relevant messages
+    // 🛠️ RESILIENCY: Filter relevant messages
+    // If testing, we show allMessages to ensure the UI works.
     final relevantMessages = allMessages.where((m) {
-      return m.sceneId == currentSceneId || m.sceneId == null;
+      // Show if: 1. Scene matches, 2. Message is system/null scene, 3. Nadia sent it
+      return m.sceneId == currentSceneId || m.sceneId == null || m.sender == Sender.nadia;
     }).toList();
     
     relevantMessages.sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
@@ -153,7 +160,7 @@ class StoryEngine extends GetxService {
     final newMessages = relevantMessages.where((m) => !visibleIds.contains(m.id)).toList();
 
     if (newMessages.isNotEmpty) {
-      print("DEBUG: Adding ${newMessages.length} new messages to $threadId queue");
+      print("ENGINE DEBUG: Adding ${newMessages.length} messages to UI for $threadId");
       if (_incomingBuffers[threadId] == null) _incomingBuffers[threadId] = [];
       _incomingBuffers[threadId]!.addAll(newMessages);
       _processQueue(threadId);
@@ -173,6 +180,7 @@ class StoryEngine extends GetxService {
     while (_incomingBuffers[threadId]?.isNotEmpty ?? false) {
       final msg = _incomingBuffers[threadId]!.removeAt(0);
 
+      // Typing indicators for non-player characters
       if (msg.sender != Sender.nadia && msg.sender != Sender.system) {
         isTyping[threadId] = true;
         _audioService.playTyping();
