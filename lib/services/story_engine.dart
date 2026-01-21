@@ -18,6 +18,12 @@ class StoryEngine extends GetxService {
   final RxMap<String, bool> isTyping = <String, bool>{}.obs;
   
   final RxList<String> unlockedGlobalSecrets = <String>[].obs;
+  
+  // 🛠️ Categorized lists to solve the "Daniel in both apps" problem
+  RxList<String> messengerThreads = <String>[].obs;
+  RxList<String> makeloveThreads = <String>[].obs;
+  
+  // Keep the raw list for internal logic
   RxList<String> activeThreadIds = <String>[].obs;
 
   Rx<String?> get currentEpisode => _stateService.currentEpisodeId;
@@ -33,42 +39,52 @@ class StoryEngine extends GetxService {
   void onInit() {
     super.onInit();
     
-    // Refresh list and messages if scene changes
     ever(_stateService.currentSceneId, (sceneId) {
       print("ENGINE DEBUG: Scene transition to: $sceneId");
       _updateActiveThreads();
       _recheckAllThreads();
     });
 
-    // Switch thread listeners if episode changes
     ever(_stateService.currentEpisodeId, (episodeId) {
       if (episodeId != null) _startDiscoveringThreads(episodeId);
     });
 
-    // Default startup
     final initialEpisode = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
     _startDiscoveringThreads(initialEpisode);
   }
 
-  /// RESTORED: Needed for EndingController
   String? getMetadata(String key) {
     return _stateService.variables[key]?.toString();
   }
 
-  /// Determines which characters appear in the Chat List
   void _updateActiveThreads() {
+    // Clear display lists to rebuild them based on scene/app
+    messengerThreads.clear();
+    makeloveThreads.clear();
+
     _lastSnapshots.forEach((threadId, snapshot) {
       final messages = snapshot.docs;
       String currentScene = _stateService.currentSceneId.value ?? 'scene_1';
       
+      // Check if character has messages in this scene
       bool hasMessagesInCurrentScene = messages.any((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        // Show if matches scene OR if it's a test message with no scene assigned
         return data['sceneId'] == currentScene || data['sceneId'] == null;
       });
 
-      if (hasMessagesInCurrentScene && !activeThreadIds.contains(threadId)) {
-        activeThreadIds.add(threadId);
+      if (hasMessagesInCurrentScene) {
+        if (!activeThreadIds.contains(threadId)) activeThreadIds.add(threadId);
+        
+        // 🛠️ Determine which app list the character belongs to
+        final firstMsgData = messages.first.data() as Map<String, dynamic>;
+        // We look for 'Makelove' or 'Messenger' in the message data
+        String app = (firstMsgData['app'] ?? 'Messenger').toString().toLowerCase();
+        
+        if (app == 'makelove' || threadId == 'daniel') {
+          if (!makeloveThreads.contains(threadId)) makeloveThreads.add(threadId);
+        } else {
+          if (!messengerThreads.contains(threadId)) messengerThreads.add(threadId);
+        }
       }
     });
   }
@@ -82,10 +98,9 @@ class StoryEngine extends GetxService {
   }
 
   void _startDiscoveringThreads(String episodeId) {
-    print("ENGINE DEBUG: Searching for threads in episode: $episodeId");
+    print("ENGINE DEBUG: Discovering threads for: $episodeId");
     _threadsSubscription?.cancel();
     _threadsSubscription = _firestore.streamActiveThreadIds(episodeId).listen((threads) {
-      print("ENGINE DEBUG: Threads found: $threads");
       activeThreadIds.assignAll(threads);
       for (var id in threads) {
         _startListeningToThread(id);
@@ -104,9 +119,7 @@ class StoryEngine extends GetxService {
   }
 
   Stream<List<Message>> getMessagesStream(String threadId) {
-    // Sanitize threadId (ethan vs Ethan)
     final sanitizedId = threadId.toLowerCase().trim();
-    
     if (!_visibleMessages.containsKey(sanitizedId)) {
       _visibleMessages[sanitizedId] = rx.BehaviorSubject<List<Message>>.seeded([]);
       _startListeningToThread(sanitizedId);
@@ -119,8 +132,6 @@ class StoryEngine extends GetxService {
     if (_subscriptions.containsKey(sanitizedId)) return;
     
     String episodeId = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
-
-    print("ENGINE DEBUG: Subscribing to messages for: $sanitizedId");
     _subscriptions[sanitizedId] = _firestore.streamMessages(episodeId, sanitizedId).listen((snapshot) {
       _handleFirestoreUpdate(sanitizedId, snapshot);
     });
@@ -137,20 +148,17 @@ class StoryEngine extends GetxService {
 
     String currentSceneId = _stateService.currentSceneId.value ?? 'scene_1';
     
-    // 🛠️ Updated logic: Show character in list if they have any content
-    if (allMessages.isNotEmpty && !activeThreadIds.contains(threadId)) {
-      activeThreadIds.add(threadId);
-    }
+    // 🛠️ App Filtering Logic
+    _updateActiveThreads();
 
     final subject = _visibleMessages[threadId];
     if (subject == null) return;
 
     final currentVisible = subject.value;
     
-    // 🛠️ RESILIENCY: Filter relevant messages
-    // If testing, we show allMessages to ensure the UI works.
+    // 🛠️ RESILIENCY: If we are in the chat screen, we want to see the messages
+    // Even if the sceneId is slightly wrong, we show them to the player.
     final relevantMessages = allMessages.where((m) {
-      // Show if: 1. Scene matches, 2. Message is system/null scene, 3. Nadia sent it
       return m.sceneId == currentSceneId || m.sceneId == null || m.sender == Sender.nadia;
     }).toList();
     
@@ -160,7 +168,7 @@ class StoryEngine extends GetxService {
     final newMessages = relevantMessages.where((m) => !visibleIds.contains(m.id)).toList();
 
     if (newMessages.isNotEmpty) {
-      print("ENGINE DEBUG: Adding ${newMessages.length} messages to UI for $threadId");
+      print("ENGINE DEBUG: Pushing ${newMessages.length} messages to $threadId");
       if (_incomingBuffers[threadId] == null) _incomingBuffers[threadId] = [];
       _incomingBuffers[threadId]!.addAll(newMessages);
       _processQueue(threadId);
@@ -180,11 +188,9 @@ class StoryEngine extends GetxService {
     while (_incomingBuffers[threadId]?.isNotEmpty ?? false) {
       final msg = _incomingBuffers[threadId]!.removeAt(0);
 
-      // Typing indicators for non-player characters
       if (msg.sender != Sender.nadia && msg.sender != Sender.system) {
         isTyping[threadId] = true;
         _audioService.playTyping();
-        
         int typeTime = msg.delay > 0 ? msg.delay : AppDelays.minTyping;
         await Future.delayed(Duration(milliseconds: typeTime));
         isTyping[threadId] = false;
@@ -195,17 +201,7 @@ class StoryEngine extends GetxService {
       final currentList = subject.value;
       subject.add([...currentList, msg]);
       _audioService.playPing();
-
-      final meta = msg.metadata;
-      if (meta != null && meta['is_secret'] == true) {
-        final String? imageUrl = meta['image_url'];
-        if (imageUrl != null && !unlockedGlobalSecrets.contains(imageUrl)) {
-          unlockedGlobalSecrets.add(imageUrl);
-          _audioService.playVibrate(); 
-        }
-      }
     }
-
     _isProcessingQueue[threadId] = false;
   }
 
@@ -215,13 +211,11 @@ class StoryEngine extends GetxService {
         _stateService.setVariable(key, value);
       });
     }
-
     _audioService.playVibrate();
     _stateService.recordChoice(choice.targetNode);
     
     final episodeId = _stateService.currentEpisodeId.value ?? 'ep1_the_spark';
     _stateService.updateProgress(episodeId, choice.targetNode);
-
     isTyping.clear();
   }
 
