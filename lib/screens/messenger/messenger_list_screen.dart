@@ -61,7 +61,7 @@ class _MessengerListScreenState extends State<MessengerListScreen>
                 // ✅ Use the engine's Messenger-only list
                 Expanded(
                   child: Obx(() {
-                    final threads = _engine.messengerThreads
+                    final threads = _engine.messengerThreads.toList();
                         .where((id) => id.toLowerCase().trim() != 'system')
                         .toList();
 
