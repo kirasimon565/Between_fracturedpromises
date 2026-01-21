@@ -17,20 +17,32 @@ class Scene {
   factory Scene.fromJson(Map<String, dynamic> json) {
     return Scene(
       id: json['id']?.toString() ?? '',
+
       messages: (json['messages'] as List?)
-              ?.map((e) => Message.fromJson(e as Map<String, dynamic>))
-              .toList() ?? [],
+              ?.whereType<Map<String, dynamic>>()
+              .map((e) => Message.fromJson(e))
+              .toList() ??
+          const [],
+
       choices: (json['choices'] as List?)
-          ?.map((e) => Choice.fromJson(e as Map<String, dynamic>))
+          ?.whereType<Map<String, dynamic>>()
+          .map((e) => Choice.fromJson(e))
           .toList(),
-      defaultNextScene: json['defaultNextScene']?.toString() ?? json['default_next_scene']?.toString(),
+
+      // ✅ supports both camelCase and snake_case
+      defaultNextScene: json['defaultNextScene']?.toString() ??
+          json['default_next_scene']?.toString(),
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'messages': messages.map((e) => e.toJson()).toList(),
-    'choices': choices?.map((e) => e.toJson()).toList(),
-    'defaultNextScene': defaultNextScene,
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'messages': messages.map((e) => e.toJson()).toList(),
+      if (choices != null)
+        'choices': choices!.map((e) => e.toJson()).toList(),
+      if (defaultNextScene != null)
+        'default_next_scene': defaultNextScene,
+    };
+  }
 }
