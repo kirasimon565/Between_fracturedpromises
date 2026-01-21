@@ -36,31 +36,31 @@ class FirestoreService extends GetxService {
 
   // Listen to Thread Messages
   Stream<QuerySnapshot> streamMessages(String episodeId, String threadId) {
+    // 🛠️ FIX: Unified to 'orderIndex' to match the Message model's toJson()
     return _db
         .collection('episodes')
         .doc(episodeId)
         .collection('threads')
         .doc(threadId)
         .collection('messages')
-        .orderBy('order_index')
+        .orderBy('orderIndex') 
         .snapshots();
   }
 
   // Listen to Available Threads
   Stream<List<String>> streamActiveThreadIds(String episodeId) {
-    // Note: Firestore does not support streaming a list of subcollections natively.
-    // However, if we structure data such that 'threads' are documents in a collection, we can stream them.
-    // In our Upload logic, we write to `.../threads/{threadId}/messages/...`.
-    // This implies `threads/{threadId}` is a document.
-    // If the Admin Uploader writes a dummy doc to `threads/{threadId}` it will show up.
-    // Let's ensure Uploader writes the thread doc too.
-
+    // This streams the 'threads' subcollection. 
+    // It will return the IDs (e.g., 'ethan', 'claire') as they are created.
     return _db
       .collection('episodes')
       .doc(episodeId)
       .collection('threads')
       .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
+      .map((snapshot) {
+        final ids = snapshot.docs.map((doc) => doc.id).toList();
+        print("FIRESTORE DEBUG: Found threads for $episodeId: $ids");
+        return ids;
+      });
   }
 
   // Episode Fetching
@@ -98,18 +98,29 @@ class FirestoreService extends GetxService {
         for (int i = 0; i < scene.messages.length; i++) {
           final Message originalMsg = scene.messages[i];
 
+          // Determine threadId (lowercase to prevent path errors)
           String threadId = 'unknown';
           if (originalMsg.sender == Sender.nadia) {
             threadId = originalMsg.recipient?.toLowerCase() ?? 'unknown';
           } else {
-            threadId = originalMsg.sender.name.toLowerCase();
+            // Using .name for enum to string conversion
+            threadId = originalMsg.sender.toString().split('.').last.toLowerCase();
           }
 
-          // ENSURE THREAD DOCUMENT EXISTS
-          final threadRef = _db.collection('episodes').doc(episodeId).collection('threads').doc(threadId);
-          batch.set(threadRef, {'last_updated': FieldValue.serverTimestamp()}, SetOptions(merge: true));
+          // 🛠️ ENSURE THREAD DOCUMENT EXISTS (Crucial for the stream to see it)
+          final threadRef = _db
+              .collection('episodes')
+              .doc(episodeId)
+              .collection('threads')
+              .doc(threadId);
+          
+          batch.set(threadRef, {
+            'last_updated': FieldValue.serverTimestamp(),
+            'thread_id': threadId,
+          }, SetOptions(merge: true));
 
           List<Choice>? choicesForMsg = originalMsg.choices;
+          // If it's the last message in a scene, attach the scene's branching choices
           if (i == scene.messages.length - 1 && (scene.choices?.isNotEmpty ?? false)) {
             choicesForMsg = scene.choices;
           }
@@ -121,7 +132,7 @@ class FirestoreService extends GetxService {
             content: originalMsg.content,
             type: originalMsg.type,
             delay: originalMsg.delay,
-            orderIndex: i,
+            orderIndex: i, // Matches the 'orderIndex' orderBy
             sceneId: scene.id,
             choices: choicesForMsg
           );
@@ -132,7 +143,7 @@ class FirestoreService extends GetxService {
       }
 
       await batch.commit();
-      print("Episode $episodeId uploaded with granular messages.");
+      print("Episode $episodeId uploaded successfully.");
 
     } catch (e) {
       print("Error uploading episode: $e");
@@ -140,6 +151,7 @@ class FirestoreService extends GetxService {
     }
   }
 
+  // Simple override for custom data
   Future<void> uploadEpisode(String episodeId, Map<String, dynamic> data) async {
     await _db.collection('episodes').doc(episodeId).set(data);
   }
