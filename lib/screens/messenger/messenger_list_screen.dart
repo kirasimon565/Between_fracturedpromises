@@ -34,12 +34,19 @@ class _MessengerListScreenState extends State<MessengerListScreen>
     super.dispose();
   }
 
+  String _toDisplayName(String threadId) {
+    final s = threadId.trim();
+    if (s.isEmpty) return "Unknown";
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
+          // Cinematic background gradient
           Container(
             decoration: BoxDecoration(
               gradient: RadialGradient(
@@ -52,17 +59,21 @@ class _MessengerListScreenState extends State<MessengerListScreen>
               ),
             ),
           ),
+
           SafeArea(
             child: Column(
               children: [
                 _buildHangingHeader(),
                 const SizedBox(height: 20),
 
-                // ✅ Use the engine's Messenger-only list
+                // ✅ Use engine's Messenger-only list (no scene filtering here)
                 Expanded(
                   child: Obx(() {
-                    final threads = _engine.messengerThreads.toList();
-                        .where((id) => id.toLowerCase().trim() != 'system')
+                    // ❗ FIX: you had a stray semicolon before `.where(...)`
+                    // That turned this into "dot shorthand" and broke release build.
+                    final threads = _engine.messengerThreads
+                        .map((id) => id.toLowerCase().trim())
+                        .where((id) => id.isNotEmpty && id != 'system')
                         .toList();
 
                     if (threads.isEmpty) {
@@ -70,8 +81,11 @@ class _MessengerListScreenState extends State<MessengerListScreen>
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.cloud_off,
-                                color: Colors.white.withOpacity(0.05), size: 40),
+                            Icon(
+                              Icons.cloud_off,
+                              color: Colors.white.withOpacity(0.05),
+                              size: 40,
+                            ),
                             const SizedBox(height: 16),
                             Text(
                               "NO SECURE CONNECTIONS",
@@ -88,11 +102,12 @@ class _MessengerListScreenState extends State<MessengerListScreen>
 
                     return ListView.builder(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                       itemCount: threads.length,
                       itemBuilder: (context, index) {
-                        // ✅ sanitize + pass sanitized id into engine calls
-                        final threadId = threads[index].toLowerCase().trim();
+                        final threadId = threads[index]; // already sanitized
                         return _buildConversationTile(threadId, index);
                       },
                     );
@@ -147,9 +162,7 @@ class _MessengerListScreenState extends State<MessengerListScreen>
 
   Widget _buildConversationTile(String threadId, int index) {
     // Display name formatting from sanitized id
-    final String name = threadId.isEmpty
-        ? threadId
-        : threadId[0].toUpperCase() + threadId.substring(1);
+    final String name = _toDisplayName(threadId);
 
     return StreamBuilder<Message?>(
       stream: _engine.getLastMessageStream(threadId),
@@ -158,7 +171,7 @@ class _MessengerListScreenState extends State<MessengerListScreen>
 
         return Obx(() {
           final bool typing = _engine.isTyping[threadId] ?? false;
-          final content =
+          final String content =
               typing ? "Typing..." : (lastMsg?.content ?? "Encryption active...");
 
           return Padding(
@@ -166,7 +179,7 @@ class _MessengerListScreenState extends State<MessengerListScreen>
             child: GestureDetector(
               onTap: () {
                 _audio.playPing();
-                // Keep name for display if your chat screen expects it
+                // Pass display name (your chat screen sanitizes to threadId internally)
                 Get.toNamed('/messenger/chat', arguments: name);
               },
               child: Container(
@@ -238,8 +251,11 @@ class _MessengerListScreenState extends State<MessengerListScreen>
                         ],
                       ),
                     ),
-                    Icon(Icons.chevron_right_rounded,
-                        color: Colors.white.withOpacity(0.1), size: 18),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: Colors.white.withOpacity(0.1),
+                      size: 18,
+                    ),
                     const SizedBox(width: 15),
                   ],
                 ),
