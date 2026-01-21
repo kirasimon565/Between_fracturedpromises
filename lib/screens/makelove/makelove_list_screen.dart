@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import '../../app/constants.dart';
 import '../../services/story_engine.dart';
 import '../../services/audio_service.dart';
-import '../../theme/colors.dart';
 import '../../theme/theme.dart';
 import '../../models/message.dart';
 import 'dart:math' as math;
@@ -26,6 +25,7 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
   void initState() {
     super.initState();
     _themeService.setSecretMode(true);
+
     _swayController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5),
@@ -38,10 +38,16 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
     super.dispose();
   }
 
+  String _displayNameFromId(String threadId) {
+    final s = threadId.trim();
+    if (s.isEmpty) return "UNKNOWN";
+    return s.toUpperCase(); // Makelove style
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF050000),
+      backgroundColor: const Color(0xFF050000), // Deeper red-black base
       body: Stack(
         children: [
           _buildAmbientGlow(),
@@ -51,18 +57,25 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
                 _buildHangingHeader(),
                 const SizedBox(height: 30),
 
-                // ✅ Use the engine's Makelove-only list
+                // ✅ No hardcoding — uses engine's Makelove-only list
                 Expanded(
                   child: Obx(() {
-                    final threads = _engine.makeloveThreads.toList();
+                    // sanitize + remove system just in case
+                    final threads = _engine.makeloveThreads
+                        .map((id) => id.toLowerCase().trim())
+                        .where((id) => id.isNotEmpty && id != 'system')
+                        .toList();
 
                     if (threads.isEmpty) {
                       return Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.favorite_border_rounded,
-                                color: Colors.red, size: 30),
+                            const Icon(
+                              Icons.favorite_border_rounded,
+                              color: Colors.red,
+                              size: 30,
+                            ),
                             const SizedBox(height: 15),
                             Text(
                               "NO SIGNAL DETECTED",
@@ -90,9 +103,8 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 0),
                       itemCount: threads.length,
                       itemBuilder: (context, index) {
-                        // ✅ Always sanitize thread ids to match StoryEngine keys
-                        final threadId = threads[index].toLowerCase().trim();
-                        final name = threadId.toUpperCase();
+                        final threadId = threads[index]; // already sanitized
+                        final name = _displayNameFromId(threadId);
 
                         return StreamBuilder<Message?>(
                           stream: _engine.getLastMessageStream(threadId),
@@ -108,7 +120,11 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
                                   : (lastMsg?.content ?? "Establishing link...");
 
                               return _buildAdvancedMatchTile(
-                                  threadId, name, content, typing);
+                                threadId,
+                                name,
+                                content,
+                                typing,
+                              );
                             });
                           },
                         );
@@ -178,11 +194,15 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
   }
 
   Widget _buildAdvancedMatchTile(
-      String threadId, String name, String lastMessage, bool isTyping) {
+    String threadId,
+    String name,
+    String lastMessage,
+    bool isTyping,
+  ) {
     return GestureDetector(
       onTap: () {
         _audio.playVibrate();
-        // ✅ Pass the actual threadId (engine uses lowercase keys)
+        // ✅ pass real threadId (already lowercase) so chat screen matches engine/firestore
         Get.toNamed('/makelove/chat', arguments: threadId);
       },
       child: Container(
@@ -200,6 +220,7 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
         ),
         child: Stack(
           children: [
+            // Distorted Background Avatar
             Positioned.fill(
               child: ShaderMask(
                 shaderCallback: (rect) => LinearGradient(
@@ -220,6 +241,8 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
                 ),
               ),
             ),
+
+            // Content Overlay
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Column(
@@ -230,7 +253,9 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: isTyping ? Colors.white : Colors.red,
                           borderRadius: BorderRadius.circular(2),
@@ -266,13 +291,17 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
                 ],
               ),
             ),
+
             const Positioned(
               right: 30,
               top: 0,
               bottom: 0,
               child: Center(
-                child: Icon(Icons.arrow_forward_ios_rounded,
-                    color: Colors.red, size: 16),
+                child: Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.red,
+                  size: 16,
+                ),
               ),
             ),
           ],
@@ -325,7 +354,8 @@ class __LivePulseDotState extends State<_LivePulseDot>
               boxShadow: [
                 BoxShadow(
                   color: Colors.red.withOpacity(
-                      widget.isActive ? _controller.value : 0.2),
+                    widget.isActive ? _controller.value : 0.2,
+                  ),
                   blurRadius: 4,
                 )
               ],
