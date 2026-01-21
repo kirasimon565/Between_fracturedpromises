@@ -322,7 +322,7 @@ class _RopeChoiceOverlay extends StatelessWidget {
                   (choice) => _SwayingChoice(
                     text: choice.text,
                     onTap: () {
-                      _engine.makeChoice(choice);
+                      _engine.makeChoice(threadId, choice);
                       Get.back();
                     },
                   ),
