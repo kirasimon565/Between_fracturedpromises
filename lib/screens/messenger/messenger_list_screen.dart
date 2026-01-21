@@ -1,9 +1,10 @@
+// lib/screens/messenger/messenger_list_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app/constants.dart';
 import '../../services/story_engine.dart';
 import '../../services/audio_service.dart';
-import '../../theme/colors.dart';
 import '../../models/message.dart';
 import 'dart:math';
 
@@ -12,7 +13,8 @@ class MessengerListScreen extends StatefulWidget {
   _MessengerListScreenState createState() => _MessengerListScreenState();
 }
 
-class _MessengerListScreenState extends State<MessengerListScreen> with SingleTickerProviderStateMixin {
+class _MessengerListScreenState extends State<MessengerListScreen>
+    with SingleTickerProviderStateMixin {
   final StoryEngine _engine = Get.find<StoryEngine>();
   final AudioService _audio = Get.find<AudioService>();
   late AnimationController _swayController;
@@ -20,10 +22,9 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
   @override
   void initState() {
     super.initState();
-    // Sway animation for the "Hanging by rope" atmosphere
     _swayController = AnimationController(
-      vsync: this, 
-      duration: const Duration(seconds: 6)
+      vsync: this,
+      duration: const Duration(seconds: 6),
     )..repeat(reverse: true);
   }
 
@@ -39,7 +40,6 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 1. Cinematic Background Gradient
           Container(
             decoration: BoxDecoration(
               gradient: RadialGradient(
@@ -52,50 +52,48 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
               ),
             ),
           ),
-
           SafeArea(
             child: Column(
               children: [
-                // 2. Hanging Title Header
                 _buildHangingHeader(),
-
                 const SizedBox(height: 20),
 
-                // 3. Thread List
+                // ✅ Use the engine's Messenger-only list
                 Expanded(
                   child: Obx(() {
-                    // 🛠️ Now uses the filtered list from StoryEngine
-                    // We also ensure only 'messenger' characters show up here if needed, 
-                    // though filtering by scene usually handles this.
-                    final threads = _engine.activeThreadIds
-                        .where((id) => id.toLowerCase() != 'system')
+                    final threads = _engine.messengerThreads
+                        .where((id) => id.toLowerCase().trim() != 'system')
                         .toList();
 
                     if (threads.isEmpty) {
                       return Center(
-                         child: Column(
-                           mainAxisAlignment: MainAxisAlignment.center,
-                           children: [
-                             Icon(Icons.cloud_off, color: Colors.white.withOpacity(0.05), size: 40),
-                             const SizedBox(height: 16),
-                             Text(
-                               "NO SECURE CONNECTIONS",
-                               style: TextStyle(
-                                 color: Colors.white.withOpacity(0.2), 
-                                 letterSpacing: 3, 
-                                 fontSize: 10
-                               )
-                             ),
-                           ],
-                         ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.cloud_off,
+                                color: Colors.white.withOpacity(0.05), size: 40),
+                            const SizedBox(height: 16),
+                            Text(
+                              "NO SECURE CONNECTIONS",
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.2),
+                                letterSpacing: 3,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
                       );
                     }
 
                     return ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
                       itemCount: threads.length,
                       itemBuilder: (context, index) {
-                        return _buildConversationTile(threads[index], index);
+                        // ✅ sanitize + pass sanitized id into engine calls
+                        final threadId = threads[index].toLowerCase().trim();
+                        return _buildConversationTile(threadId, index);
                       },
                     );
                   }),
@@ -112,7 +110,7 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
     return AnimatedBuilder(
       animation: _swayController,
       builder: (context, child) {
-        double angle = 0.015 * sin(_swayController.value * 2 * pi);
+        final double angle = 0.015 * sin(_swayController.value * 2 * pi);
         return Transform.rotate(
           angle: angle,
           alignment: Alignment.topCenter,
@@ -121,7 +119,7 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
       },
       child: Column(
         children: [
-          Container(width: 1, height: 40, color: Colors.white12), // The Rope
+          Container(width: 1, height: 40, color: Colors.white12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
             decoration: BoxDecoration(
@@ -129,7 +127,7 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
               borderRadius: BorderRadius.circular(2),
               border: Border.all(color: Colors.white10),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20)
+                BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20),
               ],
             ),
             child: const Text(
@@ -148,25 +146,27 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
   }
 
   Widget _buildConversationTile(String threadId, int index) {
-    // 🛠️ Sanitizing the name for display
-    final String name = threadId[0].toUpperCase() + threadId.substring(1);
+    // Display name formatting from sanitized id
+    final String name = threadId.isEmpty
+        ? threadId
+        : threadId[0].toUpperCase() + threadId.substring(1);
 
     return StreamBuilder<Message?>(
       stream: _engine.getLastMessageStream(threadId),
       builder: (context, snapshot) {
         final lastMsg = snapshot.data;
-        
-        // 🛠️ Show "Typing..." if the engine detects activity
+
         return Obx(() {
-          bool isTyping = _engine.isTyping[threadId] ?? false;
-          final content = isTyping ? "Typing..." : (lastMsg?.content ?? "Encryption active...");
+          final bool typing = _engine.isTyping[threadId] ?? false;
+          final content =
+              typing ? "Typing..." : (lastMsg?.content ?? "Encryption active...");
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 15),
             child: GestureDetector(
               onTap: () {
-                _audio.playPing(); 
-                // We pass the name so the chat screen knows who to load
+                _audio.playPing();
+                // Keep name for display if your chat screen expects it
                 Get.toNamed('/messenger/chat', arguments: name);
               },
               child: Container(
@@ -180,8 +180,10 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
                     bottomLeft: Radius.circular(index.isEven ? 35 : 10),
                   ),
                   border: Border.all(
-                    color: isTyping ? Colors.greenAccent.withOpacity(0.3) : Colors.white.withOpacity(0.08), 
-                    width: 0.5
+                    color: typing
+                        ? Colors.greenAccent.withOpacity(0.3)
+                        : Colors.white.withOpacity(0.08),
+                    width: 0.5,
                   ),
                 ),
                 child: Row(
@@ -192,14 +194,15 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isTyping ? Colors.greenAccent : Colors.white10,
-                          width: isTyping ? 1.5 : 1
+                          color: typing ? Colors.greenAccent : Colors.white10,
+                          width: typing ? 1.5 : 1,
                         ),
                       ),
                       child: CircleAvatar(
                         radius: 28,
                         backgroundColor: Colors.white.withOpacity(0.05),
-                        backgroundImage: AssetImage(AppConstants.getAvatarPath(name)),
+                        backgroundImage:
+                            AssetImage(AppConstants.getAvatarPath(name)),
                       ),
                     ),
                     const SizedBox(width: 15),
@@ -209,13 +212,13 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            name, 
+                            name,
                             style: const TextStyle(
-                              color: Colors.white, 
-                              fontSize: 15, 
+                              color: Colors.white,
+                              fontSize: 15,
                               fontWeight: FontWeight.w400,
-                              letterSpacing: 0.5
-                            )
+                              letterSpacing: 0.5,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -223,20 +226,20 @@ class _MessengerListScreenState extends State<MessengerListScreen> with SingleTi
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: isTyping ? Colors.greenAccent : Colors.white.withOpacity(0.4), 
+                              color: typing
+                                  ? Colors.greenAccent
+                                  : Colors.white.withOpacity(0.4),
                               fontSize: 12,
                               fontWeight: FontWeight.w300,
-                              fontStyle: isTyping ? FontStyle.italic : FontStyle.normal,
+                              fontStyle:
+                                  typing ? FontStyle.italic : FontStyle.normal,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right_rounded, 
-                      color: Colors.white.withOpacity(0.1), 
-                      size: 18
-                    ),
+                    Icon(Icons.chevron_right_rounded,
+                        color: Colors.white.withOpacity(0.1), size: 18),
                     const SizedBox(width: 15),
                   ],
                 ),
