@@ -1,3 +1,5 @@
+// lib/screens/makelove/makelove_list_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app/constants.dart';
@@ -13,7 +15,8 @@ class MakeloveListScreen extends StatefulWidget {
   _MakeloveListScreenState createState() => _MakeloveListScreenState();
 }
 
-class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTickerProviderStateMixin {
+class _MakeloveListScreenState extends State<MakeloveListScreen>
+    with SingleTickerProviderStateMixin {
   final ThemeService _themeService = Get.find<ThemeService>();
   final StoryEngine _engine = Get.find<StoryEngine>();
   final AudioService _audio = Get.find<AudioService>();
@@ -23,10 +26,9 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTick
   void initState() {
     super.initState();
     _themeService.setSecretMode(true);
-    // Sway animation for the "Hanging Rope" header
     _swayController = AnimationController(
-      vsync: this, 
-      duration: const Duration(seconds: 5)
+      vsync: this,
+      duration: const Duration(seconds: 5),
     )..repeat(reverse: true);
   }
 
@@ -39,46 +41,48 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTick
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF050000), // Deeper red-black base
+      backgroundColor: const Color(0xFF050000),
       body: Stack(
         children: [
-          // 1. Pulsing Ambient Red Glow
           _buildAmbientGlow(),
-
           SafeArea(
             child: Column(
               children: [
-                // 2. Hanging Title (Advanced Noir Version)
                 _buildHangingHeader(),
-
                 const SizedBox(height: 30),
 
-                // 3. Match List
+                // ✅ Use the engine's Makelove-only list
                 Expanded(
                   child: Obx(() {
-                    // 🛠️ Updated filter: Daniel and future Makelove characters
-                    final threads = _engine.activeThreadIds
-                        .where((id) => id.toLowerCase() == 'daniel') 
-                        .toList();
+                    final threads = _engine.makeloveThreads.toList();
 
                     if (threads.isEmpty) {
                       return Center(
-                         child: Column(
-                           mainAxisSize: MainAxisSize.min,
-                           children: [
-                             const Icon(Icons.favorite_border_rounded, color: Colors.red, size: 30),
-                             const SizedBox(height: 15),
-                             Text(
-                               "NO SIGNAL DETECTED", 
-                               style: TextStyle(color: Colors.red.withOpacity(0.3), letterSpacing: 5, fontSize: 10)
-                             ),
-                             const SizedBox(height: 5),
-                             Text(
-                               "SEARCHING FOR HEARTBEAT...", 
-                               style: TextStyle(color: Colors.red.withOpacity(0.15), letterSpacing: 2, fontSize: 8)
-                             ),
-                           ],
-                         ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.favorite_border_rounded,
+                                color: Colors.red, size: 30),
+                            const SizedBox(height: 15),
+                            Text(
+                              "NO SIGNAL DETECTED",
+                              style: TextStyle(
+                                color: Colors.red.withOpacity(0.3),
+                                letterSpacing: 5,
+                                fontSize: 10,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              "SEARCHING FOR HEARTBEAT...",
+                              style: TextStyle(
+                                color: Colors.red.withOpacity(0.15),
+                                letterSpacing: 2,
+                                fontSize: 8,
+                              ),
+                            ),
+                          ],
+                        ),
                       );
                     }
 
@@ -86,21 +90,27 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTick
                       padding: const EdgeInsets.symmetric(horizontal: 0),
                       itemCount: threads.length,
                       itemBuilder: (context, index) {
-                        final threadId = threads[index];
+                        // ✅ Always sanitize thread ids to match StoryEngine keys
+                        final threadId = threads[index].toLowerCase().trim();
                         final name = threadId.toUpperCase();
 
                         return StreamBuilder<Message?>(
                           stream: _engine.getLastMessageStream(threadId),
                           builder: (context, snapshot) {
-                             final lastMsg = snapshot.data;
-                             
-                             // 🛠️ Pull real-time typing state from Engine
-                             return Obx(() {
-                               bool isTyping = _engine.isTyping[threadId] ?? false;
-                               final content = isTyping ? "Whispering..." : (lastMsg?.content ?? "Establishing link...");
-                               return _buildAdvancedMatchTile(threadId, name, content, isTyping);
-                             });
-                          }
+                            final lastMsg = snapshot.data;
+
+                            return Obx(() {
+                              final bool typing =
+                                  _engine.isTyping[threadId] ?? false;
+
+                              final content = typing
+                                  ? "Whispering..."
+                                  : (lastMsg?.content ?? "Establishing link...");
+
+                              return _buildAdvancedMatchTile(
+                                  threadId, name, content, typing);
+                            });
+                          },
                         );
                       },
                     );
@@ -132,7 +142,8 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTick
     return AnimatedBuilder(
       animation: _swayController,
       builder: (context, child) {
-        double angle = 0.02 * math.sin(_swayController.value * 2 * math.pi);
+        final double angle =
+            0.02 * math.sin(_swayController.value * 2 * math.pi);
         return Transform.rotate(
           angle: angle,
           alignment: Alignment.topCenter,
@@ -141,14 +152,14 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTick
       },
       child: Column(
         children: [
-          Container(width: 1, height: 50, color: Colors.red.withOpacity(0.3)), 
+          Container(width: 1, height: 50, color: Colors.red.withOpacity(0.3)),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.black,
               border: Border.all(color: Colors.red.withOpacity(0.5), width: 0.5),
               boxShadow: [
-                BoxShadow(color: Colors.red.withOpacity(0.1), blurRadius: 15)
+                BoxShadow(color: Colors.red.withOpacity(0.1), blurRadius: 15),
               ],
             ),
             child: const Text(
@@ -166,11 +177,13 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTick
     );
   }
 
-  Widget _buildAdvancedMatchTile(String threadId, String name, String lastMessage, bool isTyping) {
+  Widget _buildAdvancedMatchTile(
+      String threadId, String name, String lastMessage, bool isTyping) {
     return GestureDetector(
       onTap: () {
-        _audio.playVibrate(); 
-        Get.toNamed('/makelove/chat', arguments: threadId.capitalizeFirst);
+        _audio.playVibrate();
+        // ✅ Pass the actual threadId (engine uses lowercase keys)
+        Get.toNamed('/makelove/chat', arguments: threadId);
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 5),
@@ -179,16 +192,22 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTick
         decoration: BoxDecoration(
           color: Colors.black,
           border: Border.symmetric(
-            horizontal: BorderSide(color: isTyping ? Colors.red : Colors.red.withOpacity(0.2), width: 0.5)
+            horizontal: BorderSide(
+              color: isTyping ? Colors.red : Colors.red.withOpacity(0.2),
+              width: 0.5,
+            ),
           ),
         ),
         child: Stack(
           children: [
-            // Distorted Background Avatar
             Positioned.fill(
               child: ShaderMask(
                 shaderCallback: (rect) => LinearGradient(
-                  colors: [Colors.black, Colors.black.withOpacity(0.2), Colors.black],
+                  colors: [
+                    Colors.black,
+                    Colors.black.withOpacity(0.2),
+                    Colors.black,
+                  ],
                   stops: const [0.0, 0.5, 1.0],
                 ).createShader(rect),
                 blendMode: BlendMode.dstIn,
@@ -201,8 +220,6 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTick
                 ),
               ),
             ),
-            
-            // Content Overlay
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Column(
@@ -212,19 +229,20 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTick
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: isTyping ? Colors.white : Colors.red,
                           borderRadius: BorderRadius.circular(2),
                         ),
                         child: Text(
-                          name, 
-                          style: TextStyle(
-                            color: Colors.black, 
-                            fontWeight: FontWeight.w900, 
-                            fontSize: 11, 
-                            letterSpacing: 2
-                          )
+                          name,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 11,
+                            letterSpacing: 2,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -236,23 +254,25 @@ class _MakeloveListScreenState extends State<MakeloveListScreen> with SingleTick
                     lastMessage,
                     maxLines: 2,
                     style: TextStyle(
-                      color: isTyping ? Colors.redAccent : Colors.white.withOpacity(0.8),
+                      color: isTyping
+                          ? Colors.redAccent
+                          : Colors.white.withOpacity(0.8),
                       fontSize: 16,
                       fontFamily: 'Didot',
                       fontStyle: FontStyle.italic,
-                      height: 1.3
+                      height: 1.3,
                     ),
                   ),
                 ],
               ),
             ),
-            
             const Positioned(
               right: 30,
               top: 0,
               bottom: 0,
               child: Center(
-                child: Icon(Icons.arrow_forward_ios_rounded, color: Colors.red, size: 16),
+                child: Icon(Icons.arrow_forward_ios_rounded,
+                    color: Colors.red, size: 16),
               ),
             ),
           ],
@@ -270,15 +290,25 @@ class _LivePulseDot extends StatefulWidget {
   __LivePulseDotState createState() => __LivePulseDotState();
 }
 
-class __LivePulseDotState extends State<_LivePulseDot> with SingleTickerProviderStateMixin {
+class __LivePulseDotState extends State<_LivePulseDot>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
   }
+
   @override
-  void dispose() { _controller.dispose(); super.dispose(); }
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -287,14 +317,16 @@ class __LivePulseDotState extends State<_LivePulseDot> with SingleTickerProvider
         AnimatedBuilder(
           animation: _controller,
           builder: (context, child) => Container(
-            width: 6, height: 6,
+            width: 6,
+            height: 6,
             decoration: BoxDecoration(
               color: Colors.red,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.red.withOpacity(widget.isActive ? _controller.value : 0.2), 
-                  blurRadius: 4
+                  color: Colors.red.withOpacity(
+                      widget.isActive ? _controller.value : 0.2),
+                  blurRadius: 4,
                 )
               ],
             ),
@@ -302,13 +334,13 @@ class __LivePulseDotState extends State<_LivePulseDot> with SingleTickerProvider
         ),
         const SizedBox(width: 6),
         Text(
-          widget.isActive ? "WHISPERING..." : "LIVE", 
-          style: TextStyle(
-            color: Colors.red, 
-            fontSize: 9, 
-            fontWeight: FontWeight.bold, 
-            letterSpacing: 2
-          )
+          widget.isActive ? "WHISPERING..." : "LIVE",
+          style: const TextStyle(
+            color: Colors.red,
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2,
+          ),
         ),
       ],
     );
