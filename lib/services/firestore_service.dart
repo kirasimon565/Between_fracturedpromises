@@ -1,13 +1,15 @@
 // lib/services/firestore_service.dart
 
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+
 import 'auth_service.dart';
 import '../models/episode.dart';
 import '../models/scene.dart';
 import '../models/message.dart';
 import '../models/choice.dart';
-import 'dart:convert';
 
 class FirestoreService extends GetxService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -43,6 +45,16 @@ class FirestoreService extends GetxService {
         .snapshots();
   }
 
+  /// ✅ NEW: Stream thread docs (metadata like `app`)
+  /// Used by StoryEngine to categorize threads reliably.
+  Stream<QuerySnapshot> streamThreads(String episodeId) {
+    return _db
+        .collection('episodes')
+        .doc(episodeId)
+        .collection('threads')
+        .snapshots();
+  }
+
   /// Stream Messages (sanitized + ordered by orderIndex)
   Stream<QuerySnapshot> streamMessages(String episodeId, String threadId) {
     final String sanitizedId = threadId.toLowerCase().trim();
@@ -62,7 +74,8 @@ class FirestoreService extends GetxService {
         .snapshots();
   }
 
-  /// Real-time thread discovery
+  /// Real-time thread discovery (IDs only)
+  /// (You can keep using this elsewhere; StoryEngine can now use streamThreads instead.)
   Stream<List<String>> streamActiveThreadIds(String episodeId) {
     return _db
         .collection('episodes')
@@ -91,9 +104,9 @@ class FirestoreService extends GetxService {
 
   /// Upload Episode Script (batch)
   ///
-  /// ✅ Update included:
-  /// - Writes `app` to thread docs AND messages (so UI can reliably separate Messenger vs Makelove).
-  /// - Uses a simple rule: Daniel => makelove, everyone else => messenger (you can expand later).
+  /// ✅ Updates included:
+  /// - Writes `app` to thread docs AND messages (Messenger vs Makelove separation).
+  /// - Provides a single place to decide per-thread app.
   Future<void> uploadEpisodeScript(String episodeId, String jsonString) async {
     try {
       final Map<String, dynamic> json = jsonDecode(jsonString);
@@ -119,13 +132,17 @@ class FirestoreService extends GetxService {
           if (originalMsg.sender == Sender.nadia) {
             threadId = originalMsg.recipient?.toLowerCase().trim() ?? 'unknown';
           } else {
-            threadId =
-                originalMsg.sender.toString().split('.').last.toLowerCase().trim();
+            threadId = originalMsg.sender
+                .toString()
+                .split('.')
+                .last
+                .toLowerCase()
+                .trim();
           }
 
           // ✅ Decide which app this thread belongs to
           // Expand this mapping later if you add more Makelove-only characters.
-          final String app = (threadId == 'daniel') ? 'makelove' : 'messenger';
+          final String app = _resolveThreadApp(threadId);
 
           final threadRef = _db
               .collection('episodes')
@@ -137,12 +154,13 @@ class FirestoreService extends GetxService {
           batch.set(threadRef, {
             'last_updated': FieldValue.serverTimestamp(),
             'id': threadId,
-            'app': app, // ✅ NEW
+            'app': app,
           }, SetOptions(merge: true));
 
           // If last message in scene and scene has choices, attach them there
           List<Choice>? choicesForMsg = originalMsg.choices;
-          if (i == scene.messages.length - 1 && (scene.choices?.isNotEmpty ?? false)) {
+          if (i == scene.messages.length - 1 &&
+              (scene.choices?.isNotEmpty ?? false)) {
             choicesForMsg = scene.choices;
           }
 
@@ -157,7 +175,7 @@ class FirestoreService extends GetxService {
             'sceneId': scene.id,
             'choices': choicesForMsg?.map((c) => c.toJson()).toList(),
             'timestamp': FieldValue.serverTimestamp(),
-            'app': app, // ✅ NEW (lets you infer app from first message too)
+            'app': app, // useful for fallback logic / debugging
           };
 
           final msgRef = threadRef.collection('messages').doc(originalMsg.id);
@@ -173,6 +191,14 @@ class FirestoreService extends GetxService {
       print("UPLOAD ERROR: $e");
       rethrow;
     }
+  }
+
+  /// ✅ Centralized app mapping for threads
+  /// Keeps your rule in one place.
+  String _resolveThreadApp(String threadId) {
+    final t = threadId.toLowerCase().trim();
+    if (t == 'daniel') return 'makelove';
+    return 'messenger';
   }
 
   Future<void> uploadEpisode(String episodeId, Map<String, dynamic> data) async {
