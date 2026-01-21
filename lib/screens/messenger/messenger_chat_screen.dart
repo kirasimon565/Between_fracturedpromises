@@ -1,36 +1,48 @@
+// lib/screens/messenger/messenger_chat_screen.dart
+
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../app/constants.dart';
+
 import '../../models/message.dart';
-import '../../models/choice.dart'; 
 import '../../services/story_engine.dart';
 import '../../services/firestore_service.dart';
-import '../../services/auth_service.dart';
 import '../../services/audio_service.dart';
 import '../../widgets/typing_indicator.dart';
-import '../../theme/colors.dart';
+import '../../app/constants.dart';
 import 'messenger_bubble.dart';
 import 'dart:math' as math;
 
 class MessengerChatScreen extends StatefulWidget {
   @override
-  _MessengerChatScreenState createState() => _MessengerChatScreenState();
+  State<MessengerChatScreen> createState() => _MessengerChatScreenState();
 }
 
 class _MessengerChatScreenState extends State<MessengerChatScreen> {
-  final String partnerName;
   final StoryEngine _engine = Get.find<StoryEngine>();
   final AudioService _audio = Get.find<AudioService>();
   final FirestoreService _firestore = Get.find<FirestoreService>();
   final ScrollController _scrollController = ScrollController();
-  
-  // 🛠️ Sanitized threadId for reliable Firestore pathing
-  late final String threadId;
 
-  _MessengerChatScreenState() : partnerName = Get.arguments ?? 'Unknown' {
-    // 🛠️ Force lowercase and trim to ensure "Ethan" matches "ethan" in DB exactly
-    threadId = partnerName.toLowerCase().trim();
+  late final String threadId;     // ✅ lowercase/trim for engine + firestore
+  late final String partnerName;  // ✅ display name only
+
+  @override
+  void initState() {
+    super.initState();
+
+    final arg = Get.arguments;
+    final raw = (arg is String && arg.trim().isNotEmpty) ? arg.trim() : 'Unknown';
+
+    threadId = raw.toLowerCase().trim();
+    partnerName = _toDisplayName(raw);
+  }
+
+  String _toDisplayName(String raw) {
+    final s = raw.trim();
+    if (s.isEmpty) return "Unknown";
+    // Messenger display style: "Ethan"
+    final lower = s.toLowerCase();
+    return lower[0].toUpperCase() + lower.substring(1);
   }
 
   @override
@@ -51,25 +63,32 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
               stream: _engine.getMessagesStream(threadId),
               builder: (context, snapshot) {
                 final messages = snapshot.data ?? [];
-                
-                // Auto-scroll logic for mobile devices
+
+                // Auto-scroll
                 if (messages.isNotEmpty) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (_scrollController.hasClients) {
-                      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                      _scrollController.jumpTo(
+                        _scrollController.position.maxScrollExtent,
+                      );
                     }
                   });
                 }
 
-                if (messages.isEmpty && snapshot.connectionState == ConnectionState.active) {
+                if (messages.isEmpty &&
+                    snapshot.connectionState == ConnectionState.active) {
                   return const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.blur_on, color: Colors.white10, size: 30),
                         SizedBox(height: 10),
-                        Text("NO SIGNAL FOUND", 
-                          style: TextStyle(color: Colors.white10, letterSpacing: 2, fontSize: 10)
+                        Text(
+                          "NO SIGNAL FOUND",
+                          style: TextStyle(
+                              color: Colors.white10,
+                              letterSpacing: 2,
+                              fontSize: 10),
                         ),
                       ],
                     ),
@@ -77,20 +96,21 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
                 }
 
                 return Obx(() {
-                  final isTyping = _engine.isTyping[threadId] ?? false;
-                  
+                  final typing = _engine.isTyping[threadId] ?? false;
+
                   return ListView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                    itemCount: messages.length + (isTyping ? 1 : 0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 30, horizontal: 20),
+                    itemCount: messages.length + (typing ? 1 : 0),
                     itemBuilder: (context, index) {
-                      if (index == messages.length) {
+                      if (typing && index == messages.length) {
                         return const _CloudTypingIndicator();
                       }
                       final msg = messages[index];
                       return MessengerBubble(
-                        message: msg, 
-                        isMe: msg.sender == Sender.nadia
+                        message: msg,
+                        isMe: msg.sender == Sender.nadia,
                       );
                     },
                   );
@@ -110,7 +130,8 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.white70),
+        icon: const Icon(Icons.arrow_back_ios_new,
+            size: 18, color: Colors.white70),
         onPressed: () => Get.back(),
       ),
       title: Column(
@@ -134,14 +155,19 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
   }
 
   Widget _buildOnlineStatus() {
-    return StreamBuilder<DocumentSnapshot>(
+    return StreamBuilder(
       stream: _firestore.streamCharacter(threadId),
       builder: (context, snapshot) {
         bool isOnline = true;
-        if (snapshot.hasData && snapshot.data!.exists) {
-          final data = snapshot.data!.data() as Map<String, dynamic>?;
-          isOnline = data?['is_online'] ?? true;
+        if (snapshot.hasData) {
+          final doc = snapshot.data;
+          // doc might be a DocumentSnapshot; keep your original logic if your service returns typed snapshots
+          if (doc is dynamic && doc.exists == true) {
+            final data = doc.data() as Map<String, dynamic>?;
+            isOnline = data?['is_online'] ?? true;
+          }
         }
+
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -158,7 +184,9 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
               isOnline ? "online" : "offline",
               style: TextStyle(
                 fontSize: 8,
-                color: isOnline ? Colors.greenAccent.withOpacity(0.5) : Colors.white24,
+                color: isOnline
+                    ? Colors.greenAccent.withOpacity(0.5)
+                    : Colors.white24,
                 letterSpacing: 1,
               ),
             ),
@@ -186,7 +214,8 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
                 color: Colors.white.withOpacity(0.05),
                 border: Border.all(color: Colors.white10),
               ),
-              child: const Icon(Icons.history_edu_rounded, color: Colors.white70, size: 24),
+              child: const Icon(Icons.history_edu_rounded,
+                  color: Colors.white70, size: 24),
             ),
           ),
           const SizedBox(width: 15),
@@ -199,7 +228,8 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
               ),
               child: const Text(
                 "Awaiting signal...",
-                style: TextStyle(color: Colors.white24, fontSize: 12, letterSpacing: 0.5),
+                style: TextStyle(
+                    color: Colors.white24, fontSize: 12, letterSpacing: 0.5),
               ),
             ),
           ),
@@ -209,7 +239,7 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
   }
 
   void _showChoiceRope(String threadId) {
-    _audio.playVibrate(); 
+    _audio.playVibrate();
     Get.bottomSheet(
       _RopeChoiceOverlay(threadId: threadId),
       isScrollControlled: true,
@@ -231,10 +261,10 @@ class _RopeChoiceOverlay extends StatelessWidget {
       builder: (context, snapshot) {
         final messages = snapshot.data ?? [];
         final lastMsg = messages.isNotEmpty ? messages.last : null;
-        
-        final bool hasChoices = lastMsg != null && 
-                                (lastMsg.choices?.isNotEmpty ?? false) && 
-                                lastMsg.sender != Sender.nadia;
+
+        final bool hasChoices = lastMsg != null &&
+            (lastMsg.choices?.isNotEmpty ?? false) &&
+            lastMsg.sender != Sender.nadia;
 
         return Container(
           padding: const EdgeInsets.only(top: 20, bottom: 60),
@@ -249,31 +279,41 @@ class _RopeChoiceOverlay extends StatelessWidget {
               Container(width: 1, height: 50, color: Colors.white12),
               const SizedBox(height: 15),
               const Text(
-                "FRACTURED PROMISES", 
-                style: TextStyle(color: Colors.white24, fontSize: 9, letterSpacing: 6, fontWeight: FontWeight.bold)
+                "FRACTURED PROMISES",
+                style: TextStyle(
+                    color: Colors.white24,
+                    fontSize: 9,
+                    letterSpacing: 6,
+                    fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 40),
               if (!hasChoices)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 30),
                   child: Center(
-                    child: Text("The connection is silent...", 
-                      style: TextStyle(color: Colors.white12, fontSize: 13, fontStyle: FontStyle.italic)
-                    )
+                    child: Text(
+                      "The connection is silent...",
+                      style: TextStyle(
+                          color: Colors.white12,
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic),
+                    ),
                   ),
                 )
               else
-                ...lastMsg.choices!.map((choice) => _SwayingChoice(
-                  text: choice.text,
-                  onTap: () {
-                    _engine.makeChoice(choice);
-                    Get.back();
-                  },
-                )).toList(),
+                ...lastMsg!.choices!.map(
+                  (choice) => _SwayingChoice(
+                    text: choice.text,
+                    onTap: () {
+                      _engine.makeChoice(choice);
+                      Get.back();
+                    },
+                  ),
+                ),
             ],
           ),
         );
-      }
+      },
     );
   }
 }
@@ -287,13 +327,17 @@ class _SwayingChoice extends StatefulWidget {
   State<_SwayingChoice> createState() => _SwayingChoiceState();
 }
 
-class _SwayingChoiceState extends State<_SwayingChoice> with SingleTickerProviderStateMixin {
+class _SwayingChoiceState extends State<_SwayingChoice>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat(reverse: true);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -327,10 +371,10 @@ class _SwayingChoiceState extends State<_SwayingChoice> with SingleTickerProvide
             widget.text.toUpperCase(),
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white, 
-              fontSize: 13, 
-              fontWeight: FontWeight.w300, 
-              letterSpacing: 2
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w300,
+              letterSpacing: 2,
             ),
           ),
         ),
@@ -341,6 +385,7 @@ class _SwayingChoiceState extends State<_SwayingChoice> with SingleTickerProvide
 
 class _CloudTypingIndicator extends StatelessWidget {
   const _CloudTypingIndicator();
+
   @override
   Widget build(BuildContext context) {
     return Align(
