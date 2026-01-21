@@ -74,13 +74,17 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
                     }
 
                     if (messages.isEmpty && snapshot.connectionState == ConnectionState.active) {
-                      return const Center(
+                      return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.favorite_border, color: Colors.redAccent, size: 30, opacity: 0.1),
-                            SizedBox(height: 10),
-                            Text("NO SIGNAL FOUND", 
+                            // 🛠️ FIXED: Wrapped Icon in Opacity widget to fix the compile error
+                            Opacity(
+                              opacity: 0.1,
+                              child: const Icon(Icons.favorite_border, color: Colors.redAccent, size: 30),
+                            ),
+                            const SizedBox(height: 10),
+                            const Text("NO SIGNAL FOUND", 
                               style: TextStyle(color: Colors.white10, letterSpacing: 2, fontSize: 10)
                             ),
                           ],
