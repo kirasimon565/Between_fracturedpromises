@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/message.dart'; // Keeping UI model
+import '../../models/choice.dart'; // ✅ Added import for Choice
 import '../../services/audio_service.dart';
 import '../../widgets/typing_indicator.dart';
 import '../../app/constants.dart';

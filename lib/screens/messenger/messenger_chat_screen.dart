@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../models/message.dart'; // We'll keep this model for now or switch to ScriptMessage/VisibleMessage wrapper
+import '../../models/choice.dart'; // ✅ Added import for Choice
 import '../../services/firestore_service.dart';
 import '../../services/audio_service.dart';
 import '../../data/playback_store.dart';
