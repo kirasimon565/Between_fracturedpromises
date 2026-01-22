@@ -51,26 +51,33 @@ fun Project.forceCompileSdk(api: Int) {
 }
 
 subprojects {
-    // 🚀 THE MAGIC FIX: This forces the dependency version project-wide
+    // 🚀 STEP 1: Force Isar to wait for the main app configuration
+    if (project.name == "isar_flutter_libs") {
+        evaluationDependsOn(":app")
+    }
+
+    // 🚀 STEP 2: Force modern AndroidX Core versions project-wide
     configurations.all {
         resolutionStrategy {
             eachDependency {
                 if (requested.group == "androidx.core" && requested.name.contains("core")) {
-                    // 1.10.1 is stable and supports lStar perfectly
-                    useVersion("1.10.1")
+                    useVersion("1.12.0") // Highly stable version with lStar support
                 }
             }
         }
     }
 
-    plugins.withId("com.android.application") {
-        project.applyNamespaceFallbackReflective()
-        project.forceCompileSdk(36)
-    }
+    // 🚀 STEP 3: Apply fixes during the afterEvaluate phase for maximum override
+    afterEvaluate {
+        plugins.withId("com.android.application") {
+            project.applyNamespaceFallbackReflective()
+            project.forceCompileSdk(34) // 34 is the stable standard for now
+        }
 
-    plugins.withId("com.android.library") {
-        project.applyNamespaceFallbackReflective()
-        project.forceCompileSdk(36)
+        plugins.withId("com.android.library") {
+            project.applyNamespaceFallbackReflective()
+            project.forceCompileSdk(34)
+        }
     }
 }
 
