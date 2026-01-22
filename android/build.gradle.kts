@@ -1,4 +1,4 @@
-// Root build.gradle.kts
+// android/build.gradle.kts
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
 import org.gradle.kotlin.dsl.register
@@ -11,7 +11,7 @@ allprojects {
 }
 
 /**
- * ✅ AGP 8+ requires "namespace". This sets a fallback for missing plugins.
+ * ✅ Fixes missing "namespace" for older plugins (like isar_flutter_libs).
  */
 fun Project.applyNamespaceFallbackReflective() {
     val androidExt = extensions.findByName("android") ?: return
@@ -29,13 +29,11 @@ fun Project.applyNamespaceFallbackReflective() {
 }
 
 /**
- * ✅ Forces compileSdk for ALL modules to solve the lStar resource error.
+ * ✅ Forces compileSdk for ALL modules (prevents lStar error at resource level).
  */
 fun Project.forceCompileSdk(api: Int) {
     val androidExt = extensions.findByName("android") ?: return
-    val methods = androidExt.javaClass.methods
-    
-    val targetMethods = methods.filter { 
+    val targetMethods = androidExt.javaClass.methods.filter { 
         (it.name == "setCompileSdkVersion" || it.name == "compileSdkVersion" || it.name == "setCompileSdk" || it.name == "compileSdk") 
         && it.parameterTypes.size == 1 
     }
@@ -53,15 +51,18 @@ fun Project.forceCompileSdk(api: Int) {
 }
 
 subprojects {
-    // 🚀 THE FIX: Force the correct version of AndroidX Core for the whole project
+    // 🚀 THE MAGIC FIX: This forces the dependency version project-wide
     configurations.all {
         resolutionStrategy {
-            force("androidx.core:core:1.7.0")
-            force("androidx.core:core-ktx:1.7.0")
+            eachDependency {
+                if (requested.group == "androidx.core" && requested.name.contains("core")) {
+                    // 1.10.1 is stable and supports lStar perfectly
+                    useVersion("1.10.1")
+                }
+            }
         }
     }
 
-    // Apply logic to Android Application and Library plugins
     plugins.withId("com.android.application") {
         project.applyNamespaceFallbackReflective()
         project.forceCompileSdk(34)
@@ -69,7 +70,7 @@ subprojects {
 
     plugins.withId("com.android.library") {
         project.applyNamespaceFallbackReflective()
-        project.forceCompileSdk(34)
+        project.forceCompileSdk(36)
     }
 }
 
