@@ -12,11 +12,12 @@ import '../screens/admin/episode_uploader.dart';
 import '../screens/messenger/messenger_chat_screen.dart';
 import '../screens/makelove/makelove_chat_screen.dart';
 import '../screens/profile/profile_screen.dart';
-// Removed: import '../screens/profile/profile_edit_screen.dart';
 import '../screens/gallery/gallery_screen.dart';
 import '../screens/endgame/endgame_screen.dart';
 
-// 🛠️ REMOVED: import '../screens/secret/secret_chat_screen.dart';
+// 🛠️ NEW: Isolated Episode Screens
+import '../screens/episodes/episode_gallery_screen.dart';
+import '../screens/episodes/coming_soon_screen.dart';
 
 class AppRoutes {
   static const splash = '/splash';
@@ -32,15 +33,17 @@ class AppRoutes {
   static const adminUploader = '/admin/uploader';
 
   static const profile = '/profile';
-  // static const profileEdit = '/profile/edit'; // Deprecated
   static const gallery = '/gallery';
   static const endgame = '/endgame';
-  // 🛠️ REMOVED: static const secret = '/secret';
+
+  // 🛠️ NEW: Routes for Episode Management
+  static const episodeGallery = '/episodes';
+  static const comingSoon = '/coming-soon';
 
   static final routes = [
     GetPage(
       name: splash,
-      page: () => SplashScreen(),
+      page: () => const SplashScreen(),
       transition: Transition.cupertino,
     ),
     GetPage(
@@ -72,7 +75,7 @@ class AppRoutes {
       name: makeloveChat,
       page: () => MakeloveChatScreen(),
       transition: Transition.zoom,
-      transitionDuration: Duration(milliseconds: 500),
+      transitionDuration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     ),
     GetPage(
@@ -100,13 +103,6 @@ class AppRoutes {
       page: () => ProfileScreen(),
       transition: Transition.cupertino,
     ),
-    /*
-    GetPage(
-      name: profileEdit,
-      page: () => ProfileEditScreen(),
-      transition: Transition.cupertino,
-    ),
-    */
     GetPage(
       name: gallery,
       page: () => GalleryScreen(),
@@ -117,6 +113,21 @@ class AppRoutes {
       page: () => EndgameScreen(),
       transition: Transition.cupertino,
     ),
-    // 🛠️ REMOVED: GetPage for secret chat
+
+    // 🛠️ NEW: The Cinema Gallery Page
+    GetPage(
+      name: episodeGallery,
+      page: () => const EpisodeGalleryScreen(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 600),
+    ),
+
+    // 🛠️ NEW: The Empty Beach Page
+    GetPage(
+      name: comingSoon,
+      page: () => const ComingSoonScreen(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(seconds: 1), // Slower fade for atmosphere
+    ),
   ];
 }
