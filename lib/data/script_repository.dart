@@ -5,39 +5,54 @@ import 'package:isar/isar.dart';
 
 import 'package:between_fractured_promises/data/playback_store.dart';
 import 'package:between_fractured_promises/data/models/script_models.dart';
-// Note: Imports for Isar extensions will be available via playback_store exports or explicit imports of generated code if needed.
-// But usually importing the model file with `part` directive is enough if we are in the same package.
-// Actually, `isar.scriptMessages` comes from `script_models.g.dart`.
-// Since `ScriptRepository` is in a different file, we rely on `playback_store.dart` exporting it OR importing it here.
-// But `isar` object is passed from `_store`.
 
 class ScriptRepository extends GetxService {
   final PlaybackStore _store = Get.find<PlaybackStore>();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Cache of fetched episodes to prevent re-fetching in same session if needed
+  // Cache of fetched episodes to prevent re-fetching in same session
   final Set<String> _fetchedEpisodes = {};
 
-  /// Ensures the script for an episode is loaded into Isar.
-  /// Fetches from Firestore if not present or forced.
-  Future<void> ensureEpisodeScript(String episodeId) async {
-    if (_fetchedEpisodes.contains(episodeId)) return;
+  // 🛠️ NEW: Check if a specific scene exists locally in Isar
+  // This is used by the StoryRuntime to trigger the "Coming Soon" screen
+  Future<bool> doesSceneExist(String sceneId) async {
+    final count = await _store.isar.scriptMessages
+        .filter()
+        .sceneIdEqualTo(sceneId)
+        .count();
+    return count > 0;
+  }
 
-    // Check if we already have script data for this episode?
+  // 🛠️ NEW: Check if an episode is already fully downloaded
+  Future<bool> isEpisodeLocal(String episodeId) async {
     final count = await _store.isar.scriptMessages
         .filter()
         .scriptIdStartsWith("${episodeId}_")
         .count();
+    return count > 0;
+  }
 
-    if (count > 0) {
+  // 🛠️ NEW: Bridge for the EpisodeController to trigger a download
+  Future<void> saveScriptToLocal(Map<String, dynamic> scriptData) async {
+    // We can pull the episodeId from the map passed by FirestoreService
+    final String? episodeId = scriptData['episodeId'] ?? scriptData['id'];
+    if (episodeId != null) {
+      await _fetchAndSaveEpisode(episodeId);
+    }
+  }
+
+  /// Ensures the script for an episode is loaded into Isar.
+  Future<void> ensureEpisodeScript(String episodeId) async {
+    if (_fetchedEpisodes.contains(episodeId)) return;
+
+    final isLocal = await isEpisodeLocal(episodeId);
+    if (isLocal) {
       _fetchedEpisodes.add(episodeId);
-      // ignore: avoid_print
-      print("SCRIPT: Episode $episodeId already cached locally ($count msgs).");
+      debugPrint("SCRIPT: Episode $episodeId already cached locally.");
       return;
     }
 
-    // ignore: avoid_print
-    print("SCRIPT: Fetching episode $episodeId from Firestore...");
+    debugPrint("SCRIPT: Fetching episode $episodeId from Firestore...");
     await _fetchAndSaveEpisode(episodeId);
     _fetchedEpisodes.add(episodeId);
   }
@@ -61,8 +76,7 @@ class ScriptRepository extends GetxService {
       final meta = ThreadMeta()
         ..threadId = threadId.toLowerCase().trim()
         ..app = (threadData['app'] ?? 'messenger').toString().toLowerCase()
-        ..characterId = (threadData['characterId'] ?? threadId).toString()
-        ..unlockRuleJson = null; // Can implement later
+        ..characterId = (threadData['characterId'] ?? threadId).toString();
 
       allMetas.add(meta);
 
@@ -72,7 +86,6 @@ class ScriptRepository extends GetxService {
       for (final msgDoc in messagesSnapshot.docs) {
         final data = msgDoc.data();
 
-        // Handle variations in field names (snake_case vs camelCase)
         final orderIndex = (data['orderIndex'] ?? data['order_index'] ?? 0) as int;
         final delay = (data['delay'] ?? 1000) as int;
         final type = (data['type'] ?? 'text').toString();
@@ -105,11 +118,10 @@ class ScriptRepository extends GetxService {
       await _store.isar.scriptMessages.putAll(allMessages);
     });
 
-    // ignore: avoid_print
-    print("SCRIPT: Saved ${allMessages.length} messages and ${allMetas.length} threads for $episodeId.");
+    debugPrint("SCRIPT: Saved ${allMessages.length} messages for $episodeId.");
   }
 
-  /// Returns the script messages for a specific thread/scene, sorted by orderIndex.
+  /// Returns the script messages for a specific thread/scene
   Future<List<ScriptMessage>> getScript(String threadId, String sceneId) async {
     return await _store.isar.scriptMessages
         .filter()
@@ -119,7 +131,7 @@ class ScriptRepository extends GetxService {
         .findAll();
   }
 
-  /// Look up metadata for a thread (e.g. which app it belongs to)
+  /// Look up metadata for a thread
   Future<ThreadMeta?> getThreadMeta(String threadId) async {
     return await _store.isar.threadMetas
         .filter()
