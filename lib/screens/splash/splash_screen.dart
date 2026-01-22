@@ -10,16 +10,20 @@ import '../../widgets/effects/shatter_effect.dart';
 import 'dart:math' as math;
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _bgController;
   
-  final AudioService _audioService = Get.find<AudioService>();
-  final StateService _stateService = Get.find<StateService>();
-  final StoryRuntime _storyRuntime = Get.find<StoryRuntime>();
+  // 🛠️ FIX: Use Getters instead of 'final' variables. 
+  // This prevents the "Not Found" error by fetching them only when used.
+  AudioService get _audioService => Get.find<AudioService>();
+  StateService get _stateService => Get.find<StateService>();
+  StoryRuntime get _storyRuntime => Get.find<StoryRuntime>();
 
   @override
   void initState() {
@@ -32,9 +36,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       duration: const Duration(seconds: 30),
     )..repeat(reverse: true);
 
-    // Attempt to load the current episode/script to ensure readiness
-    // Using default start for now or what's in state
-    _storyRuntime.loadEpisode(_stateService.currentEpisodeId.value);
+    // 🛠️ SAFETY: Use a small delay to ensure main() has finished all 'await' calls
+    // before the StoryRuntime tries to load data from Isar.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _prepareStory();
+    });
+  }
+
+  void _prepareStory() {
+    try {
+      final currentId = _stateService.currentEpisodeId.value;
+      _storyRuntime.loadEpisode(currentId);
+    } catch (e) {
+      debugPrint("⚠️ Story Load Warning: $e");
+      // If load fails, we don't crash, we let the user proceed to Welcome
+    }
   }
 
   void _ensureServicesRegistered() {
@@ -46,14 +62,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   void _onShatterComplete() {
-    // 🚀 Check current node in Isar to decide flow
-    // For now, simple check using state variables
-    // Assuming 'scene_1' is start.
-    // We can also check if variables map is empty to detect new user,
-    // or better yet, add 'isNewUser' flag to RuntimeState schema later.
-    // For now, let's assume if currentSceneId is 'scene_1' and no variables set, it's new.
+    // 🚀 Decision Logic for the "Hard Path"
+    final isAtStart = _stateService.currentSceneId.value == 'scene_1';
+    final hasNoData = _stateService.variables.isEmpty;
 
-    if (_stateService.currentSceneId.value == 'scene_1' && _stateService.variables.isEmpty) {
+    if (isAtStart && hasNoData) {
        Get.offAllNamed(AppRoutes.welcome);
     } else {
        Get.offAllNamed(AppRoutes.home);
@@ -73,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // 1. Living Environment
+          // 1. Living Environment (Background breathing effect)
           AnimatedBuilder(
             animation: _bgController,
             builder: (context, child) {
@@ -90,7 +103,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             ),
           ),
 
-          // 2. Logo Sequence
+          // 2. Logo Sequence (The Fracture Event)
           Center(
             child: ShatterEffect(
               onShatterStart: _onShatterStart, 
@@ -114,7 +127,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             ),
           ),
 
-          // 3. Secondary Elements
+          // 3. Secondary Elements (Loading Pulse)
           Positioned(
             bottom: 60,
             left: 0,
