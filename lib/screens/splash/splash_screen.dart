@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../app/routes.dart';
 import '../../app/constants.dart';
 import '../../services/auth_service.dart';
-import '../../services/state_service.dart';
+import 'package:between_fractured_promises/services/state_service.dart';
 // 🛠️ StoryRuntime is the new brain in the logic folder
 import '../../logic/story_runtime.dart'; 
 import '../../services/audio_service.dart'; 
