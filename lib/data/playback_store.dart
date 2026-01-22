@@ -63,8 +63,9 @@ class PlaybackStore extends GetxService {
         ..unlockedThreads = []
         ..completedNodes = []
         ..scriptVersion = "1.0"
-        ..userName = "Nadia"
-        ..userBio = "Just looking for a spark..."
+        ..messengerName = "Nadia Carter"
+        ..makeloveAlias = "Unknown"
+        ..userBio = "Marketing Coordinator | Lifestyle Brand | 28"
         ..unlockedGallery = [
            "assets/avatars/avatar_nadia.png" // AppConstants.avatarNadia
         ]
@@ -121,10 +122,11 @@ class PlaybackStore extends GetxService {
   // ⚙️ Settings & Profile Updates (New)
   // ---------------------------------------------------------------------------
 
-  Future<void> updateProfile({String? name, String? bio}) async {
+  Future<void> updateProfile({String? messenger, String? makelove, String? bio}) async {
     await _isar.writeTxn(() async {
       final state = await getRuntimeState();
-      if (name != null) state.userName = name;
+      if (messenger != null) state.messengerName = messenger;
+      if (makelove != null) state.makeloveAlias = makelove;
       if (bio != null) state.userBio = bio;
       await _isar.runtimeStates.put(state);
     });
