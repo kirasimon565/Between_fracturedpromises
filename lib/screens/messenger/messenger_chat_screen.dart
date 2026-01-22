@@ -295,9 +295,10 @@ class _RopeChoiceOverlay extends StatelessWidget {
     if (visible == null) return [];
 
     // 2. Look up ScriptMessage
+    // ✅ Fix: Handle null visible.scriptId with fallback ''
     final scriptMsg = await _store.isar.scriptMessages
       .filter()
-      .scriptIdEqualTo(visible.scriptId)
+      .scriptIdEqualTo(visible.scriptId ?? '')
       .findFirst();
 
     if (scriptMsg == null || scriptMsg.choicesJson == null) return [];

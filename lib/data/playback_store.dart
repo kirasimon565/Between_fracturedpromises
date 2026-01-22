@@ -303,4 +303,28 @@ class PlaybackStore extends GetxService {
         .threadIdEqualTo(threadId.toLowerCase().trim())
         .findFirst();
   }
+
+  // ---------------------------------------------------------------------------
+  // Admin & Debug Tools (New)
+  // ---------------------------------------------------------------------------
+
+  Future<void> clearAll() async {
+    await _isar.writeTxn(() async {
+      // Clear everything except script cache maybe?
+      // For "Clean Slate", we probably want to wipe runtime state.
+      // But we must re-create the default RuntimeState immediately or app will crash.
+
+      await _isar.runtimeStates.clear();
+      await _isar.visibleMessages.clear();
+      await _isar.pendingDeliverys.clear();
+      await _isar.threadPlaybackStates.clear();
+      await _isar.choiceRecords.clear();
+
+      // We do NOT clear scriptMessages or threadMetas usually, as that's "static" data.
+      // But if user wants full reset, we can keep scripts.
+    });
+
+    // Re-init default state
+    await _ensureRuntimeState();
+  }
 }
