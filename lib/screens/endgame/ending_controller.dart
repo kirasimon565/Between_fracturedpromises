@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../app/constants.dart';
 import '../../models/ending.dart';
 import '../../services/story_engine.dart';
+import '../../data/playback_store.dart';
 
 class EndingController extends GetxController {
   final StoryEngine _storyEngine = Get.find<StoryEngine>();
+  final PlaybackStore _store = Get.find<PlaybackStore>();
 
-  // Observables for the Endgame Screen
   final ending = Rx<Ending?>(null);
   final truthPercentage = 0.obs;
   final paradoxResolved = false.obs;
@@ -18,37 +18,23 @@ class EndingController extends GetxController {
     _calculateFinalOutcome();
   }
 
-  /// 🛠️ Analyzes the StoryEngine state to determine the finale
   void _calculateFinalOutcome() {
-    // 1. Calculate Truth (Based on how many gallery items were unlocked)
-    // Assuming 10 total secrets in the game
     int secretsFound = _storyEngine.unlockedGlobalSecrets.length;
     truthPercentage.value = ((secretsFound / 10) * 100).toInt().clamp(0, 100);
 
-    // 2. Determine Paradox Resolution
-    // Logic: If the player found the 'Daniel' truth, the paradox is resolved
     paradoxResolved.value = _storyEngine.hasCompletedThread('daniel');
 
-    // 3. Select Ending based on Story Engine 'ending_flag'
     String endingId = _storyEngine.getMetadata('final_ending_id') ?? 'e_neutral';
     
     ending.value = _getEndingById(endingId);
     
-    // 4. Save this ending to history
     _saveEndingToHistory(endingId);
   }
 
-  /// 🛠️ Persistence: Save the ending so it appears in a "Hall of Fame" or Menu
   Future<void> _saveEndingToHistory(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    List<String> history = prefs.getStringList('ending_history') ?? [];
-    if (!history.contains(id)) {
-      history.add(id);
-      await prefs.setStringList('ending_history', history);
-    }
+    await _store.recordEnding(id);
   }
 
-  /// 🛠️ Data Mapper for Ending Models
   Ending _getEndingById(String id) {
     switch (id) {
       case 'e_truth':

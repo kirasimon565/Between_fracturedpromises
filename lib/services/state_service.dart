@@ -1,67 +1,71 @@
+// lib/services/state_service.dart
+
+import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../data/playback_store.dart';
 
 class StateService extends GetxService {
-  late SharedPreferences _prefs;
+  final PlaybackStore _store = Get.find<PlaybackStore>();
 
-  // App State - Initialized as null to support the "Continue" button logic
-  final RxnString currentEpisodeId = RxnString();
-  final RxnString currentSceneId = RxnString();
-
-  // Admin State
-  final RxBool isAdminUnlocked = false.obs;
+  // Reactive state variables
+  final RxString currentEpisodeId = 'ep1_the_spark'.obs;
+  final RxString currentSceneId = 'scene_1'.obs;
+  final RxMap<String, dynamic> variables = <String, dynamic>{}.obs;
 
   Future<StateService> init() async {
-    _prefs = await SharedPreferences.getInstance();
+    // Mirror Isar state to Rx variables
+    _store.watchRuntimeState().listen((state) {
+      currentEpisodeId.value = state.currentEpisodeId;
+      currentSceneId.value = state.currentSceneId;
+      if (state.variablesJson.isNotEmpty) {
+        try {
+          variables.assignAll(jsonDecode(state.variablesJson));
+        } catch (_) {
+          // ignore error
+        }
+      }
+    });
     
-    // Load persisted state
-    currentEpisodeId.value = _prefs.getString('current_episode');
-    currentSceneId.value = _prefs.getString('current_scene');
-    isAdminUnlocked.value = _prefs.getBool('admin_unlocked') ?? false;
-    
-    // Load variables (optional: implement loop to load all 'var_' keys)
+    // Trigger initial load
+    await _store.getRuntimeState();
+
     return this;
   }
 
-  final RxMap<String, dynamic> variables = <String, dynamic>{}.obs;
-
-  // 🛠️ ADDED: Clear Progress for "Start Game" button
-  void clearProgress() {
-    currentEpisodeId.value = null;
-    currentSceneId.value = null;
-    variables.clear();
-    
-    // Clear SharedPreferences
-    _prefs.remove('current_episode');
-    _prefs.remove('current_scene');
-    
-    // Remove all stored variables
-    final keys = _prefs.getKeys();
-    for (String key in keys) {
-      if (key.startsWith('var_')) {
-        _prefs.remove(key);
-      }
-    }
+  void setVariable(String key, dynamic value) {
+    variables[key] = value;
+    _persistVariables();
   }
 
   void updateProgress(String episodeId, String sceneId) {
     currentEpisodeId.value = episodeId;
     currentSceneId.value = sceneId;
-    _prefs.setString('current_episode', episodeId);
-    _prefs.setString('current_scene', sceneId);
-  }
-
-  void setVariable(String key, dynamic value) {
-    variables[key] = value;
-    _prefs.setString('var_$key', value.toString());
+    _store.updateRuntime(sceneId: sceneId); // Persist scene
+    // Note: Episode ID update might need a separate method if it changes often
   }
 
   void recordChoice(String choiceId) {
-    print("Choice recorded: $choiceId");
+    final List<dynamic> history = variables['choice_history'] ?? [];
+    if (!history.contains(choiceId)) {
+      history.add(choiceId);
+      variables['choice_history'] = history;
+      _persistVariables();
+    }
   }
 
+  void _persistVariables() {
+    _store.updateRuntime(variablesJson: jsonEncode(variables));
+  }
+
+  // 🛠️ Stub for compatibility (Dead Code from old system)
+  void clearProgress() {
+    // TODO: Implement full reset
+    variables.clear();
+    updateProgress('ep1_the_spark', 'scene_1');
+  }
+
+  // 🛠️ Stub for Admin (Dead Code)
   void unlockAdmin() {
-    isAdminUnlocked.value = true;
-    _prefs.setBool('admin_unlocked', true);
+    setVariable('admin_unlocked', true);
   }
 }
