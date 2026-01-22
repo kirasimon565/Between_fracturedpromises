@@ -1,7 +1,6 @@
 // lib/services/firestore_service.dart
 
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 
@@ -68,7 +67,24 @@ class FirestoreService extends GetxService {
         .snapshots();
   }
 
-  // Episode Fetching
+  // 🛠️ NEW: Added for the EpisodeController to facilitate local downloads
+  Future<Map<String, dynamic>> getEpisodeScript(String episodeId) async {
+    try {
+      final doc = await _db.collection('episodes').doc(episodeId).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        // Ensure the ID is included in the map for the Repository to identify it
+        data['episodeId'] = episodeId; 
+        return data;
+      } else {
+        throw "Episode $episodeId does not exist on the server.";
+      }
+    } catch (e) {
+      throw "Firestore Error: $e";
+    }
+  }
+
+  // Episode Fetching (General Purpose)
   Future<Map<String, dynamic>?> fetchEpisode(String episodeId) async {
     try {
       final doc = await _db.collection('episodes').doc(episodeId).get();
