@@ -7,6 +7,8 @@ import 'theme/theme.dart';
 import 'services/state_service.dart';
 import 'services/audio_service.dart';
 import 'data/playback_store.dart'; 
+// 🛠️ NEW IMPORT: Pointing to the logic folder you discovered
+import 'logic/story_runtime.dart'; 
 
 void main() async {
   // 1. Mandatory: Connect Flutter to Native Layer
@@ -26,16 +28,23 @@ void main() async {
     Get.put(playbackStore, permanent: true); 
 
     // 4. Initialize StateService (Nadia's Memory)
-    // We WAIT for init() to finish so the grey screen doesn't find null data.
     final stateService = StateService();
     await stateService.init(); 
     Get.put(stateService, permanent: true);
 
-    // 5. Register Global Audio and Theme
+    // 5. 🛠️ Initialize StoryRuntime (The Game's Brain)
+    // Now that the file is in your GitHub, we inject it so the UI can find it.
+    final storyRuntime = StoryRuntime();
+    // Some versions of StoryRuntime have an init, others don't. 
+    // If Jules added one, uncomment the line below:
+    // await storyRuntime.init(); 
+    Get.put(storyRuntime, permanent: true);
+
+    // 6. Register Global Audio and Theme
     Get.put(AudioService(), permanent: true);
     Get.put(ThemeService(), permanent: true);
 
-    // 6. Launch the App
+    // 7. Launch the App
     runApp(const MyApp());
   } catch (e) {
     // 🛑 Final fallback: Log the error and launch the UI to prevent a black/grey screen
