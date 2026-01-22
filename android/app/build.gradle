@@ -6,6 +6,7 @@ plugins {
 }
 
 android {
+    // Standardizing the namespace for your app
     namespace "com.between.fracturedpromises"
     compileSdk 36
 
@@ -14,12 +15,25 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+    /**
+     * ✅ MANDATORY for AGP 8.0+
+     * This fixes the deprecation warning and ensures your app can access 
+     * its own package name and version via the BuildConfig class.
+     */
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId "com.between.fracturedpromises"
+        // Elevated minSdk to 25 to support modern security/media features
         minSdkVersion 25
         targetSdkVersion 36
         versionCode 1
         versionName "1.0.0"
+        
+        // Ensure resource linking doesn't fail on lStar
+        vectorDrawables.useSupportLibrary = true
     }
 
     compileOptions {
@@ -43,8 +57,10 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.debug
+            // Keep false for initial production testing to make debugging easier
             minifyEnabled false
             shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             signingConfig signingConfigs.debug
@@ -57,7 +73,10 @@ flutter {
 }
 
 dependencies {
+    // Firebase BoM ensures version consistency across all Firebase services
     implementation platform('com.google.firebase:firebase-bom:33.7.0')
     implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-auth' // Added for Nadia's user profile logic
+    
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
