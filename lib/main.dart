@@ -10,6 +10,7 @@ import 'data/playback_store.dart';
 import 'data/script_repository.dart';
 import 'logic/story_runtime.dart'; 
 import 'logic/chat_scheduler.dart';
+import 'screens/profile/profile_controller.dart';
 
 void main() async {
   // 🛠️ SHIELD 1: Catch UI Rendering Errors
