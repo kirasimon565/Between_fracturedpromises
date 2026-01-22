@@ -65,7 +65,7 @@ subprojects {
 
     plugins.withId("com.android.application") {
         project.applyNamespaceFallbackReflective()
-        project.forceCompileSdk(34)
+        project.forceCompileSdk(36)
     }
 
     plugins.withId("com.android.library") {
