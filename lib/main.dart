@@ -6,11 +6,12 @@ import 'app/app.dart';
 import 'theme/theme.dart';
 import 'services/state_service.dart';
 import 'services/audio_service.dart';
+import 'services/firestore_service.dart'; // 🛠️ Added for Episode Uploader
 import 'data/playback_store.dart'; 
 import 'data/script_repository.dart';
 import 'logic/story_runtime.dart'; 
 import 'logic/chat_scheduler.dart';
-import 'screens/profile/profile_controller.dart';
+import 'screens/profile/profile_controller.dart'; // 🛠️ Added for Profile Screen
 
 void main() async {
   // 🛠️ SHIELD 1: Catch UI Rendering Errors
@@ -34,15 +35,22 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // 1. 🛠️ IMMEDIATE SETUP: Register services that don't require 'await' first.
-    // This stops the "AudioService not found" error because it's available instantly.
-    debugPrint("🚀 [BOOT]: Registering Audio and Theme...");
+    // 1. 🛠️ IMMEDIATE SETUP: Controllers and services that don't require 'await'.
+    debugPrint("🚀 [BOOT]: Registering Audio, Theme, and Profile...");
     Get.put(AudioService(), permanent: true);
     Get.put(ThemeService(), permanent: true);
+    
+    // Registering ProfileController early ensures the Profile Screen is always ready.
+    Get.put(ProfileController(), permanent: true); 
 
-    // 2. Initialize Firebase
+    // 2. Initialize Firebase Core
     debugPrint("🚀 [BOOT]: Starting Firebase...");
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+    // 🛠️ Register FirestoreService right after Firebase is initialized.
+    // This fixes the error in the Episode Uploader screen.
+    debugPrint("🚀 [BOOT]: Connecting Firestore Service...");
+    Get.put(FirestoreService(), permanent: true);
 
     // 3. Initialize Isar (The Hard Path Foundation)
     debugPrint("🚀 [BOOT]: Opening Isar Database...");
@@ -72,7 +80,7 @@ void main() async {
     debugPrint("❌ [BOOT CRASH]: $e");
     debugPrint("❌ [STACK TRACE]: $stack");
 
-    // 🛠️ SHIELD 2: Visual Boot Error
+    // 🛠️ SHIELD 2: Visual Boot Error fallback
     runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
