@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // 🛠️ Added for copying UID to clipboard
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../app/routes.dart';
 import '../../app/constants.dart';
 import '../../theme/colors.dart';
 import '../../services/audio_service.dart';
-import '../../services/auth_service.dart'; // 🛠️ Added to access UID
+import '../../services/auth_service.dart';
+import '../../data/playback_store.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -15,7 +15,9 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final AudioService _audioService = Get.find<AudioService>();
-  final AuthService _authService = Get.find<AuthService>(); // 🛠️ Find AuthService
+  final AuthService _authService = Get.find<AuthService>();
+  final PlaybackStore _store = Get.find<PlaybackStore>();
+
   int _tapCount = 0;
   
   bool _isSoundFxEnabled = true;
@@ -28,19 +30,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSettings();
   }
 
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isSoundFxEnabled = prefs.getBool('settings_sfx') ?? true;
-      _isMusicEnabled = prefs.getBool('settings_music') ?? true;
-      _isNotificationsEnabled = prefs.getBool('settings_notif') ?? true;
+  void _loadSettings() {
+    _store.getRuntimeState().then((state) {
+       if (mounted) {
+         setState(() {
+           _isSoundFxEnabled = state.isSfxEnabled;
+           _isMusicEnabled = state.isMusicEnabled;
+           _isNotificationsEnabled = state.isNotificationsEnabled;
+         });
+       }
     });
   }
 
   Future<void> _toggleSetting(String key, bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
-    
     setState(() {
       if (key == 'settings_sfx') _isSoundFxEnabled = value;
       if (key == 'settings_music') {
@@ -53,6 +55,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
       if (key == 'settings_notif') _isNotificationsEnabled = value;
     });
+
+    if (key == 'settings_sfx') await _store.updateSettings(sfx: value);
+    if (key == 'settings_music') await _store.updateSettings(music: value);
+    if (key == 'settings_notif') await _store.updateSettings(notif: value);
   }
 
   void _handleVersionTap() {
@@ -75,7 +81,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  // 🛠️ Helper to copy UID for your Firebase Rules
   void _copyUid() {
     Clipboard.setData(ClipboardData(text: _authService.uid));
     Get.snackbar(
@@ -107,7 +112,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionHeader("ACCOUNT"),
           _buildSettingsItem(Icons.person_outline, "Account Profile", () => Get.toNamed(AppRoutes.profile)),
           
-          // 🛠️ NEW: DISPLAY USER ID SECTION
           _buildSectionHeader("SECURITY CLEARANCE"),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 25),
