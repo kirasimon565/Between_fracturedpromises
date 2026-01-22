@@ -72,4 +72,15 @@ class StateService extends GetxService {
   void _persistVariables() {
     _store.updateRuntime(variablesJson: jsonEncode(variables));
   }
+
+  // 🛠️ Re-implemented for Admin/Debug tools compatibility
+  void clearProgress() async {
+    await _store.clearAll();
+    variables.clear();
+    // Default start is handled by PlaybackStore._ensureRuntimeState
+  }
+
+  void unlockAdmin() {
+    setVariable('admin_unlocked', true);
+  }
 }
