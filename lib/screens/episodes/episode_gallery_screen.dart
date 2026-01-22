@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:math' as math;
 import 'episode_controller.dart';
+import '../../app/routes.dart';
 
 class EpisodeGalleryScreen extends GetView<EpisodeController> {
   const EpisodeGalleryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Ensure controller is initialized if not already
+    if (!Get.isRegistered<EpisodeController>()) {
+      Get.put(EpisodeController());
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -16,7 +22,11 @@ class EpisodeGalleryScreen extends GetView<EpisodeController> {
           Positioned.fill(
             child: Opacity(
               opacity: 0.3,
-              child: Image.asset('assets/images/gallery_bg.png', fit: BoxFit.cover),
+              child: Image.asset(
+                'assets/images/gallery_bg.png', 
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(color: Colors.black),
+              ),
             ),
           ),
 
@@ -60,7 +70,6 @@ class _HangingEpisodeSignState extends State<HangingEpisodeSign>
       duration: const Duration(seconds: 4),
     )..repeat(reverse: true);
 
-    // Using a curved animation to simulate gravity (slower at the ends)
     _swingAnimation = Tween<double>(begin: -0.05, end: 0.05).animate(
       CurvedAnimation(parent: _swingController, curve: Curves.easeInOutSine),
     );
@@ -74,11 +83,13 @@ class _HangingEpisodeSignState extends State<HangingEpisodeSign>
 
   @override
   Widget build(BuildContext context) {
+    // Access the controller we registered in the parent or main
+    final controller = Get.find<EpisodeController>();
+
     return AnimatedBuilder(
       animation: _swingAnimation,
       builder: (context, child) {
         return Transform(
-          // Set alignment to the top center so it swings from the "nail"
           alignment: Alignment.topCenter,
           transform: Matrix4.identity()
             ..setEntry(3, 2, 0.001) // Perspective
@@ -94,7 +105,7 @@ class _HangingEpisodeSignState extends State<HangingEpisodeSign>
               ),
               // The Sign
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 30),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1A1A1A),
                   border: Border.all(color: Colors.white24, width: 2),
@@ -128,21 +139,47 @@ class _HangingEpisodeSignState extends State<HangingEpisodeSign>
                         letterSpacing: 2,
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 40),
                     
-                    // The Download Button (Middle of the sign)
-                    ElevatedButton(
-                      onPressed: () {
-                        // Trigger download logic
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                      ),
-                      child: const Text("DOWNLOAD", style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
+                    // 🛠️ UPDATED: Reactive Download/Play Button
+                    Obx(() {
+                      if (controller.isDownloaded.value) {
+                        return _buildActionButton(
+                          label: "PLAY NOW",
+                          color: Colors.white,
+                          textColor: Colors.black,
+                          onTap: () => Get.toNamed(AppRoutes.home),
+                        );
+                      }
+
+                      if (controller.isDownloading.value) {
+                        return Column(
+                          children: [
+                            SizedBox(
+                              width: 150,
+                              child: LinearProgressIndicator(
+                                value: controller.downloadProgress.value,
+                                backgroundColor: Colors.white10,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              "${(controller.downloadProgress.value * 100).toInt()}%",
+                              style: const TextStyle(color: Colors.white54, fontSize: 12),
+                            )
+                          ],
+                        );
+                      }
+
+                      return _buildActionButton(
+                        label: "DOWNLOAD",
+                        color: Colors.transparent,
+                        textColor: Colors.white,
+                        borderColor: Colors.white,
+                        onTap: () => controller.startDownload('episode_1'),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -150,6 +187,34 @@ class _HangingEpisodeSignState extends State<HangingEpisodeSign>
           ),
         );
       },
+    );
+  }
+
+  // Helper to keep button code clean
+  Widget _buildActionButton({
+    required String label,
+    required Color color,
+    required Color textColor,
+    required VoidCallback onTap,
+    Color? borderColor,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+        decoration: BoxDecoration(
+          color: color,
+          border: borderColor != null ? Border.all(color: borderColor) : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2,
+          ),
+        ),
+      ),
     );
   }
 }
