@@ -4,8 +4,8 @@ import '../../app/routes.dart';
 import '../../app/constants.dart';
 import '../../services/auth_service.dart';
 import '../../services/state_service.dart';
-import '../../services/firestore_service.dart';
-import '../../services/story_engine.dart';
+// 🛠️ StoryRuntime is the new brain in the logic folder
+import '../../logic/story_runtime.dart'; 
 import '../../services/audio_service.dart'; 
 import '../../widgets/effects/shatter_effect.dart';
 import 'dart:math' as math;
@@ -18,15 +18,16 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _bgController;
   
-  // 🛠️ FIX: Use Get.find() because these are now initialized in main.dart.
-  // This prevents the "late initialization error" or silent crashes.
+  // ✅ These are now retrieved from the sequential boot in main.dart
   final AudioService _audioService = Get.find<AudioService>();
+  final StateService _stateService = Get.find<StateService>();
+  final StoryRuntime _storyRuntime = Get.find<StoryRuntime>();
 
   @override
   void initState() {
     super.initState();
     
-    // Check if other non-critical services need registration
+    // We only register the AuthService if main.dart didn't
     _ensureServicesRegistered();
 
     // Breathing World Animation (30s loop)
@@ -37,20 +38,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   void _ensureServicesRegistered() {
-    // Only put things here that are NOT in your main.dart
     if (!Get.isRegistered<AuthService>()) Get.put(AuthService());
-    if (!Get.isRegistered<FirestoreService>()) Get.put(FirestoreService());
-    if (!Get.isRegistered<StoryEngine>()) Get.put(StoryEngine());
+    // 🛠️ CRITICAL: Removed StoryEngine and FirestoreService registration.
+    // Calling these here was likely triggering the crash.
   }
 
   void _onShatterStart() {
-    // 🔊 This will now play immediately because the service is ready
     _audioService.playShatter();
   }
 
   void _onShatterComplete() {
-    // Transition to welcome screen after the physics event
-    Get.offAllNamed(AppRoutes.welcome);
+    // 🚀 Use the new StateService to decide where to go next
+    if (_stateService.isNewUser) {
+      Get.offAllNamed(AppRoutes.welcome);
+    } else {
+      Get.offAllNamed(AppRoutes.home);
+    }
   }
 
   @override
@@ -62,15 +65,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Noir base
+      backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // 1. Living Environment (Background breathing effect)
+          // 1. Living Environment
           AnimatedBuilder(
             animation: _bgController,
             builder: (context, child) {
-              double scale = 1.0 + (_bgController.value * 0.08); // Subtle scale zoom
+              double scale = 1.0 + (_bgController.value * 0.08); 
               return Transform.scale(
                 scale: scale,
                 child: child,
@@ -79,21 +82,19 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             child: Image.asset(
               AppConstants.bgSplash, 
               fit: BoxFit.cover,
-              // Fallback to prevent blank screen if asset loading flickers
               errorBuilder: (context, error, stackTrace) => Container(color: Colors.black),
             ),
           ),
 
-          // 2. Logo Sequence (The Fracture Event)
+          // 2. Logo Sequence
           Center(
             child: ShatterEffect(
               onShatterStart: _onShatterStart, 
               onShatterComplete: _onShatterComplete,
               child: Image.asset(
-                'assets/logo/logo.png', // Verified path from pubspec
+                'assets/logo/logo.png', 
                 width: 280,
                 fit: BoxFit.contain,
-                // If logo fails to load, use the styled text as a backup
                 errorBuilder: (context, error, stackTrace) {
                   return const Text(
                     "BETWEEN",
@@ -109,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             ),
           ),
 
-          // 3. Secondary Elements (Loading Sync)
+          // 3. Secondary Elements
           Positioned(
             bottom: 60,
             left: 0,
@@ -155,7 +156,6 @@ class __PulseDotsState extends State<_PulseDots> with SingleTickerProviderStateM
         return AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
-             // Staggered Opacity math
              double offset = index * 0.3;
              double value = math.sin((_controller.value * 2 * math.pi) - offset);
              double opacity = (value * 0.5 + 0.5).clamp(0.2, 1.0);
