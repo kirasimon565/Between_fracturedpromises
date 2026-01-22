@@ -12,6 +12,7 @@ import 'data/script_repository.dart';
 import 'logic/story_runtime.dart'; 
 import 'logic/chat_scheduler.dart';
 import 'screens/profile/profile_controller.dart'; 
+import 'screens/episodes/episode_controller.dart'; // 🛠️ Added for your Gallery
 
 void main() async {
   // 🛡️ SHIELD 1: Catch UI Rendering Errors
@@ -35,41 +36,47 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // 1. 🛠️ REGISTER INSTANT SERVICES
-    // We register these first so the UI never finds them "Missing"
-    debugPrint("🚀 [BOOT]: Registering Audio, Theme, and Profile...");
+    // 1. 🛠️ CORE FOUNDATION (Internal Only)
+    // Audio and Theme have zero dependencies, so they go first.
+    debugPrint("🚀 [BOOT]: Registering Core Services...");
     Get.put(AudioService(), permanent: true);
     Get.put(ThemeService(), permanent: true);
-    Get.put(ProfileController(), permanent: true); 
 
-    // 2. 🛠️ INITIALIZE ISAR IMMEDIATELY
-    // We do this BEFORE Firebase because Isar is the local foundation.
-    // If Firebase hangs, we want the database to at least be open.
+    // 2. 🛠️ DATABASE FOUNDATION (The Hard Path)
+    // We open Isar BEFORE the controllers, because controllers NEED Isar to wake up.
     debugPrint("🚀 [BOOT]: Opening Isar Database...");
     final playbackStore = PlaybackStore();
     await playbackStore.init(); 
     Get.put(playbackStore, permanent: true); 
 
-    // 3. Initialize Firebase Core
+    // 3. 🛠️ CLOUD FOUNDATION
     debugPrint("🚀 [BOOT]: Starting Firebase...");
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-    // 4. Register Cloud & Repository Logic
-    debugPrint("🚀 [BOOT]: Connecting Firestore and Repositories...");
     Get.put(FirestoreService(), permanent: true);
+
+    // 4. 🛠️ DATA REPOSITORIES
+    // These bridges sit between the Database and the Game Logic.
+    debugPrint("🚀 [BOOT]: Connecting Repositories...");
     Get.put(ScriptRepository(), permanent: true);
     Get.put(ChatScheduler(), permanent: true);
 
-    // 5. Initialize StateService (Nadia's Memory)
+    // 5. 🛠️ STATE & LOGIC
+    // Initialize StateService which depends on PlaybackStore.
     debugPrint("🚀 [BOOT]: Initializing StateService...");
     final stateService = StateService();
     await stateService.init(); 
     Get.put(stateService, permanent: true);
 
-    // 6. Initialize StoryRuntime (The Game's Brain)
+    // 6. 🛠️ FEATURE CONTROLLERS
+    // Now that Isar and State are ready, we can hire the Feature Controllers.
+    debugPrint("🚀 [BOOT]: Initializing Feature Controllers...");
+    Get.put(ProfileController(), permanent: true); 
+    Get.put(EpisodeController(), permanent: true); // Now the Gallery has its brain
+
+    // 7. 🛠️ GAME BRAIN
+    // StoryRuntime is the last piece, as it coordinates everything above.
     debugPrint("🚀 [BOOT]: Starting StoryRuntime...");
-    final storyRuntime = StoryRuntime();
-    Get.put(storyRuntime, permanent: true);
+    Get.put(StoryRuntime(), permanent: true);
 
     debugPrint("✅ [BOOT COMPLETE]: Launching MyApp");
     runApp(const MyApp());
