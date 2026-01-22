@@ -6,15 +6,15 @@ import 'app/app.dart';
 import 'theme/theme.dart';
 import 'services/state_service.dart';
 import 'services/audio_service.dart';
-import 'services/firestore_service.dart'; // 🛠️ Added for Episode Uploader
+import 'services/firestore_service.dart'; 
 import 'data/playback_store.dart'; 
 import 'data/script_repository.dart';
 import 'logic/story_runtime.dart'; 
 import 'logic/chat_scheduler.dart';
-import 'screens/profile/profile_controller.dart'; // 🛠️ Added for Profile Screen
+import 'screens/profile/profile_controller.dart'; 
 
 void main() async {
-  // 🛠️ SHIELD 1: Catch UI Rendering Errors
+  // 🛡️ SHIELD 1: Catch UI Rendering Errors
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Material(
       child: Container(
@@ -35,31 +35,28 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // 1. 🛠️ IMMEDIATE SETUP: Controllers and services that don't require 'await'.
+    // 1. 🛠️ REGISTER INSTANT SERVICES
+    // We register these first so the UI never finds them "Missing"
     debugPrint("🚀 [BOOT]: Registering Audio, Theme, and Profile...");
     Get.put(AudioService(), permanent: true);
     Get.put(ThemeService(), permanent: true);
-    
-    // Registering ProfileController early ensures the Profile Screen is always ready.
     Get.put(ProfileController(), permanent: true); 
 
-    // 2. Initialize Firebase Core
-    debugPrint("🚀 [BOOT]: Starting Firebase...");
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-    // 🛠️ Register FirestoreService right after Firebase is initialized.
-    // This fixes the error in the Episode Uploader screen.
-    debugPrint("🚀 [BOOT]: Connecting Firestore Service...");
-    Get.put(FirestoreService(), permanent: true);
-
-    // 3. Initialize Isar (The Hard Path Foundation)
+    // 2. 🛠️ INITIALIZE ISAR IMMEDIATELY
+    // We do this BEFORE Firebase because Isar is the local foundation.
+    // If Firebase hangs, we want the database to at least be open.
     debugPrint("🚀 [BOOT]: Opening Isar Database...");
     final playbackStore = PlaybackStore();
     await playbackStore.init(); 
     Get.put(playbackStore, permanent: true); 
 
-    // 4. Register Logic Dependencies
-    debugPrint("🚀 [BOOT]: Registering Repository & Scheduler...");
+    // 3. Initialize Firebase Core
+    debugPrint("🚀 [BOOT]: Starting Firebase...");
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+    // 4. Register Cloud & Repository Logic
+    debugPrint("🚀 [BOOT]: Connecting Firestore and Repositories...");
+    Get.put(FirestoreService(), permanent: true);
     Get.put(ScriptRepository(), permanent: true);
     Get.put(ChatScheduler(), permanent: true);
 
@@ -80,7 +77,7 @@ void main() async {
     debugPrint("❌ [BOOT CRASH]: $e");
     debugPrint("❌ [STACK TRACE]: $stack");
 
-    // 🛠️ SHIELD 2: Visual Boot Error fallback
+    // 🛡️ SHIELD 2: Visual Boot Error fallback
     runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -89,9 +86,15 @@ void main() async {
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: SingleChildScrollView(
-              child: Text(
-                "❌ BOOT FAILED:\n\n$e\n\nCheck if all services are committed to GitHub.",
-                style: const TextStyle(color: Colors.red, fontSize: 14, fontFamily: 'monospace'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("❌ BOOT FAILED", style: TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  Text("$e", style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'monospace')),
+                  const SizedBox(height: 20),
+                  const Text("Try: Uninstalling and Reinstalling the app to clear Isar locks.", style: TextStyle(color: Colors.grey)),
+                ],
               ),
             ),
           ),
