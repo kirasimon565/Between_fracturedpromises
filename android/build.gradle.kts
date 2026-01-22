@@ -1,5 +1,5 @@
 // android/build.gradle.kts
-// Root build.gradle.kts (production-safe: no afterEvaluate, reflection-based namespace fallback)
+// Root build.gradle.kts (production-safe: no afterEvaluate, reflection-based namespace fallback + force compileSdk)
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
@@ -43,8 +43,41 @@ fun Project.applyNamespaceFallbackReflective() {
     }
 
     setNamespace.invoke(androidExt, fallback)
-    // Optional debug:
-    // println("✅ namespace fallback applied for $path -> $fallback")
+}
+
+/**
+ * ✅ Forces compileSdk for ALL Android modules (app + libraries).
+ *
+ * Fixes errors like:
+ *   AAPT: error: resource android:attr/lStar not found
+ *
+ * Why it happens:
+ * - Your :app can be compileSdk 36
+ * - But a plugin module (ex: isar_flutter_libs) can still compile with < 31
+ * - AAPT then can't find android:attr/lStar (API 31+)
+ *
+ * IMPORTANT:
+ * - No afterEvaluate
+ * - Runs at plugin-apply time
+ * - Reflection so it works across AGP versions
+ */
+fun Project.forceCompileSdk(api: Int) {
+    val androidExt = extensions.findByName("android") ?: return
+
+    // Different AGP versions expose either:
+    // - setCompileSdkVersion(Int)
+    // - compileSdkVersion(Int)
+    val setCompileSdk = androidExt.javaClass.methods.firstOrNull {
+        it.name == "setCompileSdkVersion" && it.parameterTypes.size == 1
+    }
+    val compileSdkVersion = androidExt.javaClass.methods.firstOrNull {
+        it.name == "compileSdkVersion" && it.parameterTypes.size == 1
+    }
+
+    when {
+        setCompileSdk != null -> setCompileSdk.invoke(androidExt, api)
+        compileSdkVersion != null -> compileSdkVersion.invoke(androidExt, api)
+    }
 }
 
 subprojects {
@@ -52,10 +85,12 @@ subprojects {
     // Apply only to Android modules, at plugin-apply time (safe)
     plugins.withId("com.android.application") {
         project.applyNamespaceFallbackReflective()
+        project.forceCompileSdk(36)
     }
 
     plugins.withId("com.android.library") {
         project.applyNamespaceFallbackReflective()
+        project.forceCompileSdk(36)
     }
 }
 
