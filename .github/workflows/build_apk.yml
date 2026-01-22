@@ -24,13 +24,28 @@ jobs:
           channel: 'stable'
           cache: true
 
+      # ✅ Ensure Android SDK + sdkmanager exist (and licenses are accepted)
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # ✅ Install the exact SDK packages your build needs
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --list | head -n 50
+          yes | sdkmanager --licenses
+
+          # API 36 + build tools (adjust build-tools version if your project uses a different one)
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0"
+
       - name: Install dependencies
         run: flutter pub get
 
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # 🛠️ Step 1: Build using the absolute path and SECRETS
       - name: Build Signed APK
         env:
           STORE_PASS: ${{ secrets.RELEASE_STORE_PASSWORD }}
@@ -38,9 +53,11 @@ jobs:
           ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
         run: |
           cd android
+
+          # Use wrapper (more reliable than system gradle)
           gradle wrapper --gradle-version 8.9 --distribution-type all
           chmod +x gradlew
-          
+
           ./gradlew assembleRelease \
             -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android/app/release.jks \
             -Pandroid.injected.signing.store.password=$STORE_PASS \
