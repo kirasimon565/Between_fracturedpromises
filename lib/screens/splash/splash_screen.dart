@@ -32,6 +32,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       duration: const Duration(seconds: 30),
     )..repeat(reverse: true);
 
+    
     // Attempt to load the current episode/script to ensure readiness
     // Using default start for now or what's in state
     _storyRuntime.loadEpisode(_stateService.currentEpisodeId.value);
