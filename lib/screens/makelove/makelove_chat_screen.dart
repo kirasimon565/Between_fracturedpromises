@@ -3,14 +3,18 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/message.dart';
-import '../../services/story_engine.dart';
+import '../../models/message.dart'; // Keeping UI model
 import '../../services/audio_service.dart';
 import '../../widgets/typing_indicator.dart';
 import '../../app/constants.dart';
 import '../../theme/colors.dart';
+import '../../data/playback_store.dart';
+import '../../logic/story_runtime.dart';
+import '../../logic/chat_scheduler.dart';
 import 'makelove_bubble.dart';
 import '../profile/character_profile_screen.dart';
+import 'dart:convert';
+import 'package:isar/isar.dart';
 
 class MakeloveChatScreen extends StatefulWidget {
   @override
@@ -18,7 +22,9 @@ class MakeloveChatScreen extends StatefulWidget {
 }
 
 class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
-  final StoryEngine _engine = Get.find<StoryEngine>();
+  final StoryRuntime _runtime = Get.find<StoryRuntime>();
+  final PlaybackStore _store = Get.find<PlaybackStore>();
+  final ChatScheduler _scheduler = Get.find<ChatScheduler>();
   final AudioService _audio = Get.find<AudioService>();
   final ScrollController _scrollController = ScrollController();
 
@@ -44,10 +50,6 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
   }
 
   void _navigateToProfile() {
-    // 🛠️ Navigate to Character Profile
-    // We can inject bio based on threadId if we have a robust data source for it.
-    // For now, hardcode or lookup.
-
     String bio = "No data.";
     String avatar = AppConstants.avatarDaniel; // Default for Makelove is Daniel
 
@@ -74,6 +76,18 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
     super.dispose();
   }
 
+  // Helper to convert VisibleMessage (Isar) to UI Message Model
+  Message _convertToUiMessage(VisibleMessage vm) {
+    return Message(
+      id: vm.id.toString(),
+      sender: vm.sender == 'nadia' ? Sender.nadia : Sender.other,
+      content: vm.content,
+      type: vm.type == 'image' ? MessageType.image : MessageType.text,
+      timestamp: vm.deliveredAt,
+      // Choices are handled via the overlay logic querying the script or runtime state
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,10 +108,11 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
           Column(
             children: [
               Expanded(
-                child: StreamBuilder<List<Message>>(
-                  stream: _engine.getMessagesStream(threadId),
+                child: StreamBuilder<List<VisibleMessage>>(
+                  stream: _store.watchMessages(threadId),
                   builder: (context, snapshot) {
-                    final messages = snapshot.data ?? [];
+                    final visibleMsgs = snapshot.data ?? [];
+                    final messages = visibleMsgs.map(_convertToUiMessage).toList();
 
                     // Auto-scroll
                     if (messages.isNotEmpty) {
@@ -136,7 +151,7 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
                     }
 
                     return Obx(() {
-                      final typing = _engine.isTyping[threadId] ?? false;
+                      final typing = _scheduler.typingStates[threadId] ?? false;
 
                       return ListView.builder(
                         controller: _scrollController,
@@ -274,21 +289,44 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
 
 class _MakeloveRopeOverlay extends StatelessWidget {
   final String threadId;
-  final StoryEngine _engine = Get.find<StoryEngine>();
+  final StoryRuntime _runtime = Get.find<StoryRuntime>();
+  final PlaybackStore _store = Get.find<PlaybackStore>();
 
   _MakeloveRopeOverlay({required this.threadId});
 
+  Future<List<Choice>> _fetchChoices() async {
+    // 1. Get last visible message to find scriptId
+    final visible = await _store.watchLastMessage(threadId).first;
+    if (visible == null) return [];
+
+    // 2. Look up ScriptMessage
+    final scriptMsg = await _store.isar.scriptMessages
+      .filter()
+      .scriptIdEqualTo(visible.scriptId)
+      .findFirst();
+
+    if (scriptMsg == null || scriptMsg.choicesJson == null) return [];
+
+    try {
+      final List<dynamic> raw = jsonDecode(scriptMsg.choicesJson!);
+      return raw.map((e) => Choice(
+        id: e['id'] ?? 'unknown',
+        text: e['text'] ?? '...',
+        targetNodeId: e['targetNodeId'] ?? 'scene_1', // assuming schema
+        impact: e['impact'], // map
+      )).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Message>>(
-      stream: _engine.getMessagesStream(threadId),
+    return FutureBuilder<List<Choice>>(
+      future: _fetchChoices(),
       builder: (context, snapshot) {
-        final messages = snapshot.data ?? [];
-        final lastMsg = messages.isNotEmpty ? messages.last : null;
-
-        final hasChoices = lastMsg != null &&
-            (lastMsg.choices?.isNotEmpty ?? false) &&
-            lastMsg.sender != Sender.nadia;
+        final choices = snapshot.data ?? [];
+        final hasChoices = choices.isNotEmpty;
 
         return Container(
           padding: const EdgeInsets.symmetric(vertical: 40),
@@ -326,13 +364,13 @@ class _MakeloveRopeOverlay extends StatelessWidget {
                   ),
                 )
               else
-                ...lastMsg!.choices!.map(
+                ...choices.map(
                   (choice) => Padding(
                     padding:
                         const EdgeInsets.symmetric(vertical: 8, horizontal: 40),
                     child: GestureDetector(
                       onTap: () {
-                        _engine.makeChoice(threadId, choice);
+                        _runtime.handleChoice(threadId, choice.text, choice.targetNodeId);
                         Get.back();
                       },
                       child: Container(

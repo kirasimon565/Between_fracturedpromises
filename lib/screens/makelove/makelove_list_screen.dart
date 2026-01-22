@@ -3,10 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app/constants.dart';
-import '../../services/story_engine.dart';
+import '../../services/state_service.dart';
 import '../../services/audio_service.dart';
 import '../../theme/theme.dart';
-import '../../models/message.dart';
+import '../../data/playback_store.dart';
+import '../../logic/chat_scheduler.dart';
 import 'dart:math' as math;
 
 class MakeloveListScreen extends StatefulWidget {
@@ -17,7 +18,9 @@ class MakeloveListScreen extends StatefulWidget {
 class _MakeloveListScreenState extends State<MakeloveListScreen>
     with SingleTickerProviderStateMixin {
   final ThemeService _themeService = Get.find<ThemeService>();
-  final StoryEngine _engine = Get.find<StoryEngine>();
+  final StateService _state = Get.find<StateService>();
+  final PlaybackStore _store = Get.find<PlaybackStore>();
+  final ChatScheduler _scheduler = Get.find<ChatScheduler>();
   final AudioService _audio = Get.find<AudioService>();
   late AnimationController _swayController;
 
@@ -57,13 +60,12 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
                 _buildHangingHeader(),
                 const SizedBox(height: 30),
 
-                // ✅ No hardcoding — uses engine's Makelove-only list
+                // ✅ No hardcoding — uses StateService's Makelove-only list
                 Expanded(
                   child: Obx(() {
-                    // sanitize + remove system just in case
-                    final threads = _engine.makeloveThreads
-                        .map((id) => id.toLowerCase().trim())
-                        .where((id) => id.isNotEmpty && id != 'system')
+                    final threads = _state.unlockedThreadMetas
+                        .where((meta) => meta.app == 'makelove')
+                        .map((meta) => meta.threadId)
                         .toList();
 
                     if (threads.isEmpty) {
@@ -103,17 +105,18 @@ class _MakeloveListScreenState extends State<MakeloveListScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 0),
                       itemCount: threads.length,
                       itemBuilder: (context, index) {
-                        final threadId = threads[index]; // already sanitized
+                        final threadId = threads[index];
                         final name = _displayNameFromId(threadId);
 
-                        return StreamBuilder<Message?>(
-                          stream: _engine.getLastMessageStream(threadId),
+                        // Using Isar helper for last message
+                        return StreamBuilder<VisibleMessage?>(
+                          stream: _store.watchLastMessage(threadId),
                           builder: (context, snapshot) {
                             final lastMsg = snapshot.data;
 
                             return Obx(() {
                               final bool typing =
-                                  _engine.isTyping[threadId] ?? false;
+                                  _scheduler.typingStates[threadId] ?? false;
 
                               final content = typing
                                   ? "Whispering..."

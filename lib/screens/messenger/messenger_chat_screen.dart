@@ -4,13 +4,17 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../models/message.dart';
-import '../../services/story_engine.dart';
+import '../../models/message.dart'; // We'll keep this model for now or switch to ScriptMessage/VisibleMessage wrapper
 import '../../services/firestore_service.dart';
 import '../../services/audio_service.dart';
+import '../../data/playback_store.dart';
+import '../../logic/story_runtime.dart';
+import '../../logic/chat_scheduler.dart';
 import '../../widgets/typing_indicator.dart';
 import 'messenger_bubble.dart';
 import 'dart:math' as math;
+import 'dart:convert';
+import 'package:isar/isar.dart';
 
 class MessengerChatScreen extends StatefulWidget {
   @override
@@ -18,13 +22,15 @@ class MessengerChatScreen extends StatefulWidget {
 }
 
 class _MessengerChatScreenState extends State<MessengerChatScreen> {
-  final StoryEngine _engine = Get.find<StoryEngine>();
+  final StoryRuntime _runtime = Get.find<StoryRuntime>();
+  final PlaybackStore _store = Get.find<PlaybackStore>();
+  final ChatScheduler _scheduler = Get.find<ChatScheduler>();
   final AudioService _audio = Get.find<AudioService>();
   final FirestoreService _firestore = Get.find<FirestoreService>();
   final ScrollController _scrollController = ScrollController();
 
-  late final String threadId; // ✅ lowercase/trim for engine + firestore
-  late final String partnerName; // ✅ display name only
+  late final String threadId;
+  late final String partnerName;
 
   @override
   void initState() {
@@ -51,6 +57,17 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
     super.dispose();
   }
 
+  // Helper to convert VisibleMessage (Isar) to UI Message Model
+  Message _convertToUiMessage(VisibleMessage vm) {
+    return Message(
+      id: vm.id.toString(),
+      sender: vm.sender == 'nadia' ? Sender.nadia : Sender.other,
+      content: vm.content,
+      type: vm.type == 'image' ? MessageType.image : MessageType.text,
+      timestamp: vm.deliveredAt,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,10 +76,13 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: StreamBuilder<List<Message>>(
-              stream: _engine.getMessagesStream(threadId),
+            child: StreamBuilder<List<VisibleMessage>>(
+              stream: _store.watchMessages(threadId),
               builder: (context, snapshot) {
-                final messages = snapshot.data ?? [];
+                final visibleMsgs = snapshot.data ?? [];
+
+                // Convert to UI models
+                final messages = visibleMsgs.map(_convertToUiMessage).toList();
 
                 // Auto-scroll
                 if (messages.isNotEmpty) {
@@ -97,8 +117,7 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
                 }
 
                 return Obx(() {
-                  // ✅ Use sanitized key for typing state too
-                  final typing = _engine.isTyping[threadId] ?? false;
+                  final typing = _scheduler.typingStates[threadId] ?? false;
 
                   return ListView.builder(
                     controller: _scrollController,
@@ -161,7 +180,6 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
     );
   }
 
-  // ✅ FIXED: typed StreamBuilder + null-safe access for release builds
   Widget _buildOnlineStatus() {
     return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.streamCharacter(threadId),
@@ -265,21 +283,44 @@ class _MessengerChatScreenState extends State<MessengerChatScreen> {
 
 class _RopeChoiceOverlay extends StatelessWidget {
   final String threadId;
-  final StoryEngine _engine = Get.find<StoryEngine>();
+  final StoryRuntime _runtime = Get.find<StoryRuntime>();
+  final PlaybackStore _store = Get.find<PlaybackStore>();
 
   _RopeChoiceOverlay({required this.threadId});
 
+  Future<List<Choice>> _fetchChoices() async {
+    // 1. Get last visible message to find scriptId
+    final visible = await _store.watchLastMessage(threadId).first;
+    if (visible == null) return [];
+
+    // 2. Look up ScriptMessage
+    final scriptMsg = await _store.isar.scriptMessages
+      .filter()
+      .scriptIdEqualTo(visible.scriptId)
+      .findFirst();
+
+    if (scriptMsg == null || scriptMsg.choicesJson == null) return [];
+
+    try {
+      final List<dynamic> raw = jsonDecode(scriptMsg.choicesJson!);
+      return raw.map((e) => Choice(
+        id: e['id'] ?? 'unknown',
+        text: e['text'] ?? '...',
+        targetNodeId: e['targetNodeId'] ?? 'scene_1', // assuming schema
+        impact: e['impact'], // map
+      )).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Message>>(
-      stream: _engine.getMessagesStream(threadId),
+    return FutureBuilder<List<Choice>>(
+      future: _fetchChoices(),
       builder: (context, snapshot) {
-        final messages = snapshot.data ?? [];
-        final lastMsg = messages.isNotEmpty ? messages.last : null;
-
-        final bool hasChoices = lastMsg != null &&
-            (lastMsg.choices?.isNotEmpty ?? false) &&
-            lastMsg.sender != Sender.nadia;
+        final choices = snapshot.data ?? [];
+        final hasChoices = choices.isNotEmpty;
 
         return Container(
           padding: const EdgeInsets.only(top: 20, bottom: 60),
@@ -318,11 +359,11 @@ class _RopeChoiceOverlay extends StatelessWidget {
                   ),
                 )
               else
-                ...lastMsg!.choices!.map(
+                ...choices.map(
                   (choice) => _SwayingChoice(
                     text: choice.text,
                     onTap: () {
-                      _engine.makeChoice(threadId, choice);
+                      _runtime.handleChoice(threadId, choice.text, choice.targetNodeId);
                       Get.back();
                     },
                   ),

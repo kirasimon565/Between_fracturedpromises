@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
 import '../../app/constants.dart';
 import '../../models/ending.dart';
-import '../../services/story_engine.dart';
+import '../../services/state_service.dart';
 import '../../data/playback_store.dart';
 
 class EndingController extends GetxController {
-  final StoryEngine _storyEngine = Get.find<StoryEngine>();
+  final StateService _stateService = Get.find<StateService>();
   final PlaybackStore _store = Get.find<PlaybackStore>();
 
   final ending = Rx<Ending?>(null);
@@ -19,12 +19,19 @@ class EndingController extends GetxController {
   }
 
   void _calculateFinalOutcome() {
-    int secretsFound = _storyEngine.unlockedGlobalSecrets.length;
+    // 🛠️ Replaced queries with StateService/Store queries
+
+    // Example: Count secrets from variables or unlockedGallery
+    // Assuming 'secrets_found' variable is tracked
+    int secretsFound = (_stateService.variables['secrets_found'] as int?) ?? 0;
     truthPercentage.value = ((secretsFound / 10) * 100).toInt().clamp(0, 100);
 
-    paradoxResolved.value = _storyEngine.hasCompletedThread('daniel');
+    // Check completion of Daniel thread
+    // We can check if thread meta has some 'completed' flag or similar,
+    // or check a variable 'thread_daniel_complete'.
+    paradoxResolved.value = (_stateService.variables['thread_daniel_complete'] == true);
 
-    String endingId = _storyEngine.getMetadata('final_ending_id') ?? 'e_neutral';
+    String endingId = (_stateService.variables['final_ending_id'] as String?) ?? 'e_neutral';
     
     ending.value = _getEndingById(endingId);
     

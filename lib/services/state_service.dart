@@ -12,9 +12,12 @@ class StateService extends GetxService {
   final RxString currentSceneId = 'scene_1'.obs;
   final RxMap<String, dynamic> variables = <String, dynamic>{}.obs;
 
+  // New: Reactive list of unlocked thread metas for UI filtering
+  final RxList<ThreadMeta> unlockedThreadMetas = <ThreadMeta>[].obs;
+
   Future<StateService> init() async {
     // Mirror Isar state to Rx variables
-    _store.watchRuntimeState().listen((state) {
+    _store.watchRuntimeState().listen((state) async {
       currentEpisodeId.value = state.currentEpisodeId;
       currentSceneId.value = state.currentSceneId;
       if (state.variablesJson.isNotEmpty) {
@@ -24,12 +27,26 @@ class StateService extends GetxService {
           // ignore error
         }
       }
+
+      // Update unlocked metas when state changes
+      await _refreshUnlockedMetas(state.unlockedThreads);
     });
     
     // Trigger initial load
     await _store.getRuntimeState();
 
     return this;
+  }
+
+  Future<void> _refreshUnlockedMetas(List<String> unlockedIds) async {
+    final metas = <ThreadMeta>[];
+    for (final id in unlockedIds) {
+      final meta = await _store.getThreadMeta(id); // Helper we need to add to Store
+      if (meta != null) {
+        metas.add(meta);
+      }
+    }
+    unlockedThreadMetas.assignAll(metas);
   }
 
   void setVariable(String key, dynamic value) {
@@ -40,8 +57,7 @@ class StateService extends GetxService {
   void updateProgress(String episodeId, String sceneId) {
     currentEpisodeId.value = episodeId;
     currentSceneId.value = sceneId;
-    _store.updateRuntime(sceneId: sceneId); // Persist scene
-    // Note: Episode ID update might need a separate method if it changes often
+    _store.updateRuntime(sceneId: sceneId);
   }
 
   void recordChoice(String choiceId) {
@@ -55,17 +71,5 @@ class StateService extends GetxService {
 
   void _persistVariables() {
     _store.updateRuntime(variablesJson: jsonEncode(variables));
-  }
-
-  // 🛠️ Stub for compatibility (Dead Code from old system)
-  void clearProgress() {
-    // TODO: Implement full reset
-    variables.clear();
-    updateProgress('ep1_the_spark', 'scene_1');
-  }
-
-  // 🛠️ Stub for Admin (Dead Code)
-  void unlockAdmin() {
-    setVariable('admin_unlocked', true);
   }
 }

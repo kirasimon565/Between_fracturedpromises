@@ -1,14 +1,12 @@
 class Choice {
   final String text;
-  final String targetNode;
+  final String targetNodeId; // Renamed to match usage in ChatScreen (targetNodeId)
   final Map<String, dynamic>? impact;
-
-  // Optional but useful later (analytics, debugging, replays)
   final String? id;
 
   Choice({
     required this.text,
-    required this.targetNode,
+    required this.targetNodeId,
     this.impact,
     this.id,
   });
@@ -20,8 +18,9 @@ class Choice {
       text: json['text']?.toString() ?? '',
 
       // ✅ supports both snake_case and camelCase
-      targetNode: json['target_node']?.toString() ??
+      targetNodeId: json['target_node']?.toString() ??
           json['targetNode']?.toString() ??
+          json['targetNodeId']?.toString() ?? // Added support for targetNodeId key just in case
           '',
 
       // ✅ defensive cast
@@ -34,7 +33,7 @@ class Choice {
   Map<String, dynamic> toJson() => {
         if (id != null) 'id': id,
         'text': text,
-        'target_node': targetNode,
+        'targetNodeId': targetNodeId,
         if (impact != null) 'impact': impact,
       };
 }

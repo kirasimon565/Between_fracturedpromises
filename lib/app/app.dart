@@ -30,13 +30,39 @@ class MyApp extends StatelessWidget {
         builder: (context, widget) {
           ErrorWidget.builder = (FlutterErrorDetails details) {
             return Scaffold(
-              backgroundColor: Colors.black,
+              backgroundColor: Colors.black, // Explicitly black
               body: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: SelectableText(
-                    "UI CRASH: ${details.exception}",
-                    style: const TextStyle(color: Colors.redAccent, fontSize: 14),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
+                      const SizedBox(height: 16),
+                      SelectableText(
+                        "UI ERROR:\n${details.exception}",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 14,
+                          fontFamily: 'Courier', // Monospace for better readability
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent.withOpacity(0.2),
+                          foregroundColor: Colors.redAccent,
+                          side: const BorderSide(color: Colors.redAccent),
+                        ),
+                        onPressed: () {
+                          // Simple way to restart: Re-launch the main app or go to Splash
+                          // But since this is a global crash, Get.offAllNamed is safest.
+                          Get.offAllNamed(AppRoutes.splash);
+                        },
+                        child: const Text("RESTART APP"),
+                      ),
+                    ],
                   ),
                 ),
               ),
