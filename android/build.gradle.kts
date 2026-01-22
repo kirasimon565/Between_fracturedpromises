@@ -1,5 +1,5 @@
 // android/build.gradle.kts
-// Root build.gradle.kts (production-safe: no afterEvaluate, reflection-based namespace fallback + force compileSdk)
+// Root build.gradle.kts (production-safe: no afterEvaluate, reflection-based namespace fallback + safe compileSdk forcing)
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
@@ -19,20 +19,16 @@ allprojects {
  * This sets a fallback namespace ONLY if the module doesn't already have one.
  *
  * IMPORTANT:
- * - No afterEvaluate (Gradle 9+ can throw hard)
+ * - No afterEvaluate
  * - Runs when Android plugin is applied (safe lifecycle)
- * - Uses reflection so it works across AGP minor versions and app/library modules
+ * - Uses reflection so it works across AGP minor versions/types
  */
 fun Project.applyNamespaceFallbackReflective() {
-    // Find the "android" extension (exists for com.android.application/library modules)
     val androidExt = extensions.findByName("android") ?: return
 
-    // AGP exposes getNamespace()/setNamespace(String) on the android extension
     val getNamespace = androidExt.javaClass.methods.firstOrNull { it.name == "getNamespace" }
-    val setNamespace = androidExt.javaClass.methods.firstOrNull { it.name == "setNamespace" }
-
-    // If AGP type doesn't support namespace (very old AGP), do nothing
-    if (setNamespace == null) return
+    val setNamespace = androidExt.javaClass.methods.firstOrNull { it.name == "setNamespace" && it.parameterTypes.size == 1 }
+        ?: return
 
     val current = (getNamespace?.invoke(androidExt) as? String).orEmpty()
     if (current.isNotBlank()) return
@@ -48,36 +44,58 @@ fun Project.applyNamespaceFallbackReflective() {
 /**
  * ✅ Forces compileSdk for ALL Android modules (app + libraries).
  *
- * Fixes errors like:
- *   AAPT: error: resource android:attr/lStar not found
- *
- * Why it happens:
- * - Your :app can be compileSdk 36
- * - But a plugin module (ex: isar_flutter_libs) can still compile with < 31
- * - AAPT then can't find android:attr/lStar (API 31+)
+ * Fixes: AAPT "android:attr/lStar not found" when a plugin compiles with < 31.
  *
  * IMPORTANT:
  * - No afterEvaluate
  * - Runs at plugin-apply time
- * - Reflection so it works across AGP versions
+ * - Reflection + overload-safe (Int vs String)
+ * - Won't crash the build if AGP API differs
  */
 fun Project.forceCompileSdk(api: Int) {
     val androidExt = extensions.findByName("android") ?: return
 
-    // Different AGP versions expose either:
-    // - setCompileSdkVersion(Int)
-    // - compileSdkVersion(Int)
-    val setCompileSdk = androidExt.javaClass.methods.firstOrNull {
-        it.name == "setCompileSdkVersion" && it.parameterTypes.size == 1
-    }
-    val compileSdkVersion = androidExt.javaClass.methods.firstOrNull {
-        it.name == "compileSdkVersion" && it.parameterTypes.size == 1
+    fun invokeIfExists(methodName: String): Boolean {
+        val candidates = androidExt.javaClass.methods.filter { it.name == methodName && it.parameterTypes.size == 1 }
+        if (candidates.isEmpty()) return false
+
+        // Prefer Int/Integer overloads
+        val intMethod = candidates.firstOrNull { p ->
+            val t = p.parameterTypes[0]
+            t == Int::class.javaPrimitiveType || t == Integer::class.java
+        }
+
+        // Otherwise fall back to String overloads
+        val stringMethod = candidates.firstOrNull { p -> p.parameterTypes[0] == String::class.java }
+
+        return try {
+            when {
+                intMethod != null -> {
+                    intMethod.invoke(androidExt, api)
+                    true
+                }
+                stringMethod != null -> {
+                    // AGP sometimes expects "android-34" style
+                    stringMethod.invoke(androidExt, "android-$api")
+                    true
+                }
+                else -> false
+            }
+        } catch (_: Throwable) {
+            // Don't crash plugin application if AGP signature differs
+            false
+        }
     }
 
-    when {
-        setCompileSdk != null -> setCompileSdk.invoke(androidExt, api)
-        compileSdkVersion != null -> compileSdkVersion.invoke(androidExt, api)
-    }
+    // Different AGP versions use different names. Try all safe options.
+    val applied =
+        invokeIfExists("setCompileSdkVersion") ||
+        invokeIfExists("compileSdkVersion") ||
+        invokeIfExists("setCompileSdk") ||      // newer DSL uses compileSdk property; some expose setter
+        invokeIfExists("compileSdk")            // sometimes a method exists too
+
+    // Optional debug:
+    // if (applied) println("✅ compileSdk forced for $path -> $api")
 }
 
 subprojects {
