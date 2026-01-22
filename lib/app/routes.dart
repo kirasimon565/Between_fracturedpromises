@@ -12,7 +12,7 @@ import '../screens/admin/episode_uploader.dart';
 import '../screens/messenger/messenger_chat_screen.dart';
 import '../screens/makelove/makelove_chat_screen.dart';
 import '../screens/profile/profile_screen.dart';
-import '../screens/profile/profile_edit_screen.dart';
+// Removed: import '../screens/profile/profile_edit_screen.dart';
 import '../screens/gallery/gallery_screen.dart';
 import '../screens/endgame/endgame_screen.dart';
 
@@ -32,7 +32,7 @@ class AppRoutes {
   static const adminUploader = '/admin/uploader';
 
   static const profile = '/profile';
-  static const profileEdit = '/profile/edit';
+  // static const profileEdit = '/profile/edit'; // Deprecated
   static const gallery = '/gallery';
   static const endgame = '/endgame';
   // 🛠️ REMOVED: static const secret = '/secret';
@@ -100,11 +100,13 @@ class AppRoutes {
       page: () => ProfileScreen(),
       transition: Transition.cupertino,
     ),
+    /*
     GetPage(
       name: profileEdit,
       page: () => ProfileEditScreen(),
       transition: Transition.cupertino,
     ),
+    */
     GetPage(
       name: gallery,
       page: () => GalleryScreen(),

@@ -8,7 +8,9 @@ import '../../services/story_engine.dart';
 import '../../services/audio_service.dart';
 import '../../widgets/typing_indicator.dart';
 import '../../app/constants.dart';
+import '../../theme/colors.dart';
 import 'makelove_bubble.dart';
+import '../profile/character_profile_screen.dart';
 
 class MakeloveChatScreen extends StatefulWidget {
   @override
@@ -39,6 +41,31 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
     if (s.isEmpty) return "UNKNOWN";
     // If raw is already "daniel", show "DANIEL" (your Makelove header style)
     return s.toUpperCase();
+  }
+
+  void _navigateToProfile() {
+    // 🛠️ Navigate to Character Profile
+    // We can inject bio based on threadId if we have a robust data source for it.
+    // For now, hardcode or lookup.
+
+    String bio = "No data.";
+    String avatar = AppConstants.avatarDaniel; // Default for Makelove is Daniel
+
+    if (threadId == 'daniel') {
+      bio = "A freelance UI/UX designer and part-time digital nomad.\nLives an unrooted life fueled by attention, novelty, and online connections.\nDrawn to secrecy and conquest, mistaking obsession for intimacy.";
+      avatar = AppConstants.avatarDaniel;
+    } else if (threadId == 'liam') {
+      bio = "A product analyst at the same company as Nadia.\nCharming, sociable, and casually flirtatious without long-term intentions.\nSees Nadia as an escape from routine.";
+      avatar = AppConstants.avatarLiam;
+    }
+
+    Get.to(() => CharacterProfileScreen(
+      characterId: threadId,
+      name: partnerName,
+      bio: bio,
+      avatarPath: avatar,
+      themeColor: AppColors.makelovePrimary,
+    ));
   }
 
   @override
@@ -156,36 +183,39 @@ class _MakeloveChatScreenState extends State<MakeloveChatScreen> {
             size: 18, color: Colors.redAccent),
         onPressed: () => Get.back(),
       ),
-      title: Column(
-        children: [
-          Text(
-            partnerName,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              letterSpacing: 5,
-              fontFamily: 'Didot',
-              fontWeight: FontWeight.w200,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              _LivePulseDot(),
-              SizedBox(width: 6),
-              Text(
-                "LIVE",
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
+      title: GestureDetector(
+        onTap: _navigateToProfile,
+        child: Column(
+          children: [
+            Text(
+              partnerName,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                letterSpacing: 5,
+                fontFamily: 'Didot',
+                fontWeight: FontWeight.w200,
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                _LivePulseDot(),
+                SizedBox(width: 6),
+                Text(
+                  "LIVE",
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

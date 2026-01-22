@@ -22,8 +22,9 @@ class RuntimeState {
   // ---------------------------------------------------------------------------
   // 👤 User Profile (Migrated from SharedPreferences)
   // ---------------------------------------------------------------------------
-  String userName = "Nadia";
-  String userBio = "Just looking for a spark...";
+  String messengerName = "Nadia Carter"; // Default "Safe" name
+  String makeloveAlias = "Unknown";      // Default "Secret" alias
+  String userBio = "Marketing Coordinator | Lifestyle Brand | 28";
 
   // ---------------------------------------------------------------------------
   // 🖼️ Gallery & Collectibles
