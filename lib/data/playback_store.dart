@@ -276,9 +276,31 @@ class PlaybackStore extends GetxService {
         .watch(fireImmediately: true);
   }
 
+  // 🛠️ NEW: Watch just the last message for the list screen
+  Stream<VisibleMessage?> watchLastMessage(String threadId) {
+    return _isar.visibleMessages
+        .filter()
+        .saveSlotIdEqualTo(saveSlotId)
+        .threadIdEqualTo(threadId)
+        .sortByDeliveredAtDesc() // Newest first
+        .watch(fireImmediately: true)
+        .map((list) => list.isNotEmpty ? list.first : null);
+  }
+
   Future<void> addVisibleMessage(VisibleMessage msg) async {
     await _isar.writeTxn(() async {
       await _isar.visibleMessages.put(msg);
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Script / Meta Helpers (New)
+  // ---------------------------------------------------------------------------
+
+  Future<ThreadMeta?> getThreadMeta(String threadId) async {
+    return await _isar.threadMetas
+        .filter()
+        .threadIdEqualTo(threadId.toLowerCase().trim())
+        .findFirst();
   }
 }

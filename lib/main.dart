@@ -7,49 +7,47 @@ import 'theme/theme.dart';
 import 'services/state_service.dart';
 import 'services/audio_service.dart';
 import 'data/playback_store.dart'; 
-// 🛠️ NEW IMPORT: Pointing to the logic folder you discovered
+import 'data/script_repository.dart';
 import 'logic/story_runtime.dart'; 
+import 'logic/chat_scheduler.dart';
 
 void main() async {
   // 1. Mandatory: Connect Flutter to Native Layer
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // 2. Initialize Firebase (Critical for Analytics/Auth)
+    // 2. Initialize Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
     // 3. Initialize Isar (The Hard Path Foundation)
-    // We open the database BEFORE anything else tries to read from it.
     final playbackStore = PlaybackStore();
     await playbackStore.init(); 
-    // 'permanent: true' prevents GetX from disposing this accidentally
     Get.put(playbackStore, permanent: true); 
 
-    // 4. Initialize StateService (Nadia's Memory)
+    // 4. Register ScriptRepository & ChatScheduler (Dependencies for StoryRuntime)
+    Get.put(ScriptRepository(), permanent: true);
+    Get.put(ChatScheduler(), permanent: true);
+
+    // 5. Initialize StateService (Nadia's Memory)
     final stateService = StateService();
     await stateService.init(); 
     Get.put(stateService, permanent: true);
 
-    // 5. 🛠️ Initialize StoryRuntime (The Game's Brain)
-    // Now that the file is in your GitHub, we inject it so the UI can find it.
+    // 6. Initialize StoryRuntime (The Game's Brain)
     final storyRuntime = StoryRuntime();
-    // Some versions of StoryRuntime have an init, others don't. 
-    // If Jules added one, uncomment the line below:
-    // await storyRuntime.init(); 
+    // await storyRuntime.init(); // Uncomment if init logic is added later
     Get.put(storyRuntime, permanent: true);
 
-    // 6. Register Global Audio and Theme
+    // 7. Register Global Audio and Theme
     Get.put(AudioService(), permanent: true);
     Get.put(ThemeService(), permanent: true);
 
-    // 7. Launch the App
+    // 8. Launch the App
     runApp(const MyApp());
   } catch (e) {
-    // 🛑 Final fallback: Log the error and launch the UI to prevent a black/grey screen
     debugPrint("=== BOOT CRASH ===: $e");
-    
     // If we fail, we still launch MyApp so the engine doesn't just hang
     runApp(const MyApp());
   }

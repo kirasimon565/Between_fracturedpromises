@@ -45,8 +45,7 @@ class FirestoreService extends GetxService {
         .snapshots();
   }
 
-  /// ✅ NEW: Stream thread docs (metadata like `app`)
-  /// Used by StoryEngine to categorize threads reliably.
+  /// Stream thread docs (metadata like `app`)
   Stream<QuerySnapshot> streamThreads(String episodeId) {
     return _db
         .collection('episodes')
@@ -59,11 +58,6 @@ class FirestoreService extends GetxService {
   Stream<QuerySnapshot> streamMessages(String episodeId, String threadId) {
     final String sanitizedId = threadId.toLowerCase().trim();
 
-    // ignore: avoid_print
-    print(
-      "FIRESTORE: Streaming /episodes/$episodeId/threads/$sanitizedId/messages",
-    );
-
     return _db
         .collection('episodes')
         .doc(episodeId)
@@ -72,22 +66,6 @@ class FirestoreService extends GetxService {
         .collection('messages')
         .orderBy('orderIndex', descending: false)
         .snapshots();
-  }
-
-  /// Real-time thread discovery (IDs only)
-  /// (You can keep using this elsewhere; StoryEngine can now use streamThreads instead.)
-  Stream<List<String>> streamActiveThreadIds(String episodeId) {
-    return _db
-        .collection('episodes')
-        .doc(episodeId)
-        .collection('threads')
-        .snapshots()
-        .map((snapshot) {
-      final ids = snapshot.docs.map((doc) => doc.id).toList();
-      // ignore: avoid_print
-      print("FIRESTORE DEBUG: Found threads in DB: $ids");
-      return ids;
-    });
   }
 
   // Episode Fetching
@@ -103,10 +81,6 @@ class FirestoreService extends GetxService {
   }
 
   /// Upload Episode Script (batch)
-  ///
-  /// ✅ Updates included:
-  /// - Writes `app` to thread docs AND messages (Messenger vs Makelove separation).
-  /// - Provides a single place to decide per-thread app.
   Future<void> uploadEpisodeScript(String episodeId, String jsonString) async {
     try {
       final Map<String, dynamic> json = jsonDecode(jsonString);
@@ -141,7 +115,6 @@ class FirestoreService extends GetxService {
           }
 
           // ✅ Decide which app this thread belongs to
-          // Expand this mapping later if you add more Makelove-only characters.
           final String app = _resolveThreadApp(threadId);
 
           final threadRef = _db
@@ -164,7 +137,6 @@ class FirestoreService extends GetxService {
             choicesForMsg = scene.choices;
           }
 
-          // Message data (keys match StoryEngine expectations)
           final Map<String, dynamic> messageData = {
             'id': originalMsg.id,
             'sender': originalMsg.sender.toString().split('.').last,
@@ -175,7 +147,7 @@ class FirestoreService extends GetxService {
             'sceneId': scene.id,
             'choices': choicesForMsg?.map((c) => c.toJson()).toList(),
             'timestamp': FieldValue.serverTimestamp(),
-            'app': app, // useful for fallback logic / debugging
+            'app': app,
           };
 
           final msgRef = threadRef.collection('messages').doc(originalMsg.id);
@@ -194,7 +166,6 @@ class FirestoreService extends GetxService {
   }
 
   /// ✅ Centralized app mapping for threads
-  /// Keeps your rule in one place.
   String _resolveThreadApp(String threadId) {
     final t = threadId.toLowerCase().trim();
     if (t == 'daniel') return 'makelove';

@@ -1,7 +1,7 @@
 import 'choice.dart';
 
 enum MessageType { text, image, choice }
-enum Sender { nadia, ethan, claire, olivia, daniel, liam, system }
+enum Sender { nadia, ethan, claire, olivia, daniel, liam, system, other } // Added 'other' for generic sender mapping
 
 class Message {
   final String id;
@@ -14,6 +14,7 @@ class Message {
   final String? sceneId;
   final List<Choice>? choices;
   final Map<String, dynamic>? metadata;
+  final DateTime? timestamp; // ✅ Added timestamp
 
   Message({
     required this.id,
@@ -26,6 +27,7 @@ class Message {
     this.sceneId,
     this.choices,
     this.metadata,
+    this.timestamp,
   });
 
   /// 🔐 Safe enum parser
@@ -81,6 +83,12 @@ class Message {
           .toList(),
 
       metadata: json['metadata'] as Map<String, dynamic>?,
+
+      timestamp: json['timestamp'] != null
+          ? (json['timestamp'] is int
+              ? DateTime.fromMillisecondsSinceEpoch(json['timestamp'])
+              : DateTime.tryParse(json['timestamp'].toString()))
+          : null,
     );
   }
 
@@ -96,6 +104,7 @@ class Message {
       'sceneId': sceneId,
       'choices': choices?.map((e) => e.toJson()).toList(),
       'metadata': metadata,
+      'timestamp': timestamp?.toIso8601String(),
     };
   }
 }

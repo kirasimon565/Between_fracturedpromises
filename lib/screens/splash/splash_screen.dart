@@ -31,6 +31,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       vsync: this,
       duration: const Duration(seconds: 30),
     )..repeat(reverse: true);
+
     
     // Attempt to load the current episode/script to ensure readiness
     // Using default start for now or what's in state
@@ -49,10 +50,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // 🚀 Check current node in Isar to decide flow
     // For now, simple check using state variables
     // Assuming 'scene_1' is start.
-    // We can also check if variables map is empty to detect new user, 
+    // We can also check if variables map is empty to detect new user,
     // or better yet, add 'isNewUser' flag to RuntimeState schema later.
     // For now, let's assume if currentSceneId is 'scene_1' and no variables set, it's new.
-    
+
     if (_stateService.currentSceneId.value == 'scene_1' && _stateService.variables.isEmpty) {
        Get.offAllNamed(AppRoutes.welcome);
     } else {

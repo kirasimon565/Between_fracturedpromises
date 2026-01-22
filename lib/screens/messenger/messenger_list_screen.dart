@@ -3,9 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app/constants.dart';
-import '../../services/story_engine.dart';
+import '../../services/state_service.dart';
 import '../../services/audio_service.dart';
-import '../../models/message.dart';
+import '../../data/playback_store.dart';
+import '../../logic/chat_scheduler.dart';
 import 'dart:math';
 
 class MessengerListScreen extends StatefulWidget {
@@ -15,7 +16,9 @@ class MessengerListScreen extends StatefulWidget {
 
 class _MessengerListScreenState extends State<MessengerListScreen>
     with SingleTickerProviderStateMixin {
-  final StoryEngine _engine = Get.find<StoryEngine>();
+  final StateService _state = Get.find<StateService>();
+  final PlaybackStore _store = Get.find<PlaybackStore>();
+  final ChatScheduler _scheduler = Get.find<ChatScheduler>();
   final AudioService _audio = Get.find<AudioService>();
   late AnimationController _swayController;
 
@@ -66,14 +69,12 @@ class _MessengerListScreenState extends State<MessengerListScreen>
                 _buildHangingHeader(),
                 const SizedBox(height: 20),
 
-                // ✅ Use engine's Messenger-only list (no scene filtering here)
+                // ✅ Use StateService's unlocked thread list
                 Expanded(
                   child: Obx(() {
-                    // ❗ FIX: you had a stray semicolon before `.where(...)`
-                    // That turned this into "dot shorthand" and broke release build.
-                    final threads = _engine.messengerThreads
-                        .map((id) => id.toLowerCase().trim())
-                        .where((id) => id.isNotEmpty && id != 'system')
+                    final threads = _state.unlockedThreadMetas
+                        .where((meta) => meta.app == 'messenger')
+                        .map((meta) => meta.threadId)
                         .toList();
 
                     if (threads.isEmpty) {
@@ -107,7 +108,7 @@ class _MessengerListScreenState extends State<MessengerListScreen>
                       ),
                       itemCount: threads.length,
                       itemBuilder: (context, index) {
-                        final threadId = threads[index]; // already sanitized
+                        final threadId = threads[index];
                         return _buildConversationTile(threadId, index);
                       },
                     );
@@ -161,16 +162,16 @@ class _MessengerListScreenState extends State<MessengerListScreen>
   }
 
   Widget _buildConversationTile(String threadId, int index) {
-    // Display name formatting from sanitized id
     final String name = _toDisplayName(threadId);
 
-    return StreamBuilder<Message?>(
-      stream: _engine.getLastMessageStream(threadId),
+    // Using Isar helper for last message
+    return StreamBuilder<VisibleMessage?>(
+      stream: _store.watchLastMessage(threadId),
       builder: (context, snapshot) {
         final lastMsg = snapshot.data;
 
         return Obx(() {
-          final bool typing = _engine.isTyping[threadId] ?? false;
+          final bool typing = _scheduler.typingStates[threadId] ?? false;
           final String content =
               typing ? "Typing..." : (lastMsg?.content ?? "Encryption active...");
 
@@ -179,7 +180,9 @@ class _MessengerListScreenState extends State<MessengerListScreen>
             child: GestureDetector(
               onTap: () {
                 _audio.playPing();
-                // Pass display name (your chat screen sanitizes to threadId internally)
+                // Pass display name (chat screen logic should be updated to expect threadId or resolve it)
+                // Assuming chat screen expects name for now, but safer to pass ID if refactoring deeper.
+                // Keeping argument as 'name' for compatibility with existing route logic unless changed.
                 Get.toNamed('/messenger/chat', arguments: name);
               },
               child: Container(
