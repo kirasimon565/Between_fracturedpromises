@@ -6,37 +6,42 @@ import 'app/app.dart';
 import 'theme/theme.dart';
 import 'services/state_service.dart';
 import 'services/audio_service.dart';
-// 🛠️ Import the new Hard Path store
 import 'data/playback_store.dart'; 
 
 void main() async {
-  // 1. Connect Flutter to the Native Layer
+  // 1. Mandatory: Connect Flutter to Native Layer
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // 2. Initialize Firebase
+    // 2. Initialize Firebase (Critical for Analytics/Auth)
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    // 3. Initialize the Isar Database (THE CRITICAL STEP)
-    // We must open the database BEFORE the StateService tries to read from it.
+    // 3. Initialize Isar (The Hard Path Foundation)
+    // We open the database BEFORE anything else tries to read from it.
     final playbackStore = PlaybackStore();
     await playbackStore.init(); 
-    Get.put(playbackStore); 
+    // 'permanent: true' prevents GetX from disposing this accidentally
+    Get.put(playbackStore, permanent: true); 
 
-    // 4. Register Global Services
-    // putAsync ensures the StateService finishes its logic before moving on.
-    await Get.putAsync(() => StateService().init());
-    
-    Get.put(AudioService());
-    Get.put(ThemeService());
+    // 4. Initialize StateService (Nadia's Memory)
+    // We WAIT for init() to finish so the grey screen doesn't find null data.
+    final stateService = StateService();
+    await stateService.init(); 
+    Get.put(stateService, permanent: true);
 
+    // 5. Register Global Audio and Theme
+    Get.put(AudioService(), permanent: true);
+    Get.put(ThemeService(), permanent: true);
+
+    // 6. Launch the App
     runApp(const MyApp());
   } catch (e) {
-    // 🛑 If anything fails during boot, print the error and attempt to launch anyway
-    // This prevents the "Infinite Launcher" hang.
-    debugPrint("CRITICAL BOOT ERROR: $e");
+    // 🛑 Final fallback: Log the error and launch the UI to prevent a black/grey screen
+    debugPrint("=== BOOT CRASH ===: $e");
+    
+    // If we fail, we still launch MyApp so the engine doesn't just hang
     runApp(const MyApp());
   }
 }
