@@ -7,13 +7,14 @@ import 'theme/theme.dart';
 import 'services/state_service.dart';
 import 'services/audio_service.dart';
 import 'services/firestore_service.dart'; 
-import 'services/auth_service.dart'; // 🛠️ ADDED: Required for Firebase & UI checks
+import 'services/auth_service.dart'; 
 import 'data/playback_store.dart'; 
 import 'data/script_repository.dart';
 import 'logic/story_runtime.dart'; 
 import 'logic/chat_scheduler.dart';
 import 'screens/profile/profile_controller.dart'; 
 import 'screens/episodes/episode_controller.dart'; 
+import 'screens/gallery/gallery_controller.dart'; // 🛠️ ADDED: For the Photo Gallery app
 
 void main() async {
   // 🛡️ SHIELD 1: Catch UI Rendering Errors
@@ -52,7 +53,6 @@ void main() async {
     debugPrint("🚀 [BOOT]: Starting Firebase...");
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     
-    // 🛠️ Register AuthService immediately after Firebase
     debugPrint("🚀 [BOOT]: Initializing Auth Service...");
     Get.put(AuthService(), permanent: true); 
     
@@ -74,6 +74,7 @@ void main() async {
     debugPrint("🚀 [BOOT]: Initializing Feature Controllers...");
     Get.put(ProfileController(), permanent: true); 
     Get.put(EpisodeController(), permanent: true); 
+    Get.put(GalleryController(), permanent: true); // 🛠️ REGISTERED: Photo Gallery controller
 
     // 7. 🛠️ GAME BRAIN
     debugPrint("🚀 [BOOT]: Starting StoryRuntime...");
