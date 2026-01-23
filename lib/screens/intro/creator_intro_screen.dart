@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../../app/routes.dart';
 
 /// 🎞 24FPS MOTION QUANTIZATION
@@ -21,7 +20,7 @@ class CreatorIntroScreen extends StatefulWidget {
 
 class _CreatorIntroScreenState extends State<CreatorIntroScreen>
     with TickerProviderStateMixin {
-  // 🎬 Animation Controllers
+  // 🎬 Controllers
   late AnimationController _dropController;
   late AnimationController _swayController;
   late AnimationController _fadeController;
@@ -37,9 +36,6 @@ class _CreatorIntroScreenState extends State<CreatorIntroScreen>
   late Animation<double> _blackout;
   late Animation<double> _letterboxHeight;
 
-  // 🔊 Audio
-  final AudioPlayer _audio = AudioPlayer();
-
   bool showDots = false;
 
   // 🧠 Dynamic studio name
@@ -50,50 +46,67 @@ class _CreatorIntroScreenState extends State<CreatorIntroScreen>
     super.initState();
 
     /// DROP
-    _dropController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 1600));
+    _dropController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
     _drop = Tween<double>(begin: -700, end: 0).animate(
       CurvedAnimation(parent: _dropController, curve: Curves.easeOutCubic),
     );
 
     /// SWAY
-    _swayController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 6));
+    _swayController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    );
     _sway = Tween<double>(begin: -0.015, end: 0.015).animate(
       CurvedAnimation(parent: _swayController, curve: Curves.easeInOutSine),
     );
 
     /// DISCLAIMER FADE
-    _fadeController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
     _fadeDisclaimer =
         CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
 
     /// CAMERA MICRO-ZOOM
-    _zoomController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 6));
+    _zoomController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    );
     _zoom = Tween<double>(begin: 0.98, end: 1.0).animate(
       CurvedAnimation(parent: _zoomController, curve: Curves.easeOut),
     );
 
     /// FADE TO BLACK
-    _blackoutController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
+    _blackoutController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
     _blackout =
         CurvedAnimation(parent: _blackoutController, curve: Curves.easeInOut);
 
-    /// LETTERBOX BARS
-    _letterboxController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    /// LETTERBOX
+    _letterboxController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
     _letterboxHeight = Tween<double>(begin: 0, end: 48).animate(
       CurvedAnimation(parent: _letterboxController, curve: Curves.easeOutCubic),
     );
 
-    /// SEQUENCE
-    _dropController.addStatusListener((status) async {
+    /// 🎧 DUAL-HAPTIC SEQUENCE (NO AUDIO)
+    _dropController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        HapticFeedback.mediumImpact();
-        await _audio.play(AssetSource('sounds/impact_low.wav'), volume: 0.6);
+        // 1️⃣ HEAVY IMPACT (sign hits rope limit)
+        HapticFeedback.heavyImpact();
+
+        // 2️⃣ ROPE TENSION / SETTLE
+        Future.delayed(const Duration(milliseconds: 120), () {
+          HapticFeedback.selectionClick();
+        });
 
         _swayController.repeat(reverse: true);
         _zoomController.forward();
@@ -117,7 +130,6 @@ class _CreatorIntroScreenState extends State<CreatorIntroScreen>
 
   @override
   void dispose() {
-    _audio.dispose();
     _dropController.dispose();
     _swayController.dispose();
     _fadeController.dispose();
@@ -135,7 +147,7 @@ class _CreatorIntroScreenState extends State<CreatorIntroScreen>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          /// CAMERA MICRO-ZOOM (24fps)
+          /// CAMERA ZOOM (24fps)
           AnimatedBuilder(
             animation: _zoom,
             builder: (_, child) {
@@ -274,12 +286,8 @@ class _CreatorIntroScreenState extends State<CreatorIntroScreen>
             right: 0,
             child: AnimatedBuilder(
               animation: _letterboxHeight,
-              builder: (_, __) {
-                return Container(
-                  height: _letterboxHeight.value,
-                  color: Colors.black,
-                );
-              },
+              builder: (_, __) =>
+                  Container(height: _letterboxHeight.value, color: Colors.black),
             ),
           ),
 
@@ -290,12 +298,8 @@ class _CreatorIntroScreenState extends State<CreatorIntroScreen>
             right: 0,
             child: AnimatedBuilder(
               animation: _letterboxHeight,
-              builder: (_, __) {
-                return Container(
-                  height: _letterboxHeight.value,
-                  color: Colors.black,
-                );
-              },
+              builder: (_, __) =>
+                  Container(height: _letterboxHeight.value, color: Colors.black),
             ),
           ),
 
