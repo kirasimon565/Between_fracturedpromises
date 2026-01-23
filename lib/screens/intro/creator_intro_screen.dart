@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // 🛠️ Required for Haptics
-import 'package:get/get.dart';
 import 'dart:async';
-import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import '../../app/routes.dart';
 
 class CreatorIntroScreen extends StatefulWidget {
@@ -12,123 +11,163 @@ class CreatorIntroScreen extends StatefulWidget {
   State<CreatorIntroScreen> createState() => _CreatorIntroScreenState();
 }
 
-class _CreatorIntroScreenState extends State<CreatorIntroScreen> with TickerProviderStateMixin {
-  late AnimationController _fallController;
+class _CreatorIntroScreenState extends State<CreatorIntroScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _dropController;
   late AnimationController _swayController;
-  late Animation<double> _fallAnimation;
-  late Animation<double> _swayAnimation;
+  late AnimationController _fadeController;
+
+  late Animation<double> _drop;
+  late Animation<double> _sway;
+  late Animation<double> _fadeDisclaimer;
+
+  bool showDots = false;
 
   @override
   void initState() {
     super.initState();
 
-    // 1. Fall Animation (Drop from top)
-    _fallController = AnimationController(
+    /// SIGN DROP — heavy gravity (cinematic)
+    _dropController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
+
+    _drop = Tween<double>(begin: -650, end: 0).animate(
+      CurvedAnimation(
+        parent: _dropController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+
+    /// SWAY — slow & restrained
+    _swayController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    );
+
+    _sway = Tween<double>(begin: -0.015, end: 0.015).animate(
+      CurvedAnimation(
+        parent: _swayController,
+        curve: Curves.easeInOutSine,
+      ),
+    );
+
+    /// DISCLAIMER FADE
+    _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
 
-    _fallAnimation = Tween<double>(begin: -500, end: 0).animate(
-      CurvedAnimation(parent: _fallController, curve: Curves.bounceOut),
-    );
+    _fadeDisclaimer =
+        CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
 
-    // 2. Sway Animation (Continuous)
-    _swayController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    );
-
-    _swayAnimation = Tween<double>(begin: -0.04, end: 0.04).animate(
-      CurvedAnimation(parent: _swayController, curve: Curves.easeInOutSine),
-    );
-
-    // 🛠️ HAPTIC TENSION TRIGGER
-    // We listen to the fall. When it hits the bottom (Bounce), we trigger haptics.
-    _fallController.addStatusListener((status) {
+    /// SEQUENCE
+    _dropController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        // First Impact: The heavy drop hits the end of the rope
-        HapticFeedback.heavyImpact(); 
-        
-        // Second subtle vibration to mimic rope tension/stretching
-        Future.delayed(const Duration(milliseconds: 150), () {
-          HapticFeedback.selectionClick();
-        });
-
-        // Start the swaying now that the sign has "landed"
+        HapticFeedback.mediumImpact();
         _swayController.repeat(reverse: true);
+
+        Future.delayed(const Duration(milliseconds: 400), () {
+          _fadeController.forward();
+          setState(() => showDots = true);
+        });
       }
     });
 
-    // Start the fall immediately
-    _fallController.forward();
+    _dropController.forward();
 
-    // 3. Transition to Splash after 5 seconds total
-    Timer(const Duration(seconds: 5), () {
-      Get.offNamed(AppRoutes.splash); 
+    /// TRANSITION TO SPLASH
+    Timer(const Duration(seconds: 7), () {
+      Get.offNamed(AppRoutes.splash);
     });
   }
 
   @override
   void dispose() {
-    _fallController.dispose();
+    _dropController.dispose();
     _swayController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // THE HANGING SIGN
+          /// VIGNETTE
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  radius: 1.2,
+                  colors: [
+                    Colors.black,
+                    Colors.black.withOpacity(0.92),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          /// HANGING SIGN
           AnimatedBuilder(
-            animation: Listenable.merge([_fallAnimation, _swayAnimation]),
-            builder: (context, child) {
+            animation: Listenable.merge([_drop, _sway]),
+            builder: (_, __) {
               return Positioned(
-                // Positioned relative to the center of the screen
-                top: (MediaQuery.of(context).size.height / 2 - 150) + _fallAnimation.value,
+                top: height * 0.28 + _drop.value,
                 left: 0,
                 right: 0,
                 child: Transform(
                   alignment: Alignment.topCenter,
                   transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.001) // Perspective
-                    ..rotateZ(_swayAnimation.value),
+                    ..setEntry(3, 2, 0.001)
+                    ..rotateZ(_sway.value),
                   child: Column(
                     children: [
-                      // The Ropes (Two ropes hanging from the top)
+                      /// ROPES
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(width: 1.5, height: 250, color: Colors.white12),
-                          const SizedBox(width: 120),
-                          Container(width: 1.5, height: 250, color: Colors.white12),
+                        children: const [
+                          _Rope(),
+                          SizedBox(width: 140),
+                          _Rope(),
                         ],
                       ),
-                      // The Logo Sign
+
+                      /// SIGN BOARD
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 25),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 48,
+                          vertical: 28,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0A0A0A),
-                          border: Border.all(color: Colors.white10, width: 1.5),
+                          color: const Color(0xFF0B0B0B),
+                          border: Border.all(
+                            color: Colors.white12,
+                            width: 1,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.8),
-                              blurRadius: 30,
-                              offset: const Offset(0, 20),
-                            )
-                          ]
+                              color: Colors.black.withOpacity(0.9),
+                              blurRadius: 40,
+                              offset: const Offset(0, 32),
+                            ),
+                          ],
                         ),
                         child: const Text(
-                          "BETWEEN\nPRODUCTIONS", // Or your specific Name
+                          "BETWEEN\nPRODUCTIONS",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 24,
-                            letterSpacing: 10,
-                            fontWeight: FontWeight.w100,
-                            fontFamily: 'Serif',
+                            fontSize: 22,
+                            height: 1.4,
+                            letterSpacing: 8,
+                            fontWeight: FontWeight.w200,
                           ),
                         ),
                       ),
@@ -139,42 +178,44 @@ class _CreatorIntroScreenState extends State<CreatorIntroScreen> with TickerProv
             },
           ),
 
-          // FICTIONAL DISCLAIMER (Bottom Center)
-          const Align(
+          /// DISCLAIMER
+          Align(
             alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 100, left: 50, right: 50),
-              child: Text(
-                "All characters, places, and names are purely fictional, and any resemblance to reality is purely coincidental.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white24, 
-                  fontSize: 10, 
-                  height: 1.6,
-                  letterSpacing: 0.5,
+            child: FadeTransition(
+              opacity: _fadeDisclaimer,
+              child: const Padding(
+                padding: EdgeInsets.only(bottom: 120, left: 40, right: 40),
+                child: Text(
+                  "All characters, places, and names are purely fictional.\nAny resemblance to reality is coincidental.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white38,
+                    fontSize: 11,
+                    height: 1.6,
+                    letterSpacing: 0.6,
+                  ),
                 ),
               ),
             ),
           ),
 
-          // LOADING DOTS (Bottom Left)
-          Positioned(
-            bottom: 40,
-            left: 40,
-            child: Row(
-              children: List.generate(3, (index) => _AnimatedDot(index: index)),
+          /// LOADING DOTS (TEMPORARY)
+          if (showDots)
+            const Positioned(
+              bottom: 40,
+              left: 40,
+              child: _CinematicDots(),
             ),
-          ),
 
-          // VERSION NUMBER (Bottom Right)
+          /// VERSION
           const Positioned(
             bottom: 40,
             right: 40,
             child: Text(
-              "v1.0.0",
+              "v1.0.4-alpha",
               style: TextStyle(
-                color: Colors.white10, 
-                fontSize: 10, 
+                color: Colors.white12,
+                fontSize: 10,
                 letterSpacing: 2,
               ),
             ),
@@ -185,50 +226,38 @@ class _CreatorIntroScreenState extends State<CreatorIntroScreen> with TickerProv
   }
 }
 
-class _AnimatedDot extends StatefulWidget {
-  final int index;
-  const _AnimatedDot({required this.index});
-
-  @override
-  State<_AnimatedDot> createState() => _AnimatedDotState();
-}
-
-class _AnimatedDotState extends State<_AnimatedDot> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _opacity;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    );
-
-    _opacity = Tween<double>(begin: 0.05, end: 0.8).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-
-    Future.delayed(Duration(milliseconds: widget.index * 300), () {
-      if (mounted) _controller.repeat(reverse: true);
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+/// ROPE
+class _Rope extends StatelessWidget {
+  const _Rope();
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _opacity,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        width: 3,
-        height: 3,
-        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+    return Container(
+      width: 1.2,
+      height: 260,
+      color: Colors.white10,
+    );
+  }
+}
+
+/// DOTS
+class _CinematicDots extends StatelessWidget {
+  const _CinematicDots();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: List.generate(
+        3,
+        (index) => Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: 4,
+          height: 4,
+          decoration: const BoxDecoration(
+            color: Colors.white70,
+            shape: BoxShape.circle,
+          ),
+        ),
       ),
     );
   }
