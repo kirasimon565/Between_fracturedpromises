@@ -15,11 +15,15 @@ import '../screens/profile/profile_screen.dart';
 import '../screens/gallery/gallery_screen.dart';
 import '../screens/endgame/endgame_screen.dart';
 
-// 🛠️ NEW: Isolated Episode Screens
+// 🛠️ NEW: Isolated Episode & Intro Screens
 import '../screens/episodes/episode_gallery_screen.dart';
 import '../screens/episodes/coming_soon_screen.dart';
+import '../screens/intro/creator_intro_screen.dart'; // 💡 Added Intro Import
 
 class AppRoutes {
+  // 💡 NEW: Entry Point
+  static const creatorIntro = '/intro';
+  
   static const splash = '/splash';
   static const welcome = '/welcome';
   static const home = '/home';
@@ -36,15 +40,23 @@ class AppRoutes {
   static const gallery = '/gallery';
   static const endgame = '/endgame';
 
-  // 🛠️ NEW: Routes for Episode Management
   static const episodeGallery = '/episodes';
   static const comingSoon = '/coming-soon';
 
   static final routes = [
+    // 💡 NEW: The first screen the player will see
+    GetPage(
+      name: creatorIntro,
+      page: () => const CreatorIntroScreen(),
+      transition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 800),
+    ),
+    
     GetPage(
       name: splash,
       page: () => const SplashScreen(),
-      transition: Transition.cupertino,
+      transition: Transition.fade, // Changed to fade for a smoother intro-to-splash flow
+      transitionDuration: const Duration(seconds: 1),
     ),
     GetPage(
       name: welcome,
@@ -114,7 +126,6 @@ class AppRoutes {
       transition: Transition.cupertino,
     ),
 
-    // 🛠️ NEW: The Cinema Gallery Page
     GetPage(
       name: episodeGallery,
       page: () => const EpisodeGalleryScreen(),
@@ -122,12 +133,11 @@ class AppRoutes {
       transitionDuration: const Duration(milliseconds: 600),
     ),
 
-    // 🛠️ NEW: The Empty Beach Page
     GetPage(
       name: comingSoon,
       page: () => const ComingSoonScreen(),
       transition: Transition.fadeIn,
-      transitionDuration: const Duration(seconds: 1), // Slower fade for atmosphere
+      transitionDuration: const Duration(seconds: 1),
     ),
   ];
 }
