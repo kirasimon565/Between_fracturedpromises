@@ -7,12 +7,13 @@ import 'theme/theme.dart';
 import 'services/state_service.dart';
 import 'services/audio_service.dart';
 import 'services/firestore_service.dart'; 
+import 'services/auth_service.dart'; // 🛠️ ADDED: Required for Firebase & UI checks
 import 'data/playback_store.dart'; 
 import 'data/script_repository.dart';
 import 'logic/story_runtime.dart'; 
 import 'logic/chat_scheduler.dart';
 import 'screens/profile/profile_controller.dart'; 
-import 'screens/episodes/episode_controller.dart'; // 🛠️ Added for your Gallery
+import 'screens/episodes/episode_controller.dart'; 
 
 void main() async {
   // 🛡️ SHIELD 1: Catch UI Rendering Errors
@@ -36,14 +37,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // 1. 🛠️ CORE FOUNDATION (Internal Only)
-    // Audio and Theme have zero dependencies, so they go first.
+    // 1. 🛠️ CORE FOUNDATION
     debugPrint("🚀 [BOOT]: Registering Core Services...");
     Get.put(AudioService(), permanent: true);
     Get.put(ThemeService(), permanent: true);
 
-    // 2. 🛠️ DATABASE FOUNDATION (The Hard Path)
-    // We open Isar BEFORE the controllers, because controllers NEED Isar to wake up.
+    // 2. 🛠️ DATABASE FOUNDATION (Local First)
     debugPrint("🚀 [BOOT]: Opening Isar Database...");
     final playbackStore = PlaybackStore();
     await playbackStore.init(); 
@@ -52,29 +51,31 @@ void main() async {
     // 3. 🛠️ CLOUD FOUNDATION
     debugPrint("🚀 [BOOT]: Starting Firebase...");
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    
+    // 🛠️ Register AuthService immediately after Firebase
+    debugPrint("🚀 [BOOT]: Initializing Auth Service...");
+    Get.put(AuthService(), permanent: true); 
+    
+    debugPrint("🚀 [BOOT]: Connecting Firestore...");
     Get.put(FirestoreService(), permanent: true);
 
     // 4. 🛠️ DATA REPOSITORIES
-    // These bridges sit between the Database and the Game Logic.
     debugPrint("🚀 [BOOT]: Connecting Repositories...");
     Get.put(ScriptRepository(), permanent: true);
     Get.put(ChatScheduler(), permanent: true);
 
     // 5. 🛠️ STATE & LOGIC
-    // Initialize StateService which depends on PlaybackStore.
     debugPrint("🚀 [BOOT]: Initializing StateService...");
     final stateService = StateService();
     await stateService.init(); 
     Get.put(stateService, permanent: true);
 
     // 6. 🛠️ FEATURE CONTROLLERS
-    // Now that Isar and State are ready, we can hire the Feature Controllers.
     debugPrint("🚀 [BOOT]: Initializing Feature Controllers...");
     Get.put(ProfileController(), permanent: true); 
-    Get.put(EpisodeController(), permanent: true); // Now the Gallery has its brain
+    Get.put(EpisodeController(), permanent: true); 
 
     // 7. 🛠️ GAME BRAIN
-    // StoryRuntime is the last piece, as it coordinates everything above.
     debugPrint("🚀 [BOOT]: Starting StoryRuntime...");
     Get.put(StoryRuntime(), permanent: true);
 
@@ -84,7 +85,6 @@ void main() async {
     debugPrint("❌ [BOOT CRASH]: $e");
     debugPrint("❌ [STACK TRACE]: $stack");
 
-    // 🛡️ SHIELD 2: Visual Boot Error fallback
     runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
