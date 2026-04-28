@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,17 +25,13 @@ jobs:
           channel: 'stable'
           cache: true
 
-      # ✅ Ensure Android SDK + sdkmanager exist (and licenses are accepted)
+      # ✅ Android SDK
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      # ✅ Install the exact SDK packages your build needs
       - name: Install Android SDK packages
         run: |
-          sdkmanager --list | head -n 50
           yes | sdkmanager --licenses
-
-          # API 36 + build tools (adjust build-tools version if your project uses a different one)
           sdkmanager \
             "platform-tools" \
             "platforms;android-36" \
@@ -46,28 +43,28 @@ jobs:
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      - name: Build Signed APK
-        env:
-          STORE_PASS: ${{ secrets.RELEASE_STORE_PASSWORD }}
-          KEY_PASS: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+      # ✅ Create key.properties dynamically from secrets
+      - name: Create key.properties
         run: |
-          cd android
+          echo "storePassword=${{ secrets.RELEASE_STORE_PASSWORD }}" >> android/key.properties
+          echo "keyPassword=${{ secrets.RELEASE_KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.RELEASE_KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=release.jks" >> android/key.properties
 
-          # Use wrapper (more reliable than system gradle)
-          gradle wrapper --gradle-version 8.9 --distribution-type all
-          chmod +x gradlew
+      # ✅ Decode keystore file from base64 secret
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.jks
 
-          ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android/app/release.jks \
-            -Pandroid.injected.signing.store.password=$STORE_PASS \
-            -Pandroid.injected.signing.key.alias=$ALIAS \
-            -Pandroid.injected.signing.key.password=$KEY_PASS
+      # ✅ Flutter build (THIS is the main fix)
+      - name: Build Release APK
+        run: flutter build apk --release
 
+      # ✅ Collect APK
       - name: Organize APKs for Download
         run: |
           mkdir -p build/app/outputs/flutter-apk/
-          find android/app/build/outputs/apk/release/ -name "*.apk" -exec cp {} build/app/outputs/flutter-apk/ \;
+          cp build/app/outputs/flutter-apk/*.apk build/app/outputs/flutter-apk/ || true
 
       - name: Upload Signed APK
         uses: actions/upload-artifact@v4
