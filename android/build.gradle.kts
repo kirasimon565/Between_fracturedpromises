@@ -10,6 +10,18 @@ allprojects {
     }
 }
 
+// Keep Android/Gradle outputs in Flutter's canonical project-root build/
+// directory. Flutter's build tooling looks for APKs at
+// <project>/build/app/outputs/flutter-apk/ after :app:assembleRelease. If the
+// Android project uses Gradle's default android/app/build/ location instead,
+// assembleRelease can succeed while Flutter reports that no APK was produced.
+val flutterBuildDir = rootProject.layout.projectDirectory.dir("../build")
+rootProject.layout.buildDirectory.set(flutterBuildDir)
+
+subprojects {
+    project.layout.buildDirectory.set(flutterBuildDir.dir(project.name))
+}
+
 // The compile SDK every module is pinned to. Keep this equal to the app's
 // `compileSdk` in app/build.gradle — a library compiled against an older SDK
 // than the application's `targetSdkVersion` fails resource linking.
