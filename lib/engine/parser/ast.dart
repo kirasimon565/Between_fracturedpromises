@@ -305,9 +305,9 @@ class ScriptNode {
     List<LabelNode>? labels,
     Map<String, Expression>? metadata,
     List<String>? includes,
-  })  : labels = labels ?? <LabelNode>[],
-        metadata = metadata ?? <String, Expression>{},
-        includes = includes ?? <String>[];
+  }) : labels = labels ?? <LabelNode>[],
+       metadata = metadata ?? <String, Expression>{},
+       includes = includes ?? <String>[];
 
   final String sourceName;
   final List<LabelNode> labels;

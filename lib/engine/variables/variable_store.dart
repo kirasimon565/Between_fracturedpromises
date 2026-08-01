@@ -105,8 +105,9 @@ class VariableStore {
   EngineValue clamp(String key, num min, num max) {
     final String k = _normalize(key);
     final num value = (_values[k] ?? EngineValue.zero).asNum;
-    final EngineValue clamped =
-        EngineValue.number(value < min ? min : (value > max ? max : value));
+    final EngineValue clamped = EngineValue.number(
+      value < min ? min : (value > max ? max : value),
+    );
     _values[k] = clamped;
     _notify(k, clamped);
     return clamped;
@@ -134,7 +135,8 @@ class VariableStore {
   }
 
   Map<String, Object?> toJson() => _values.map<String, Object?>(
-      (String k, EngineValue v) => MapEntry<String, Object?>(k, v.raw));
+    (String k, EngineValue v) => MapEntry<String, Object?>(k, v.raw),
+  );
 
   void restore(Map<String, Object?> json) {
     _values.clear();

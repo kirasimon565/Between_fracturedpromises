@@ -316,7 +316,7 @@ def main():
                     stack.append(s)
             if chain_unknown:
                 continue
-            scope = u.code[m.end():m.end() + 1200]
+            scope = u.code[m.end():m.end() + 4000]
             nxt = re.search(r'\b[A-Z][\w$]*[?]?\s+' + re.escape(var) + r'\s*=', scope)
             if nxt:
                 scope = scope[:nxt.start()]

@@ -64,8 +64,9 @@ class _SavesScreenState extends ConsumerState<SavesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<List<SaveSlotSummary>> slots =
-        ref.watch(saveSlotsProvider);
+    final AsyncValue<List<SaveSlotSummary>> slots = ref.watch(
+      saveSlotsProvider,
+    );
     final bool sessionLive = ref.watch(gameSessionProvider).isLoaded;
 
     return Scaffold(
@@ -97,8 +98,8 @@ class _SavesScreenState extends ConsumerState<SavesScreen> {
                   data: (List<SaveSlotSummary> list) {
                     final Map<int, SaveSlotSummary> bySlot =
                         <int, SaveSlotSummary>{
-                      for (final SaveSlotSummary s in list) s.slot: s,
-                    };
+                          for (final SaveSlotSummary s in list) s.slot: s,
+                        };
                     return ListView(
                       padding: const EdgeInsets.fromLTRB(18, 10, 18, 30),
                       children: <Widget>[
@@ -165,8 +166,9 @@ class _SlotCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Bind the non-empty case to its own non-nullable local: Dart's flow
     // analysis cannot promote `summary` through a separate boolean.
-    final SaveSlotSummary? s =
-        (summary == null || summary!.isEmpty) ? null : summary;
+    final SaveSlotSummary? s = (summary == null || summary!.isEmpty)
+        ? null
+        : summary;
     final bool empty = s == null;
     final String title = slot == AppSchema.autoSlot ? 'Autosave' : 'Slot $slot';
 
@@ -208,8 +210,7 @@ class _SlotCard extends StatelessWidget {
                 if (s == null)
                   const Text(
                     'Empty',
-                    style:
-                        TextStyle(color: AppColors.textFaint, fontSize: 12),
+                    style: TextStyle(color: AppColors.textFaint, fontSize: 12),
                   )
                 else ...<Widget>[
                   Text(
@@ -253,8 +254,11 @@ class _SlotCard extends StatelessWidget {
             if (slot != AppSchema.autoSlot)
               PopupMenuButton<String>(
                 color: AppColors.surfaceHigh,
-                icon: const Icon(Icons.more_vert_rounded,
-                    size: 18, color: AppColors.textDim),
+                icon: const Icon(
+                  Icons.more_vert_rounded,
+                  size: 18,
+                  color: AppColors.textDim,
+                ),
                 onSelected: (String value) {
                   if (value == 'save') onSave(slot);
                   if (value == 'delete') onDelete(slot);

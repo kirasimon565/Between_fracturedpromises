@@ -49,11 +49,11 @@ class Lexer {
   }
 
   SourceSpan _span(int length) => SourceSpan(
-        source: sourceName,
-        line: _line,
-        column: _column,
-        length: length,
-      );
+    source: sourceName,
+    line: _line,
+    column: _column,
+    length: length,
+  );
 
   void _advance([int count = 1]) {
     for (int i = 0; i < count && !_isAtEnd; i++) {
@@ -89,8 +89,7 @@ class Lexer {
     }
 
     // Comments: `#…`, `//…`. A `#` inside a string is handled by _string().
-    if (c == 0x23 /* # */ ||
-        (c == 0x2F /* / */ && _peek() == 0x2F)) {
+    if (c == 0x23 /* # */ || (c == 0x2F /* / */ && _peek() == 0x2F)) {
       while (!_isAtEnd && _current != _lf) {
         _advance();
       }
@@ -116,7 +115,7 @@ class Lexer {
     }
 
     // Arrow `->`
-    if (c == 0x2D /* - */ && _peek() == 0x3E /* > */) {
+    if (c == 0x2D /* - */ && _peek() == 0x3E /* > */ ) {
       final SourceSpan span = _span(2);
       _advance(2);
       _add(TokenType.arrow, '->', span);
@@ -124,7 +123,7 @@ class Lexer {
     }
 
     // String literal.
-    if (c == 0x22 /* " */ || c == 0x27 /* ' */) {
+    if (c == 0x22 /* " */ || c == 0x27 /* ' */ ) {
       _string(c);
       return;
     }
@@ -281,7 +280,9 @@ class Lexer {
     // Surrogate pair.
     if (c >= 0xD800 && c <= 0xDBFF && !_isAtEnd) {
       final String rune = source.substring(
-          _offset, (_offset + 2).clamp(0, source.length));
+        _offset,
+        (_offset + 2).clamp(0, source.length),
+      );
       _advance(2);
       return rune;
     }
@@ -327,7 +328,7 @@ class Lexer {
         diagnostics.error('Unterminated string literal.', start);
         break;
       }
-      if (_current == 0x5C /* \ */) {
+      if (_current == 0x5C /* \ */ ) {
         _advance();
         switch (_current) {
           case 0x6E: // n
@@ -396,8 +397,12 @@ class Lexer {
       return;
     }
     final String text = buffer.toString();
-    _add(TokenType.number, text, start.copyWith(length: text.length),
-        num.tryParse(text) ?? 0);
+    _add(
+      TokenType.number,
+      text,
+      start.copyWith(length: text.length),
+      num.tryParse(text) ?? 0,
+    );
   }
 
   void _identifier() {

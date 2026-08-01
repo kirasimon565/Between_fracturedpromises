@@ -75,13 +75,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Image.asset(
-                    'assets/logo/logo.png',
-                    width: 132,
-                    errorBuilder:
-                        (BuildContext _, Object _, StackTrace? _) =>
-                            const Icon(Icons.blur_on_rounded,
-                                size: 92, color: AppColors.ember),
-                  )
+                        'assets/logo/logo.png',
+                        width: 132,
+                        errorBuilder:
+                            (BuildContext _, Object _, StackTrace? _) =>
+                                const Icon(
+                                  Icons.blur_on_rounded,
+                                  size: 92,
+                                  color: AppColors.ember,
+                                ),
+                      )
                       .animate()
                       .fadeIn(duration: 700.ms, curve: Curves.easeOut)
                       .scale(

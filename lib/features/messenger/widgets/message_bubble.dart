@@ -87,126 +87,143 @@ class _Bubble extends StatelessWidget {
     const Radius pinched = Radius.circular(6);
 
     return Padding(
-      padding: EdgeInsets.only(
-        left: mine ? 56 : 8,
-        right: mine ? 8 : 56,
-        top: 2,
-        bottom: showTail ? 8 : 2,
-      ),
-      child: Row(
-        mainAxisAlignment:
-            mine ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          if (!mine)
-            SizedBox(
-              width: 34,
-              child: showAvatar && showTail
-                  ? CharacterAvatar(
-                      id: message.senderId,
-                      name: senderName,
-                      image: avatar,
-                      size: 30,
-                    )
-                  : null,
-            ),
-          if (!mine) const SizedBox(width: 8),
-          Flexible(
-            child: Column(
-              crossAxisAlignment:
-                  mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  padding: message.attachment != null
-                      ? const EdgeInsets.all(5)
-                      : const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: bubbleColor,
-                    borderRadius: BorderRadius.only(
-                      topLeft: corner,
-                      topRight: corner,
-                      bottomLeft: mine || !showTail ? corner : pinched,
-                      bottomRight: mine && showTail ? pinched : corner,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      if (message.attachment != null)
-                        _Attachment(
-                          asset: message.attachment!,
-                          type: message.attachmentType,
-                          onTap: onTapAttachment,
-                        ),
-                      if (message.text.isNotEmpty)
-                        Padding(
-                          padding: message.attachment != null
-                              ? const EdgeInsets.fromLTRB(10, 8, 10, 4)
-                              : EdgeInsets.zero,
-                          child: Text(
-                            message.text,
-                            style: TextStyle(
-                              color: textColor,
-                              fontSize: 14.5,
-                              height: 1.4,
-                              fontStyle: message.style == 'whisper'
-                                  ? FontStyle.italic
-                                  : FontStyle.normal,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                if (message.reactions.isNotEmpty)
-                  Transform.translate(
-                    offset: const Offset(0, -6),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: AppRadii.pill,
-                        border: Border.all(color: AppColors.outline),
-                      ),
-                      child: Text(message.reactions.join(' '),
-                          style: const TextStyle(fontSize: 11)),
-                    ),
-                  ),
-                if (showTail)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 3, left: 4, right: 4),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          message.clock ?? '',
-                          style: const TextStyle(
-                              color: AppColors.textFaint, fontSize: 10),
-                        ),
-                        if (mine) ...<Widget>[
-                          const SizedBox(width: 4),
-                          Icon(
-                            message.status == MessageStatus.seen
-                                ? Icons.done_all_rounded
-                                : Icons.done_rounded,
-                            size: 12,
-                            color: message.status == MessageStatus.seen
-                                ? accent
-                                : AppColors.textFaint,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-              ],
-            ),
+          padding: EdgeInsets.only(
+            left: mine ? 56 : 8,
+            right: mine ? 8 : 56,
+            top: 2,
+            bottom: showTail ? 8 : 2,
           ),
-        ],
-      ),
-    ).animate().fadeIn(duration: 220.ms).slideY(begin: 0.15, end: 0, duration: 220.ms);
+          child: Row(
+            mainAxisAlignment: mine
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              if (!mine)
+                SizedBox(
+                  width: 34,
+                  child: showAvatar && showTail
+                      ? CharacterAvatar(
+                          id: message.senderId,
+                          name: senderName,
+                          image: avatar,
+                          size: 30,
+                        )
+                      : null,
+                ),
+              if (!mine) const SizedBox(width: 8),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: mine
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      padding: message.attachment != null
+                          ? const EdgeInsets.all(5)
+                          : const EdgeInsets.symmetric(
+                              horizontal: 15,
+                              vertical: 10,
+                            ),
+                      decoration: BoxDecoration(
+                        color: bubbleColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: corner,
+                          topRight: corner,
+                          bottomLeft: mine || !showTail ? corner : pinched,
+                          bottomRight: mine && showTail ? pinched : corner,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          if (message.attachment != null)
+                            _Attachment(
+                              asset: message.attachment!,
+                              type: message.attachmentType,
+                              onTap: onTapAttachment,
+                            ),
+                          if (message.text.isNotEmpty)
+                            Padding(
+                              padding: message.attachment != null
+                                  ? const EdgeInsets.fromLTRB(10, 8, 10, 4)
+                                  : EdgeInsets.zero,
+                              child: Text(
+                                message.text,
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 14.5,
+                                  height: 1.4,
+                                  fontStyle: message.style == 'whisper'
+                                      ? FontStyle.italic
+                                      : FontStyle.normal,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (message.reactions.isNotEmpty)
+                      Transform.translate(
+                        offset: const Offset(0, -6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: AppRadii.pill,
+                            border: Border.all(color: AppColors.outline),
+                          ),
+                          child: Text(
+                            message.reactions.join(' '),
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                        ),
+                      ),
+                    if (showTail)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: 3,
+                          left: 4,
+                          right: 4,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              message.clock ?? '',
+                              style: const TextStyle(
+                                color: AppColors.textFaint,
+                                fontSize: 10,
+                              ),
+                            ),
+                            if (mine) ...<Widget>[
+                              const SizedBox(width: 4),
+                              Icon(
+                                message.status == MessageStatus.seen
+                                    ? Icons.done_all_rounded
+                                    : Icons.done_rounded,
+                                size: 12,
+                                color: message.status == MessageStatus.seen
+                                    ? accent
+                                    : AppColors.textFaint,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+        .animate()
+        .fadeIn(duration: 220.ms)
+        .slideY(begin: 0.15, end: 0, duration: 220.ms);
   }
 }
 
@@ -237,8 +254,10 @@ class _Attachment extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Text('0:14',
-                style: TextStyle(color: Colors.white70, fontSize: 11)),
+            const Text(
+              '0:14',
+              style: TextStyle(color: Colors.white70, fontSize: 11),
+            ),
           ],
         ),
       );
@@ -257,8 +276,11 @@ class _Attachment extends StatelessWidget {
             height: 130,
             color: AppColors.outline,
             alignment: Alignment.center,
-            child: const Icon(Icons.image_outlined,
-                color: AppColors.textFaint, size: 26),
+            child: const Icon(
+              Icons.image_outlined,
+              color: AppColors.textFaint,
+              size: 26,
+            ),
           ),
         ),
       ),
@@ -306,7 +328,9 @@ class _Thought extends StatelessWidget {
           borderRadius: AppRadii.card,
           border: Border(
             left: BorderSide(
-                color: AppColors.ember.withValues(alpha: 0.55), width: 2),
+              color: AppColors.ember.withValues(alpha: 0.55),
+              width: 2,
+            ),
           ),
         ),
         child: Text(
@@ -330,8 +354,8 @@ class _SystemLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool divider = text.trim().isNotEmpty &&
-        RegExp(r'^[═─—=_\s]+$').hasMatch(text.trim());
+    final bool divider =
+        text.trim().isNotEmpty && RegExp(r'^[═─—=_\s]+$').hasMatch(text.trim());
 
     if (divider) {
       return const Padding(
@@ -404,12 +428,7 @@ class TypingRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          CharacterAvatar(
-            id: characterId,
-            name: name,
-            image: avatar,
-            size: 30,
-          ),
+          CharacterAvatar(id: characterId, name: name, image: avatar, size: 30),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

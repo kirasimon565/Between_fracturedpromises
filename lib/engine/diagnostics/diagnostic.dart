@@ -64,6 +64,7 @@ class EngineRuntimeException implements Exception {
   final SourceSpan? span;
 
   @override
-  String toString() => 'EngineRuntimeException: $message'
+  String toString() =>
+      'EngineRuntimeException: $message'
       '${span == null ? '' : ' at $span'}';
 }

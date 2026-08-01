@@ -12,19 +12,22 @@ import '../phone/widgets/phone_chrome.dart';
 /// profile-wide collection in Drift.
 final FutureProvider<List<GalleryUnlock>> galleryLibraryProvider =
     FutureProvider<List<GalleryUnlock>>((ref) async {
-  final List<GalleryUnlock> saved =
-      await ref.watch(collectionRepositoryProvider).gallery();
-  final List<GalleryUnlock> live = ref.watch(galleryProvider);
+      final List<GalleryUnlock> saved = await ref
+          .watch(collectionRepositoryProvider)
+          .gallery();
+      final List<GalleryUnlock> live = ref.watch(galleryProvider);
 
-  final Map<String, GalleryUnlock> merged = <String, GalleryUnlock>{
-    for (final GalleryUnlock item in saved) item.id: item,
-    for (final GalleryUnlock item in live) item.id: item,
-  };
-  final List<GalleryUnlock> all = merged.values.toList();
-  all.sort((GalleryUnlock a, GalleryUnlock b) =>
-      (b.unlockedAt ?? DateTime(0)).compareTo(a.unlockedAt ?? DateTime(0)));
-  return all;
-});
+      final Map<String, GalleryUnlock> merged = <String, GalleryUnlock>{
+        for (final GalleryUnlock item in saved) item.id: item,
+        for (final GalleryUnlock item in live) item.id: item,
+      };
+      final List<GalleryUnlock> all = merged.values.toList();
+      all.sort(
+        (GalleryUnlock a, GalleryUnlock b) => (b.unlockedAt ?? DateTime(0))
+            .compareTo(a.unlockedAt ?? DateTime(0)),
+      );
+      return all;
+    });
 
 class GalleryApp extends ConsumerWidget {
   const GalleryApp({super.key, this.onExit});
@@ -33,8 +36,9 @@ class GalleryApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<List<GalleryUnlock>> library =
-        ref.watch(galleryLibraryProvider);
+    final AsyncValue<List<GalleryUnlock>> library = ref.watch(
+      galleryLibraryProvider,
+    );
 
     return Column(
       children: <Widget>[
@@ -66,17 +70,17 @@ class GalleryApp extends ConsumerWidget {
                     padding: const EdgeInsets.all(14),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.78,
-                    ),
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 0.78,
+                        ),
                     itemCount: items.length,
                     itemBuilder: (BuildContext context, int index) =>
                         _GalleryTile(
-                      item: items[index],
-                      onTap: () => _open(context, items[index]),
-                    ),
+                          item: items[index],
+                          onTap: () => _open(context, items[index]),
+                        ),
                   ),
           ),
         ),
@@ -101,8 +105,11 @@ class GalleryApp extends ConsumerWidget {
                   height: 260,
                   color: AppColors.surfaceHigh,
                   alignment: Alignment.center,
-                  child: const Icon(Icons.image_outlined,
-                      color: AppColors.textFaint, size: 34),
+                  child: const Icon(
+                    Icons.image_outlined,
+                    color: AppColors.textFaint,
+                    size: 34,
+                  ),
                 ),
               ),
             ),
@@ -151,7 +158,8 @@ class _GalleryTile extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 22, 12, 12),
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(20)),
+                  bottom: Radius.circular(20),
+                ),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -180,7 +188,9 @@ class _GalleryTile extends StatelessWidget {
                   Text(
                     item.category,
                     style: const TextStyle(
-                        color: AppColors.textFaint, fontSize: 10.5),
+                      color: AppColors.textFaint,
+                      fontSize: 10.5,
+                    ),
                   ),
                 ],
               ),

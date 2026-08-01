@@ -150,9 +150,11 @@ class _EffectOverlayHostState extends ConsumerState<EffectOverlayHost>
           ..forward(from: 0);
         break;
       case 'flash':
-        setState(() => _flash = effect.color == null
-            ? Colors.white
-            : Color(effect.color!));
+        setState(
+          () => _flash = effect.color == null
+              ? Colors.white
+              : Color(effect.color!),
+        );
         Timer(effect.duration, () {
           if (mounted) setState(() => _flash = null);
         });
@@ -190,8 +192,10 @@ class _EffectOverlayHostState extends ConsumerState<EffectOverlayHost>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<EngineEffect>>(engineEffectProvider,
-        (AsyncValue<EngineEffect>? previous, AsyncValue<EngineEffect> next) {
+    ref.listen<AsyncValue<EngineEffect>>(engineEffectProvider, (
+      AsyncValue<EngineEffect>? previous,
+      AsyncValue<EngineEffect> next,
+    ) {
       final EngineEffect? effect = next.value;
       if (effect != null) _handle(effect);
     });
@@ -206,7 +210,9 @@ class _EffectOverlayHostState extends ConsumerState<EffectOverlayHost>
             final double amount =
                 math.sin(_shake.value * math.pi * 8) * 8 * (1 - _shake.value);
             return Transform.translate(
-                offset: Offset(amount, amount / 2), child: child);
+              offset: Offset(amount, amount / 2),
+              child: child,
+            );
           },
           child: widget.child,
         ),
@@ -255,8 +261,9 @@ class _NotificationLayerState extends ConsumerState<NotificationLayer> {
 
   @override
   Widget build(BuildContext context) {
-    final List<GameNotification> notifications =
-        ref.watch(notificationsProvider);
+    final List<GameNotification> notifications = ref.watch(
+      notificationsProvider,
+    );
     final GameNotification? latest = notifications.isEmpty
         ? null
         : notifications.firstWhere(
@@ -272,7 +279,9 @@ class _NotificationLayerState extends ConsumerState<NotificationLayer> {
       if (!latest.sticky) {
         _timer = Timer(const Duration(seconds: 4), () {
           if (mounted) {
-            ref.read(gameSessionProvider.notifier).dismissNotification(latest.id);
+            ref
+                .read(gameSessionProvider.notifier)
+                .dismissNotification(latest.id);
           }
         });
       }
@@ -284,70 +293,89 @@ class _NotificationLayerState extends ConsumerState<NotificationLayer> {
       top: 8,
       left: 12,
       right: 12,
-      child: Dismissible(
-        key: ValueKey<String>(latest.id),
-        direction: DismissDirection.up,
-        onDismissed: (_) => ref
-            .read(gameSessionProvider.notifier)
-            .dismissNotification(latest.id),
-        child: GlassCard(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.2),
-                  borderRadius: AppRadii.icon,
-                ),
-                child: Icon(AppIconTile.iconFor(latest.appId),
-                    size: 18, color: accent),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      latest.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.text,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
+      child:
+          Dismissible(
+                key: ValueKey<String>(latest.id),
+                direction: DismissDirection.up,
+                onDismissed: (_) => ref
+                    .read(gameSessionProvider.notifier)
+                    .dismissNotification(latest.id),
+                child: GlassCard(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: 0.2),
+                          borderRadius: AppRadii.icon,
+                        ),
+                        child: Icon(
+                          AppIconTile.iconFor(latest.appId),
+                          size: 18,
+                          color: accent,
+                        ),
                       ),
-                    ),
-                    if (latest.body.isNotEmpty)
-                      Text(
-                        latest.body,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            color: AppColors.textDim, fontSize: 12, height: 1.35),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              latest.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: AppColors.text,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                            if (latest.body.isNotEmpty)
+                              Text(
+                                latest.body,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: AppColors.textDim,
+                                  fontSize: 12,
+                                  height: 1.35,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                  ],
+                      if (latest.threadId != null)
+                        TextButton(
+                          onPressed: () {
+                            final GameSessionController session = ref.read(
+                              gameSessionProvider.notifier,
+                            );
+                            session.dismissNotification(latest.id);
+                            session.openApp(
+                              latest.appId,
+                              threadId: latest.threadId,
+                            );
+                          },
+                          child: const Text('Open'),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              if (latest.threadId != null)
-                TextButton(
-                  onPressed: () {
-                    final GameSessionController session =
-                        ref.read(gameSessionProvider.notifier);
-                    session.dismissNotification(latest.id);
-                    session.openApp(latest.appId, threadId: latest.threadId);
-                  },
-                  child: const Text('Open'),
-                ),
-            ],
-          ),
-        ),
-      )
-          .animate()
-          .slideY(begin: -0.4, end: 0, duration: 320.ms, curve: Curves.easeOutCubic)
-          .fadeIn(duration: 240.ms),
+              )
+              .animate()
+              .slideY(
+                begin: -0.4,
+                end: 0,
+                duration: 320.ms,
+                curve: Curves.easeOutCubic,
+              )
+              .fadeIn(duration: 240.ms),
     );
   }
 }
@@ -372,8 +400,11 @@ class _ToastOverlay extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 if (effect.icon == 'crystal') ...<Widget>[
-                  const Icon(Icons.diamond_outlined,
-                      size: 15, color: AppColors.crystal),
+                  const Icon(
+                    Icons.diamond_outlined,
+                    size: 15,
+                    color: AppColors.crystal,
+                  ),
                   const SizedBox(width: 8),
                 ],
                 Flexible(
@@ -464,7 +495,10 @@ class _ImageOverlay extends StatelessWidget {
                   effect.caption!,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                      color: AppColors.textDim, fontSize: 13, height: 1.5),
+                    color: AppColors.textDim,
+                    fontSize: 13,
+                    height: 1.5,
+                  ),
                 ),
               ),
           ],
@@ -506,7 +540,10 @@ class _TitleCardOverlay extends StatelessWidget {
                 effect.subtitle!,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                    color: AppColors.textDim, fontSize: 13, letterSpacing: 1.5),
+                  color: AppColors.textDim,
+                  fontSize: 13,
+                  letterSpacing: 1.5,
+                ),
               ).animate(delay: 350.ms).fadeIn(duration: 700.ms),
             ],
           ],
@@ -537,13 +574,18 @@ class _InstallOverlay extends StatelessWidget {
               height: 46,
               decoration: BoxDecoration(
                 borderRadius: AppRadii.icon,
-                gradient: LinearGradient(colors: <Color>[
-                  accent.withValues(alpha: 0.9),
-                  accent.withValues(alpha: 0.4),
-                ]),
+                gradient: LinearGradient(
+                  colors: <Color>[
+                    accent.withValues(alpha: 0.9),
+                    accent.withValues(alpha: 0.4),
+                  ],
+                ),
               ),
-              child: Icon(AppIconTile.iconFor(effect.appId),
-                  color: Colors.white, size: 22),
+              child: Icon(
+                AppIconTile.iconFor(effect.appId),
+                color: Colors.white,
+                size: 22,
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -562,7 +604,10 @@ class _InstallOverlay extends StatelessWidget {
                   const SizedBox(height: 3),
                   const Text(
                     'Installing…',
-                    style: TextStyle(color: AppColors.textFaint, fontSize: 11.5),
+                    style: TextStyle(
+                      color: AppColors.textFaint,
+                      fontSize: 11.5,
+                    ),
                   ),
                   const SizedBox(height: 9),
                   TweenAnimationBuilder<double>(
@@ -570,14 +615,14 @@ class _InstallOverlay extends StatelessWidget {
                     duration: effect.duration,
                     builder: (BuildContext context, double value, _) =>
                         ClipRRect(
-                      borderRadius: BorderRadius.circular(3),
-                      child: LinearProgressIndicator(
-                        value: value,
-                        minHeight: 4,
-                        color: accent,
-                        backgroundColor: AppColors.outline,
-                      ),
-                    ),
+                          borderRadius: BorderRadius.circular(3),
+                          child: LinearProgressIndicator(
+                            value: value,
+                            minHeight: 4,
+                            color: accent,
+                            backgroundColor: AppColors.outline,
+                          ),
+                        ),
                   ),
                 ],
               ),
@@ -610,8 +655,11 @@ class _AchievementToast extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: LinearGradient(colors: AppColors.crystalGradient),
               ),
-              child: const Icon(Icons.military_tech_rounded,
-                  color: Colors.white, size: 21),
+              child: const Icon(
+                Icons.military_tech_rounded,
+                color: Colors.white,
+                size: 21,
+              ),
             ),
             const SizedBox(width: 13),
             Expanded(
@@ -655,9 +703,12 @@ class IncomingCallOverlay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final GameSessionController session =
-        ref.read(gameSessionProvider.notifier);
-    final CharacterState? character = ref.watch(characterProvider(call.characterId));
+    final GameSessionController session = ref.read(
+      gameSessionProvider.notifier,
+    );
+    final CharacterState? character = ref.watch(
+      characterProvider(call.characterId),
+    );
     final bool ringing = call.state == CallState.incoming;
 
     return Container(
@@ -667,11 +718,14 @@ class IncomingCallOverlay extends ConsumerWidget {
           children: <Widget>[
             const Spacer(flex: 2),
             CharacterAvatar(
-              id: call.characterId,
-              name: character?.name,
-              image: character?.avatar,
-              size: 106,
-            ).animate(onPlay: (AnimationController c) => c.repeat(reverse: true))
+                  id: call.characterId,
+                  name: character?.name,
+                  image: character?.avatar,
+                  size: 106,
+                )
+                .animate(
+                  onPlay: (AnimationController c) => c.repeat(reverse: true),
+                )
                 .scaleXY(begin: 1, end: 1.04, duration: 900.ms),
             const SizedBox(height: 22),
             Text(
@@ -697,18 +751,20 @@ class IncomingCallOverlay extends ConsumerWidget {
                     color: AppColors.danger,
                     icon: Icons.call_end_rounded,
                     label: 'Decline',
-                    onTap: () => session.emitUiEvent('call_declined',
-                        data: <String, Object?>{'character': call.characterId}),
+                    onTap: () => session.emitUiEvent(
+                      'call_declined',
+                      data: <String, Object?>{'character': call.characterId},
+                    ),
                   ),
                   if (ringing)
                     _CallButton(
                       color: AppColors.success,
                       icon: Icons.call_rounded,
                       label: 'Answer',
-                      onTap: () => session.emitUiEvent('call_answered',
-                          data: <String, Object?>{
-                            'character': call.characterId
-                          }),
+                      onTap: () => session.emitUiEvent(
+                        'call_answered',
+                        data: <String, Object?>{'character': call.characterId},
+                      ),
                     ),
                 ],
               ),
@@ -750,8 +806,10 @@ class _CallButton extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Text(label,
-            style: const TextStyle(color: AppColors.textDim, fontSize: 12)),
+        Text(
+          label,
+          style: const TextStyle(color: AppColors.textDim, fontSize: 12),
+        ),
       ],
     );
   }

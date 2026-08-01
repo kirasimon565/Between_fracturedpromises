@@ -46,11 +46,13 @@ class CallFrame {
   /// `call`, `handler`, `async` — useful for the debug overlay.
   final String kind;
 
-  Map<String, dynamic> toJson() =>
-      <String, dynamic>{'ret': returnAddress, 'kind': kind};
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'ret': returnAddress,
+    'kind': kind,
+  };
 
   factory CallFrame.fromJson(Map<String, dynamic> json) => CallFrame(
-        (json['ret'] as num).toInt(),
-        kind: json['kind'] as String? ?? 'call',
-      );
+    (json['ret'] as num).toInt(),
+    kind: json['kind'] as String? ?? 'call',
+  );
 }

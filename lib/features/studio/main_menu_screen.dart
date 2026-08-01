@@ -25,8 +25,7 @@ class _MainMenuScreenState extends ConsumerState<MainMenuScreen> {
   Future<void> _continue() async {
     if (_busy) return;
     setState(() => _busy = true);
-    final bool ok =
-        await ref.read(gameSessionProvider.notifier).continueGame();
+    final bool ok = await ref.read(gameSessionProvider.notifier).continueGame();
     if (!mounted) return;
     setState(() => _busy = false);
     if (ok) {
@@ -40,11 +39,11 @@ class _MainMenuScreenState extends ConsumerState<MainMenuScreen> {
 
   Future<void> _newGame({bool confirmOverwrite = true}) async {
     if (_busy) return;
-    final bool hasSave =
-        ref.read(bootstrapProvider).value?.hasSave ?? false;
+    final bool hasSave = ref.read(bootstrapProvider).value?.hasSave ?? false;
 
     if (hasSave && confirmOverwrite) {
-      final bool ok = await showDialog<bool>(
+      final bool ok =
+          await showDialog<bool>(
             context: context,
             builder: (BuildContext context) => AlertDialog(
               backgroundColor: AppColors.surface,
@@ -76,8 +75,9 @@ class _MainMenuScreenState extends ConsumerState<MainMenuScreen> {
 
     final String? error = ref.read(gameSessionProvider).error;
     if (error != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error)));
       return;
     }
     ref.invalidate(bootstrapProvider);
@@ -322,12 +322,15 @@ class _ContinueCard extends StatelessWidget {
                       width: 42,
                       height: 42,
                       decoration: const BoxDecoration(
-                        gradient:
-                            LinearGradient(colors: AppColors.emberGradient),
+                        gradient: LinearGradient(
+                          colors: AppColors.emberGradient,
+                        ),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.play_arrow_rounded,
-                          color: Colors.white),
+                      child: const Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.white,
+                      ),
                     ),
             ],
           ),
@@ -356,24 +359,21 @@ class _MenuLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-        borderRadius: AppRadii.card,
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(icon, color: AppColors.textDim, size: 21),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.textFaint,
-                  fontSize: 11,
-                ),
-              ),
-            ],
+    borderRadius: AppRadii.card,
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(icon, color: AppColors.textDim, size: 21),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(color: AppColors.textFaint, fontSize: 11),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }

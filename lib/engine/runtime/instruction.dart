@@ -82,7 +82,7 @@ class JumpInstruction extends Instruction {
 /// Jumps to [target] when [condition] evaluates to false.
 class BranchIfFalseInstruction extends Instruction {
   BranchIfFalseInstruction(this.condition, this.target, SourceSpan span)
-      : super(span);
+    : super(span);
 
   final Expression condition;
   int target;

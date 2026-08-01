@@ -40,8 +40,9 @@ class _MessengerAppState extends ConsumerState<MessengerApp> {
   @override
   Widget build(BuildContext context) {
     final Color accent = widget.accent ?? AppColors.forApp(widget.appId);
-    final List<ChatThread> threads =
-        ref.watch(threadsForAppProvider(widget.appId));
+    final List<ChatThread> threads = ref.watch(
+      threadsForAppProvider(widget.appId),
+    );
     final ChatThread? active = ref.watch(activeThreadProvider);
 
     // Follow the story: when the script moves the conversation, follow it.
@@ -86,8 +87,7 @@ class _MessengerAppState extends ConsumerState<MessengerApp> {
                     height: 1,
                     color: AppColors.outline,
                   ),
-                  itemBuilder: (BuildContext context, int index) =>
-                      _ThreadTile(
+                  itemBuilder: (BuildContext context, int index) => _ThreadTile(
                     thread: threads[index],
                     accent: accent,
                     onTap: () {
@@ -122,8 +122,8 @@ class _ThreadTile extends ConsumerWidget {
     final String preview = thread.typingBy != null
         ? 'typing…'
         : (last == null
-            ? 'Say something.'
-            : '${last.isPlayer ? 'You: ' : ''}${last.text}');
+              ? 'Say something.'
+              : '${last.isPlayer ? 'You: ' : ''}${last.text}');
 
     return ListTile(
       onTap: onTap,
@@ -144,8 +144,9 @@ class _ThreadTile extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: AppColors.text,
-                fontWeight:
-                    thread.unread > 0 ? FontWeight.w700 : FontWeight.w500,
+                fontWeight: thread.unread > 0
+                    ? FontWeight.w700
+                    : FontWeight.w500,
                 fontSize: 15,
               ),
             ),
@@ -169,8 +170,8 @@ class _ThreadTile extends ConsumerWidget {
                   color: thread.typingBy != null
                       ? accent
                       : (thread.unread > 0
-                          ? AppColors.text
-                          : AppColors.textFaint),
+                            ? AppColors.text
+                            : AppColors.textFaint),
                   fontSize: 12.5,
                   fontStyle: thread.typingBy != null
                       ? FontStyle.italic
@@ -181,8 +182,7 @@ class _ThreadTile extends ConsumerWidget {
             if (thread.unread > 0)
               Container(
                 margin: const EdgeInsets.only(left: 8),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
                   color: accent,
                   borderRadius: AppRadii.pill,

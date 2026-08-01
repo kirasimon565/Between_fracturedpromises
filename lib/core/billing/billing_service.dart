@@ -48,19 +48,18 @@ class BillingSnapshot {
     Object? lastResult = _sentinel,
     Object? error = _sentinel,
     DateTime? lastRestoreAt,
-  }) =>
-      BillingSnapshot(
-        target: target ?? this.target,
-        available: available ?? this.available,
-        loading: loading ?? this.loading,
-        products: products ?? this.products,
-        busySku: identical(busySku, _sentinel) ? this.busySku : busySku as String?,
-        lastResult: identical(lastResult, _sentinel)
-            ? this.lastResult
-            : lastResult as PurchaseResult?,
-        error: identical(error, _sentinel) ? this.error : error as String?,
-        lastRestoreAt: lastRestoreAt ?? this.lastRestoreAt,
-      );
+  }) => BillingSnapshot(
+    target: target ?? this.target,
+    available: available ?? this.available,
+    loading: loading ?? this.loading,
+    products: products ?? this.products,
+    busySku: identical(busySku, _sentinel) ? this.busySku : busySku as String?,
+    lastResult: identical(lastResult, _sentinel)
+        ? this.lastResult
+        : lastResult as PurchaseResult?,
+    error: identical(error, _sentinel) ? this.error : error as String?,
+    lastRestoreAt: lastRestoreAt ?? this.lastRestoreAt,
+  );
 
   static const Object _sentinel = Object();
 }
@@ -96,15 +95,18 @@ class BillingService {
     List<BillingGateway>? gateways,
     this.forcedTarget,
     this.onGrant,
-  }) : _gateways = gateways ??
-            <BillingGateway>[
-              HuaweiBillingGateway(),
-              AmazonBillingGateway(),
-              SamsungBillingGateway(),
-            ];
+  }) : _gateways =
+           gateways ??
+           <BillingGateway>[
+             HuaweiBillingGateway(),
+             AmazonBillingGateway(),
+             SamsungBillingGateway(),
+           ];
 
-  static const String storeFromEnvironment =
-      String.fromEnvironment('STORE', defaultValue: '');
+  static const String storeFromEnvironment = String.fromEnvironment(
+    'STORE',
+    defaultValue: '',
+  );
 
   final List<BillingGateway> _gateways;
   final StoreTarget? forcedTarget;
@@ -160,8 +162,9 @@ class BillingService {
 
   Future<BillingSnapshot> _load(BillingGateway gateway) async {
     final bool available = await gateway.isAvailable();
-    final List<StoreProduct> products =
-        await gateway.loadProducts(StoreCatalog.skus);
+    final List<StoreProduct> products = await gateway.loadProducts(
+      StoreCatalog.skus,
+    );
     return BillingSnapshot(
       target: gateway.target,
       available: available,
@@ -212,14 +215,16 @@ class BillingService {
   Future<void> _grant(PurchaseResult result, {required bool restored}) async {
     final StoreProduct? product = StoreCatalog.bySku(result.sku);
     if (product == null) return;
-    await onGrant?.call(BillingGrant(
-      sku: result.sku,
-      crystals: product.totalCrystals * result.quantity,
-      entitlement: product.kind == ProductKind.nonConsumable,
-      receiptId: result.receiptId,
-      provider: result.provider,
-      restored: restored,
-    ));
+    await onGrant?.call(
+      BillingGrant(
+        sku: result.sku,
+        crystals: product.totalCrystals * result.quantity,
+        entitlement: product.kind == ProductKind.nonConsumable,
+        receiptId: result.receiptId,
+        provider: result.provider,
+        restored: restored,
+      ),
+    );
   }
 
   Future<void> dispose() async {

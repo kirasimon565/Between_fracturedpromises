@@ -13,7 +13,8 @@ import '../phone/widgets/phone_chrome.dart';
 /// Which episodes have been finished, read from `episode_progress`.
 final FutureProvider<Map<String, bool>> completedEpisodesProvider =
     FutureProvider<Map<String, bool>>(
-        (ref) => ref.watch(collectionRepositoryProvider).completedEpisodes());
+      (ref) => ref.watch(collectionRepositoryProvider).completedEpisodes(),
+    );
 
 /// Episode picker.
 ///
@@ -31,16 +32,15 @@ class _EpisodesScreenState extends ConsumerState<EpisodesScreen> {
 
   Future<void> _start(EpisodeManifest episode) async {
     setState(() => _busy = episode.id);
-    await ref
-        .read(gameSessionProvider.notifier)
-        .newGame(episodeId: episode.id);
+    await ref.read(gameSessionProvider.notifier).newGame(episodeId: episode.id);
     if (!mounted) return;
     setState(() => _busy = null);
 
     final String? error = ref.read(gameSessionProvider).error;
     if (error != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error)));
       return;
     }
     ref.invalidate(bootstrapProvider);
@@ -50,8 +50,7 @@ class _EpisodesScreenState extends ConsumerState<EpisodesScreen> {
   @override
   Widget build(BuildContext context) {
     final Map<String, bool> completed =
-        ref.watch(completedEpisodesProvider).value ??
-            const <String, bool>{};
+        ref.watch(completedEpisodesProvider).value ?? const <String, bool>{};
 
     return Scaffold(
       backgroundColor: AppColors.night,
@@ -124,11 +123,17 @@ class _EpisodeCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 if (done)
-                  const Icon(Icons.check_circle_rounded,
-                      size: 16, color: AppColors.success),
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    size: 16,
+                    color: AppColors.success,
+                  ),
                 if (locked)
-                  const Icon(Icons.lock_outline_rounded,
-                      size: 16, color: AppColors.textFaint),
+                  const Icon(
+                    Icons.lock_outline_rounded,
+                    size: 16,
+                    color: AppColors.textFaint,
+                  ),
               ],
             ),
             const SizedBox(height: 8),
@@ -169,8 +174,7 @@ class _EpisodeCard extends StatelessWidget {
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child:
-                                  CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(done ? 'Play again' : 'Start episode'),
                     ),

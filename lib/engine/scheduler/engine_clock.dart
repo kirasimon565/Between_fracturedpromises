@@ -49,7 +49,7 @@ class SystemClock implements EngineClock {
 /// Deterministic clock for unit tests: nothing fires until [advance] is called.
 class FakeClock implements EngineClock {
   FakeClock([DateTime? start])
-      : _now = start ?? DateTime.fromMillisecondsSinceEpoch(0);
+    : _now = start ?? DateTime.fromMillisecondsSinceEpoch(0);
 
   DateTime _now;
   int _nextId = 0;
@@ -78,11 +78,16 @@ class FakeClock implements EngineClock {
   void advance(Duration duration) {
     final DateTime target = _now.add(duration);
     while (true) {
-      final List<MapEntry<int, _FakeTask>> due = _tasks.entries
-          .where((MapEntry<int, _FakeTask> e) => !e.value.at.isAfter(target))
-          .toList()
-        ..sort((MapEntry<int, _FakeTask> a, MapEntry<int, _FakeTask> b) =>
-            a.value.at.compareTo(b.value.at));
+      final List<MapEntry<int, _FakeTask>> due =
+          _tasks.entries
+              .where(
+                (MapEntry<int, _FakeTask> e) => !e.value.at.isAfter(target),
+              )
+              .toList()
+            ..sort(
+              (MapEntry<int, _FakeTask> a, MapEntry<int, _FakeTask> b) =>
+                  a.value.at.compareTo(b.value.at),
+            );
       if (due.isEmpty) break;
       final MapEntry<int, _FakeTask> entry = due.first;
       _now = entry.value.at;
@@ -90,8 +95,11 @@ class FakeClock implements EngineClock {
       if (interval == null) {
         _tasks.remove(entry.key);
       } else {
-        _tasks[entry.key] =
-            _FakeTask(_now.add(interval), entry.value.callback, interval);
+        _tasks[entry.key] = _FakeTask(
+          _now.add(interval),
+          entry.value.callback,
+          interval,
+        );
       }
       entry.value.callback();
     }

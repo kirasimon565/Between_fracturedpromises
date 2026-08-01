@@ -21,9 +21,7 @@ class WebBlock {
   List<Map<String, Object?>> get items {
     final Object? raw = data['items'];
     if (raw is! List) return const <Map<String, Object?>>[];
-    return raw
-        .whereType<Map<String, Object?>>()
-        .toList(growable: false);
+    return raw.whereType<Map<String, Object?>>().toList(growable: false);
   }
 
   factory WebBlock.fromJson(Map<String, Object?> json) =>
@@ -47,15 +45,15 @@ class WebPage {
   final String? accent;
 
   factory WebPage.fromJson(Map<String, Object?> json) => WebPage(
-        url: (json['url'] ?? '').toString(),
-        title: (json['title'] ?? '').toString(),
-        kind: (json['kind'] ?? 'page').toString(),
-        accent: json['accent']?.toString(),
-        blocks: ((json['blocks'] as List<Object?>?) ?? const <Object?>[])
-            .whereType<Map<String, Object?>>()
-            .map(WebBlock.fromJson)
-            .toList(growable: false),
-      );
+    url: (json['url'] ?? '').toString(),
+    title: (json['title'] ?? '').toString(),
+    kind: (json['kind'] ?? 'page').toString(),
+    accent: json['accent']?.toString(),
+    blocks: ((json['blocks'] as List<Object?>?) ?? const <Object?>[])
+        .whereType<Map<String, Object?>>()
+        .map(WebBlock.fromJson)
+        .toList(growable: false),
+  );
 }
 
 /// Loads `assets/data/websites.json`.
@@ -71,11 +69,11 @@ class WebsiteRepository {
 
   static Future<WebsiteRepository> load() async {
     final String raw = await rootBundle.loadString(AppConfig.websiteCatalog);
-    final Map<String, Object?> json =
-        jsonDecode(raw) as Map<String, Object?>;
+    final Map<String, Object?> json = jsonDecode(raw) as Map<String, Object?>;
 
     final Map<String, WebPage> pages = <String, WebPage>{};
-    for (final Object? entry in (json['sites'] as List<Object?>? ?? const <Object?>[])) {
+    for (final Object? entry
+        in (json['sites'] as List<Object?>? ?? const <Object?>[])) {
       if (entry is! Map<String, Object?>) continue;
       final WebPage page = WebPage.fromJson(entry);
       pages[normalise(page.url)] = page;
@@ -83,7 +81,7 @@ class WebsiteRepository {
 
     final Map<String, Object?> missing =
         (json['notFound'] as Map<String, Object?>?) ??
-            <String, Object?>{'title': 'Not found', 'blocks': <Object?>[]};
+        <String, Object?>{'title': 'Not found', 'blocks': <Object?>[]};
 
     return WebsiteRepository(
       pages,

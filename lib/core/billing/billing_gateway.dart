@@ -45,7 +45,7 @@ abstract class BillingGateway {
 /// unavailable and the service falls back to the sandbox.
 abstract class ChannelBillingGateway extends BillingGateway {
   ChannelBillingGateway(String channelName)
-      : channel = MethodChannel(channelName);
+    : channel = MethodChannel(channelName);
 
   final MethodChannel channel;
 
@@ -93,11 +93,10 @@ abstract class ChannelBillingGateway extends BillingGateway {
   @override
   Future<PurchaseResult> purchase(String sku) async {
     try {
-      final Map<Object?, Object?>? raw =
-          await channel.invokeMethod<Map<Object?, Object?>>(
-        'purchase',
-        <String, Object?>{'sku': sku},
-      );
+      final Map<Object?, Object?>? raw = await channel
+          .invokeMethod<Map<Object?, Object?>>('purchase', <String, Object?>{
+            'sku': sku,
+          });
       if (raw == null) {
         return PurchaseResult.cancelled(sku, id);
       }
@@ -115,15 +114,18 @@ abstract class ChannelBillingGateway extends BillingGateway {
   @override
   Future<List<PurchaseResult>> restore() async {
     try {
-      final List<Object?>? raw =
-          await channel.invokeMethod<List<Object?>>('restore');
+      final List<Object?>? raw = await channel.invokeMethod<List<Object?>>(
+        'restore',
+      );
       if (raw == null) return const <PurchaseResult>[];
       return raw
           .whereType<Map<Object?, Object?>>()
-          .map((Map<Object?, Object?> m) => PurchaseResult.fromMap(
-                <Object?, Object?>{...m, 'state': 'restored'},
-                provider: id,
-              ))
+          .map(
+            (Map<Object?, Object?> m) => PurchaseResult.fromMap(
+              <Object?, Object?>{...m, 'state': 'restored'},
+              provider: id,
+            ),
+          )
           .toList();
     } on MissingPluginException {
       return const <PurchaseResult>[];
@@ -224,13 +226,15 @@ class SandboxBillingGateway extends BillingGateway {
   Future<List<PurchaseResult>> restore() async {
     await Future<void>.delayed(latency);
     return _owned.values
-        .map((PurchaseResult p) => PurchaseResult(
-              sku: p.sku,
-              state: PurchaseState.restored,
-              provider: id,
-              orderId: p.orderId,
-              token: p.token,
-            ))
+        .map(
+          (PurchaseResult p) => PurchaseResult(
+            sku: p.sku,
+            state: PurchaseState.restored,
+            provider: id,
+            orderId: p.orderId,
+            token: p.token,
+          ),
+        )
         .toList();
   }
 

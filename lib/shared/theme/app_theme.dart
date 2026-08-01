@@ -93,9 +93,16 @@ abstract final class AppColors {
       case 'narrator':
         return textFaint;
       default:
-        final int hash = id.codeUnits.fold<int>(7, (int a, int b) => a * 31 + b);
-        return HSLColor.fromAHSL(1, (hash % 360).toDouble(), 0.35, 0.62)
-            .toColor();
+        final int hash = id.codeUnits.fold<int>(
+          7,
+          (int a, int b) => a * 31 + b,
+        );
+        return HSLColor.fromAHSL(
+          1,
+          (hash % 360).toDouble(),
+          0.35,
+          0.62,
+        ).toColor();
     }
   }
 }
@@ -103,8 +110,9 @@ abstract final class AppColors {
 abstract final class AppRadii {
   static const BorderRadius bubble = BorderRadius.all(Radius.circular(18));
   static const BorderRadius card = BorderRadius.all(Radius.circular(20));
-  static const BorderRadius sheet =
-      BorderRadius.vertical(top: Radius.circular(26));
+  static const BorderRadius sheet = BorderRadius.vertical(
+    top: Radius.circular(26),
+  );
   static const BorderRadius pill = BorderRadius.all(Radius.circular(999));
   static const BorderRadius icon = BorderRadius.all(Radius.circular(16));
 }
@@ -192,8 +200,10 @@ abstract final class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceHigh,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 16,
+        ),
         hintStyle: base.bodyMedium?.copyWith(color: AppColors.textFaint),
         border: const OutlineInputBorder(
           borderRadius: AppRadii.card,
@@ -227,14 +237,16 @@ abstract final class AppTheme {
         linearTrackColor: AppColors.outline,
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) =>
-            states.contains(WidgetState.selected)
-                ? AppColors.ember
-                : AppColors.textFaint),
-        trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) =>
-            states.contains(WidgetState.selected)
-                ? AppColors.ember.withValues(alpha: 0.35)
-                : AppColors.surfaceHigh),
+        thumbColor: WidgetStateProperty.resolveWith(
+          (Set<WidgetState> states) => states.contains(WidgetState.selected)
+              ? AppColors.ember
+              : AppColors.textFaint,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (Set<WidgetState> states) => states.contains(WidgetState.selected)
+              ? AppColors.ember.withValues(alpha: 0.35)
+              : AppColors.surfaceHigh,
+        ),
       ),
       sliderTheme: const SliderThemeData(
         activeTrackColor: AppColors.ember,

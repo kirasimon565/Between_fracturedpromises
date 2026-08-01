@@ -47,8 +47,9 @@ class _StoreViewState extends ConsumerState<StoreView> {
   }
 
   Future<void> _buy(String sku) async {
-    final PurchaseResult? result =
-        await ref.read(billingControllerProvider.notifier).buy(sku);
+    final PurchaseResult? result = await ref
+        .read(billingControllerProvider.notifier)
+        .buy(sku);
     if (!mounted || result == null) return;
 
     final String message;
@@ -78,12 +79,15 @@ class _StoreViewState extends ConsumerState<StoreView> {
   }
 
   Future<void> _restore() async {
-    final int count =
-        await ref.read(billingControllerProvider.notifier).restore();
+    final int count = await ref
+        .read(billingControllerProvider.notifier)
+        .restore();
     if (!mounted) return;
-    _say(count == 0
-        ? 'Nothing to restore on this account.'
-        : 'Restored $count purchase${count == 1 ? '' : 's'}.');
+    _say(
+      count == 0
+          ? 'Nothing to restore on this account.'
+          : 'Restored $count purchase${count == 1 ? '' : 's'}.',
+    );
   }
 
   void _say(String message) {
@@ -98,8 +102,9 @@ class _StoreViewState extends ConsumerState<StoreView> {
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<BillingSnapshot> async =
-        ref.watch(billingControllerProvider);
+    final AsyncValue<BillingSnapshot> async = ref.watch(
+      billingControllerProvider,
+    );
     final Wallet wallet = ref.watch(walletProvider);
 
     return Column(
@@ -138,8 +143,7 @@ class _StoreViewState extends ConsumerState<StoreView> {
                 ),
               ),
             ),
-            data: (BillingSnapshot snapshot) =>
-                _content(snapshot, wallet),
+            data: (BillingSnapshot snapshot) => _content(snapshot, wallet),
           ),
         ),
       ],
@@ -182,7 +186,8 @@ class _StoreViewState extends ConsumerState<StoreView> {
             child: _ProductCard(
               product: product,
               busy: snapshot.busySku == product.sku,
-              owned: product.kind == ProductKind.nonConsumable &&
+              owned:
+                  product.kind == ProductKind.nonConsumable &&
                   wallet.ownedSkus.contains(product.sku),
               onBuy: () => _buy(product.sku),
             ),
@@ -204,8 +209,9 @@ class _StoreViewState extends ConsumerState<StoreView> {
         ],
         const SizedBox(height: 22),
         OutlinedButton.icon(
-          onPressed:
-              snapshot.busySku == '__restore__' ? null : () => _restore(),
+          onPressed: snapshot.busySku == '__restore__'
+              ? null
+              : () => _restore(),
           icon: snapshot.busySku == '__restore__'
               ? const SizedBox(
                   width: 16,
@@ -260,48 +266,51 @@ class _BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GlassCard(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const Text(
+          'BALANCE',
+          style: TextStyle(
+            color: AppColors.textFaint,
+            fontSize: 10,
+            letterSpacing: 2.4,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'BALANCE',
-              style: TextStyle(
-                color: AppColors.textFaint,
-                fontSize: 10,
-                letterSpacing: 2.4,
-                fontWeight: FontWeight.w700,
+            const Icon(
+              Icons.diamond_outlined,
+              color: AppColors.crystal,
+              size: 30,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '${wallet.crystals}',
+              style: const TextStyle(
+                color: AppColors.text,
+                fontSize: 40,
+                fontWeight: FontWeight.w300,
+                height: 1,
               ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                const Icon(Icons.diamond_outlined,
-                    color: AppColors.crystal, size: 30),
-                const SizedBox(width: 12),
-                Text(
-                  '${wallet.crystals}',
-                  style: const TextStyle(
-                    color: AppColors.text,
-                    fontSize: 40,
-                    fontWeight: FontWeight.w300,
-                    height: 1,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: <Widget>[
-                _Stat(label: 'Earned', value: wallet.lifetimeEarned),
-                _Stat(label: 'Spent', value: wallet.lifetimeSpent),
-                _Stat(label: 'Bought', value: wallet.lifetimePurchased),
-              ],
             ),
           ],
         ),
-      );
+        const SizedBox(height: 16),
+        Row(
+          children: <Widget>[
+            _Stat(label: 'Earned', value: wallet.lifetimeEarned),
+            _Stat(label: 'Spent', value: wallet.lifetimeSpent),
+            _Stat(label: 'Bought', value: wallet.lifetimePurchased),
+          ],
+        ),
+      ],
+    ),
+  );
 }
 
 class _Stat extends StatelessWidget {
@@ -312,28 +321,25 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              '$value',
-              style: const TextStyle(
-                color: AppColors.text,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: const TextStyle(
-                color: AppColors.textFaint,
-                fontSize: 11,
-              ),
-            ),
-          ],
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          '$value',
+          style: const TextStyle(
+            color: AppColors.text,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-      );
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(color: AppColors.textFaint, fontSize: 11),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ShortfallBanner extends StatelessWidget {
@@ -344,30 +350,29 @@ class _ShortfallBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.ember.withValues(alpha: 0.12),
-          borderRadius: AppRadii.card,
-          border: Border.all(color: AppColors.ember.withValues(alpha: 0.35)),
-        ),
-        child: Row(
-          children: <Widget>[
-            const Icon(Icons.lock_open_rounded,
-                color: AppColors.ember, size: 18),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'That choice costs $required crystals — you need $short more.',
-                style: const TextStyle(
-                  color: AppColors.text,
-                  fontSize: 13,
-                  height: 1.4,
-                ),
-              ),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    decoration: BoxDecoration(
+      color: AppColors.ember.withValues(alpha: 0.12),
+      borderRadius: AppRadii.card,
+      border: Border.all(color: AppColors.ember.withValues(alpha: 0.35)),
+    ),
+    child: Row(
+      children: <Widget>[
+        const Icon(Icons.lock_open_rounded, color: AppColors.ember, size: 18),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            'That choice costs $required crystals — you need $short more.',
+            style: const TextStyle(
+              color: AppColors.text,
+              fontSize: 13,
+              height: 1.4,
             ),
-          ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _OfflineNotice extends StatelessWidget {
@@ -375,31 +380,30 @@ class _OfflineNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceHigh,
-          borderRadius: AppRadii.card,
-          border: Border.all(color: AppColors.outline),
-        ),
-        child: const Row(
-          children: <Widget>[
-            Icon(Icons.info_outline_rounded,
-                color: AppColors.textDim, size: 18),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'No storefront is connected on this build. Purchases run in '
-                'sandbox mode and grant crystals locally.',
-                style: TextStyle(
-                  color: AppColors.textDim,
-                  fontSize: 12,
-                  height: 1.4,
-                ),
-              ),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    decoration: BoxDecoration(
+      color: AppColors.surfaceHigh,
+      borderRadius: AppRadii.card,
+      border: Border.all(color: AppColors.outline),
+    ),
+    child: const Row(
+      children: <Widget>[
+        Icon(Icons.info_outline_rounded, color: AppColors.textDim, size: 18),
+        SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            'No storefront is connected on this build. Purchases run in '
+            'sandbox mode and grant crystals locally.',
+            style: TextStyle(
+              color: AppColors.textDim,
+              fontSize: 12,
+              height: 1.4,
             ),
-          ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _ProductCard extends StatelessWidget {
@@ -464,7 +468,9 @@ class _ProductCard extends StatelessWidget {
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 2),
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.ember.withValues(alpha: 0.18),
                           borderRadius: AppRadii.pill,
@@ -527,16 +533,16 @@ class _ProductCard extends StatelessWidget {
                       backgroundColor: highlight
                           ? AppColors.crystal
                           : AppColors.surfaceHigh,
-                      foregroundColor:
-                          highlight ? AppColors.voidBlack : AppColors.text,
+                      foregroundColor: highlight
+                          ? AppColors.voidBlack
+                          : AppColors.text,
                     ),
                     onPressed: busy ? null : onBuy,
                     child: busy
                         ? const SizedBox(
                             width: 16,
                             height: 16,
-                            child:
-                                CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : Text(
                             product.price,
@@ -561,14 +567,14 @@ class StoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: AppColors.night,
-        body: NightBackdrop(
-          child: SafeArea(
-            child: StoreView(
-              requiredCrystals: requiredCrystals,
-              onExit: () => Navigator.of(context).maybePop(),
-            ),
-          ),
+    backgroundColor: AppColors.night,
+    body: NightBackdrop(
+      child: SafeArea(
+        child: StoreView(
+          requiredCrystals: requiredCrystals,
+          onExit: () => Navigator.of(context).maybePop(),
         ),
-      );
+      ),
+    ),
+  );
 }

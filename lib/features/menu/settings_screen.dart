@@ -25,9 +25,7 @@ class SettingsScreen extends ConsumerWidget {
         child: SafeArea(
           child: Column(
             children: <Widget>[
-              Expanded(
-                child: PhoneSettingsApp(onExit: () => context.pop()),
-              ),
+              Expanded(child: PhoneSettingsApp(onExit: () => context.pop())),
               const Divider(height: 1),
               Padding(
                 padding: const EdgeInsets.fromLTRB(18, 12, 18, 16),
@@ -50,8 +48,11 @@ class SettingsScreen extends ConsumerWidget {
                     Expanded(
                       child: TextButton.icon(
                         onPressed: () => _eraseEverything(context, ref),
-                        icon: const Icon(Icons.delete_forever_outlined,
-                            size: 17, color: AppColors.danger),
+                        icon: const Icon(
+                          Icons.delete_forever_outlined,
+                          size: 17,
+                          color: AppColors.danger,
+                        ),
                         label: const Text(
                           'Erase',
                           style: TextStyle(color: AppColors.danger),
@@ -69,7 +70,8 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _eraseEverything(BuildContext context, WidgetRef ref) async {
-    final bool ok = await showDialog<bool>(
+    final bool ok =
+        await showDialog<bool>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
             backgroundColor: AppColors.surface,
@@ -86,7 +88,8 @@ class SettingsScreen extends ConsumerWidget {
               ),
               FilledButton(
                 style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.danger),
+                  backgroundColor: AppColors.danger,
+                ),
                 onPressed: () => Navigator.of(context).pop(true),
                 child: const Text('Erase'),
               ),

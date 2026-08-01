@@ -38,13 +38,13 @@ class StoryRuntime implements EngineApi {
     DeterministicRandom? random,
     EngineSettings settings = const EngineSettings(),
     this.onCheckpoint,
-  })  : _state = state ?? GameState(),
-        clock = clock ?? const SystemClock(),
-        _scheduler =
-            scheduler ?? EngineScheduler(clock: clock ?? const SystemClock()),
-        events = events ?? EventBus(),
-        random = random ?? DeterministicRandom(0x2545F491),
-        _settings = settings {
+  }) : _state = state ?? GameState(),
+       clock = clock ?? const SystemClock(),
+       _scheduler =
+           scheduler ?? EngineScheduler(clock: clock ?? const SystemClock()),
+       events = events ?? EventBus(),
+       random = random ?? DeterministicRandom(0x2545F491),
+       _settings = settings {
     _scope = ScriptScope(state: _state, random: this.random);
   }
 
@@ -128,8 +128,7 @@ class StoryRuntime implements EngineApi {
   int get programCounter => _pc;
 
   @override
-  String get currentLabel =>
-      _program == null ? '' : _program!.labelAt(_pc);
+  String get currentLabel => _program == null ? '' : _program!.labelAt(_pc);
 
   RuntimeStatus get status => _status;
 
@@ -173,8 +172,10 @@ class StoryRuntime implements EngineApi {
     _lastError = null;
     _instructionBudget = 0;
     _setStatus(RuntimeStatus.running);
-    emitEvent(EngineEvents.episodeStarted,
-        data: <String, Object?>{'episode': program.id});
+    emitEvent(
+      EngineEvents.episodeStarted,
+      data: <String, Object?>{'episode': program.id},
+    );
     if (autoRun) await _drive();
   }
 
@@ -217,21 +218,21 @@ class StoryRuntime implements EngineApi {
 
   /// Snapshot of everything needed to continue later.
   EngineSnapshot snapshot() => EngineSnapshot(
-        episodeId: _state.episodeId,
-        programId: _program?.id ?? '',
-        programCounter: _pc,
-        label: currentLabel,
-        line: _program?.lineAt(_pc) ?? 0,
-        status: _status,
-        callStack: List<CallFrame>.of(_callStack),
-        handlers: List<EventHandlerRegistration>.of(_handlers),
-        randomSeed: random.seed,
-        gameState: _state.toJson(),
-        scheduledLabels: _scheduledLabels.values
-            .map((_ScheduledLabel s) => s.toJson(clock.now()))
-            .toList(),
-        savedAt: clock.now(),
-      );
+    episodeId: _state.episodeId,
+    programId: _program?.id ?? '',
+    programCounter: _pc,
+    label: currentLabel,
+    line: _program?.lineAt(_pc) ?? 0,
+    status: _status,
+    callStack: List<CallFrame>.of(_callStack),
+    handlers: List<EventHandlerRegistration>.of(_handlers),
+    randomSeed: random.seed,
+    gameState: _state.toJson(),
+    scheduledLabels: _scheduledLabels.values
+        .map((_ScheduledLabel s) => s.toJson(clock.now()))
+        .toList(),
+    savedAt: clock.now(),
+  );
 
   void pause() {
     if (_status == RuntimeStatus.paused || _status.isTerminal) return;
@@ -296,44 +297,52 @@ class StoryRuntime implements EngineApi {
 
     if (!option.enabled) {
       if (option.isPremium) {
-        emitEffect(StoreEffect(
-          reason: 'premium_choice',
-          requiredCrystals: option.cost,
-        ));
+        emitEffect(
+          StoreEffect(reason: 'premium_choice', requiredCrystals: option.cost),
+        );
       }
-      emitEvent(EngineEvents.choiceRejected, data: <String, Object?>{
-        'id': option.id,
-        'reason': option.isPremium ? 'insufficient_crystals' : 'locked',
-      });
+      emitEvent(
+        EngineEvents.choiceRejected,
+        data: <String, Object?>{
+          'id': option.id,
+          'reason': option.isPremium ? 'insufficient_crystals' : 'locked',
+        },
+      );
       return false;
     }
 
     if (option.isPremium && !option.alreadyOwned && option.cost > 0) {
       if (!_state.wallet.canAfford(option.cost)) {
-        emitEffect(StoreEffect(
-          reason: 'premium_choice',
-          requiredCrystals: option.cost,
-        ));
-        emitEvent(EngineEvents.choiceRejected, data: <String, Object?>{
-          'id': option.id,
-          'reason': 'insufficient_crystals',
-        });
+        emitEffect(
+          StoreEffect(reason: 'premium_choice', requiredCrystals: option.cost),
+        );
+        emitEvent(
+          EngineEvents.choiceRejected,
+          data: <String, Object?>{
+            'id': option.id,
+            'reason': 'insufficient_crystals',
+          },
+        );
         return false;
       }
       _state.updateWallet(
-          (wallet) => wallet.spend(option.cost, choiceId: option.id));
-      emitEvent(EngineEvents.crystalsSpent, data: <String, Object?>{
-        'amount': option.cost,
-        'choice': option.id,
-      });
+        (wallet) => wallet.spend(option.cost, choiceId: option.id),
+      );
+      emitEvent(
+        EngineEvents.crystalsSpent,
+        data: <String, Object?>{'amount': option.cost, 'choice': option.id},
+      );
     }
 
     _state.markPicked(option.id);
-    emitEvent(EngineEvents.choiceMade, data: <String, Object?>{
-      'id': option.id,
-      'label': option.label,
-      'premium': option.isPremium,
-    });
+    emitEvent(
+      EngineEvents.choiceMade,
+      data: <String, Object?>{
+        'id': option.id,
+        'label': option.label,
+        'premium': option.isPremium,
+      },
+    );
 
     _scheduler.cancelTag('choice_timer');
     _clearChoice();
@@ -358,7 +367,10 @@ class StoryRuntime implements EngineApi {
   }
 
   @override
-  void emitEvent(String name, {Map<String, Object?> data = const <String, Object?>{}}) {
+  void emitEvent(
+    String name, {
+    Map<String, Object?> data = const <String, Object?>{},
+  }) {
     events.emit(EngineEvent(name, data: data));
     _fireHandlers(name);
   }
@@ -520,8 +532,10 @@ class StoryRuntime implements EngineApi {
     if (instruction is LabelInstruction) {
       _state.currentLabel = instruction.name;
       _state.markSeen(instruction.name);
-      emitEvent(EngineEvents.labelEntered,
-          data: <String, Object?>{'label': instruction.name});
+      emitEvent(
+        EngineEvents.labelEntered,
+        data: <String, Object?>{'label': instruction.name},
+      );
       _pc++;
       return true;
     }
@@ -575,11 +589,13 @@ class StoryRuntime implements EngineApi {
     }
 
     if (instruction is RegisterHandlerInstruction) {
-      _handlers.add(EventHandlerRegistration(
-        event: instruction.event,
-        address: instruction.address,
-        once: instruction.once,
-      ));
+      _handlers.add(
+        EventHandlerRegistration(
+          event: instruction.event,
+          address: instruction.address,
+          once: instruction.once,
+        ),
+      );
       _pc++;
       return true;
     }
@@ -601,8 +617,10 @@ class StoryRuntime implements EngineApi {
   Future<bool> _executeCommand(CommandInstruction instruction) async {
     final CommandHandler? handler = registry.lookup(instruction.name);
     if (handler == null) {
-      log('No handler for @${instruction.name} (${instruction.span}).',
-          level: 'warning');
+      log(
+        'No handler for @${instruction.name} (${instruction.span}).',
+        level: 'warning',
+      );
       _pc++;
       return true;
     }
@@ -629,11 +647,14 @@ class StoryRuntime implements EngineApi {
         return true;
 
       case CommandOutcomeType.jump:
-        final int? address = outcome.address ??
+        final int? address =
+            outcome.address ??
             (outcome.label == null ? null : resolveLabel(outcome.label!));
         if (address == null) {
-          log('Cannot jump to "${outcome.label}" — unknown label.',
-              level: 'error');
+          log(
+            'Cannot jump to "${outcome.label}" — unknown label.',
+            level: 'error',
+          );
           _pc++;
           return true;
         }
@@ -679,12 +700,14 @@ class StoryRuntime implements EngineApi {
       case VariableNamespace.wallet:
         final int current = _state.wallet.crystals;
         final int next = _applyOperator(
-                instruction.operator, current, value.asNum)
-            .round();
+          instruction.operator,
+          current,
+          value.asNum,
+        ).round();
         final int delta = next - current;
-        _state.updateWallet((wallet) => delta >= 0
-            ? wallet.earn(delta)
-            : wallet.spend(-delta));
+        _state.updateWallet(
+          (wallet) => delta >= 0 ? wallet.earn(delta) : wallet.spend(-delta),
+        );
         emitEvent(
           delta >= 0
               ? EngineEvents.crystalsGranted
@@ -698,18 +721,25 @@ class StoryRuntime implements EngineApi {
         final RelationshipAxis? axis = underscore <= 0
             ? null
             : relationshipAxisFromName(
-                instruction.target.substring(0, underscore));
+                instruction.target.substring(0, underscore),
+              );
         if (axis != null) {
           final String character = instruction.target.substring(underscore + 1);
           final num current = _state.relationship(character).axis(axis);
-          final num next =
-              _applyOperator(instruction.operator, current, value.asNum);
+          final num next = _applyOperator(
+            instruction.operator,
+            current,
+            value.asNum,
+          );
           _state.adjustRelationship(character, axis, next, absolute: true);
-          emitEvent(EngineEvents.relationshipChanged, data: <String, Object?>{
-            'character': character,
-            'axis': axis.name,
-            'value': next,
-          });
+          emitEvent(
+            EngineEvents.relationshipChanged,
+            data: <String, Object?>{
+              'character': character,
+              'axis': axis.name,
+              'value': next,
+            },
+          );
           return;
         }
         continue variable;
@@ -718,10 +748,13 @@ class StoryRuntime implements EngineApi {
       case VariableNamespace.variable:
       case VariableNamespace.flag:
         variables.mutate(instruction.target, instruction.operator, value);
-        emitEvent(EngineEvents.variableChanged, data: <String, Object?>{
-          'name': instruction.target,
-          'value': variables.get(instruction.target).raw,
-        });
+        emitEvent(
+          EngineEvents.variableChanged,
+          data: <String, Object?>{
+            'name': instruction.target,
+            'value': variables.get(instruction.target).raw,
+          },
+        );
         return;
     }
   }
@@ -771,36 +804,42 @@ class StoryRuntime implements EngineApi {
         hint ??= 'Needs $cost crystals';
       }
 
-      views.add(ChoiceOptionView(
-        index: index++,
-        id: option.id,
-        label: text(option.label),
-        kind: option.kind,
-        target: option.target,
-        cost: cost,
-        enabled: enabled,
-        hint: hint,
-        alreadyOwned: owned,
-        picked: _state.hasPicked(option.id),
-      ));
+      views.add(
+        ChoiceOptionView(
+          index: index++,
+          id: option.id,
+          label: text(option.label),
+          kind: option.kind,
+          target: option.target,
+          cost: cost,
+          enabled: enabled,
+          hint: hint,
+          alreadyOwned: owned,
+          picked: _state.hasPicked(option.id),
+        ),
+      );
     }
 
     if (views.isEmpty) {
-      log('Choice at ${instruction.span} had no selectable options.',
-          level: 'warning');
+      log(
+        'Choice at ${instruction.span} had no selectable options.',
+        level: 'warning',
+      );
       _pc++;
       unawaited(_drive());
       return;
     }
 
-    final List<ChoiceOptionView> ordered =
-        instruction.shuffle ? random.shuffled(views) : views;
+    final List<ChoiceOptionView> ordered = instruction.shuffle
+        ? random.shuffled(views)
+        : views;
 
     final Duration? timeout = instruction.timeout == null
         ? null
         : Duration(
-            milliseconds:
-                (instruction.timeout!.evaluate(_scope).asNum * 1000).round());
+            milliseconds: (instruction.timeout!.evaluate(_scope).asNum * 1000)
+                .round(),
+          );
 
     _pendingChoice = PendingChoice(
       options: ordered,
@@ -812,14 +851,20 @@ class StoryRuntime implements EngineApi {
     );
     _setStatus(RuntimeStatus.awaitingChoice);
     if (!_choiceChanges.isClosed) _choiceChanges.add(_pendingChoice);
-    emitEvent(EngineEvents.choicePresented, data: <String, Object?>{
-      'count': ordered.length,
-      'timed': timeout != null,
-    });
+    emitEvent(
+      EngineEvents.choicePresented,
+      data: <String, Object?>{
+        'count': ordered.length,
+        'timed': timeout != null,
+      },
+    );
 
     if (timeout != null) {
-      _scheduler.after(timeout, () => _onChoiceTimeout(instruction),
-          tag: 'choice_timer');
+      _scheduler.after(
+        timeout,
+        () => _onChoiceTimeout(instruction),
+        tag: 'choice_timer',
+      );
     }
   }
 
@@ -829,13 +874,16 @@ class StoryRuntime implements EngineApi {
     if (choice == null) return;
 
     final String? fallbackLabel = instruction.defaultLabel;
-    final int? fallbackAddress =
-        fallbackLabel == null ? null : resolveLabel(fallbackLabel);
+    final int? fallbackAddress = fallbackLabel == null
+        ? null
+        : resolveLabel(fallbackLabel);
 
     if (fallbackAddress != null) {
       _clearChoice();
-      emitEvent(EngineEvents.choiceMade,
-          data: <String, Object?>{'id': 'timeout', 'timeout': true});
+      emitEvent(
+        EngineEvents.choiceMade,
+        data: <String, Object?>{'id': 'timeout', 'timeout': true},
+      );
       _pc = fallbackAddress;
       _setStatus(RuntimeStatus.running);
       unawaited(_drive());
@@ -906,18 +954,20 @@ class StoryRuntime implements EngineApi {
     _clearChoice();
     _setStatus(RuntimeStatus.finished);
     emitEffect(EpisodeCompleteEffect(_state.episodeId, reason: reason));
-    emitEvent(EngineEvents.episodeFinished, data: <String, Object?>{
-      'episode': _state.episodeId,
-      'reason': reason,
-    });
+    emitEvent(
+      EngineEvents.episodeFinished,
+      data: <String, Object?>{'episode': _state.episodeId, 'reason': reason},
+    );
   }
 
   void _fail(String message) {
     _lastError = message;
     _setStatus(RuntimeStatus.error);
     emitEffect(DebugEffect(message, level: 'error'));
-    emitEvent(EngineEvents.runtimeError,
-        data: <String, Object?>{'message': message});
+    emitEvent(
+      EngineEvents.runtimeError,
+      data: <String, Object?>{'message': message},
+    );
   }
 
   /// Default price used when a premium option omits an explicit cost.

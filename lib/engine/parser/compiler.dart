@@ -14,7 +14,7 @@ import 'expression.dart';
 /// resume anywhere" work.
 class ScriptCompiler {
   ScriptCompiler({DiagnosticBag? diagnostics})
-      : diagnostics = diagnostics ?? DiagnosticBag();
+    : diagnostics = diagnostics ?? DiagnosticBag();
 
   final DiagnosticBag diagnostics;
 
@@ -43,11 +43,11 @@ class ScriptCompiler {
     }
 
     // Every program ends with an implicit halt.
-    _emit(HaltInstruction(
-      script.labels.isEmpty
-          ? SourceSpan.unknown
-          : script.labels.last.span,
-    ));
+    _emit(
+      HaltInstruction(
+        script.labels.isEmpty ? SourceSpan.unknown : script.labels.last.span,
+      ),
+    );
 
     _resolvePendingJumps();
 
@@ -86,10 +86,7 @@ class ScriptCompiler {
     for (final _PendingLabelJump jump in _pending) {
       final int? address = _labels[jump.label];
       if (address == null) {
-        diagnostics.error(
-          'Unknown label "@${jump.label}".',
-          jump.span,
-        );
+        diagnostics.error('Unknown label "@${jump.label}".', jump.span);
         // Point the jump at the final halt so the game degrades gracefully.
         jump.apply(_code.length - 1);
         continue;
@@ -109,22 +106,26 @@ class ScriptCompiler {
   void _emitStatement(Statement statement) {
     if (statement is CommandStatement) {
       if (statement.name == 'include') return; // resolved by the loader
-      _emit(CommandInstruction(
-        name: statement.name,
-        arguments: statement.arguments,
-        span: statement.span,
-      ));
+      _emit(
+        CommandInstruction(
+          name: statement.name,
+          arguments: statement.arguments,
+          span: statement.span,
+        ),
+      );
       return;
     }
 
     if (statement is AssignmentStatement) {
-      _emit(AssignInstruction(
-        target: statement.target,
-        operator: statement.operator,
-        value: statement.value,
-        namespace: statement.namespace,
-        span: statement.span,
-      ));
+      _emit(
+        AssignInstruction(
+          target: statement.target,
+          operator: statement.operator,
+          value: statement.value,
+          namespace: statement.namespace,
+          span: statement.span,
+        ),
+      );
       return;
     }
 
@@ -132,13 +133,23 @@ class ScriptCompiler {
       if (statement.isCall) {
         final CallInstruction call = CallInstruction(-1, statement.span);
         _emit(call);
-        _pending.add(_PendingLabelJump(
-            statement.target, statement.span, (int a) => call.target = a));
+        _pending.add(
+          _PendingLabelJump(
+            statement.target,
+            statement.span,
+            (int a) => call.target = a,
+          ),
+        );
       } else {
         final JumpInstruction jump = JumpInstruction(-1, statement.span);
         _emit(jump);
-        _pending.add(_PendingLabelJump(
-            statement.target, statement.span, (int a) => jump.target = a));
+        _pending.add(
+          _PendingLabelJump(
+            statement.target,
+            statement.span,
+            (int a) => jump.target = a,
+          ),
+        );
       }
       return;
     }
@@ -194,15 +205,20 @@ class ScriptCompiler {
     }
 
     diagnostics.warn(
-        'Statement ${statement.runtimeType} was ignored.', statement.span);
+      'Statement ${statement.runtimeType} was ignored.',
+      statement.span,
+    );
   }
 
   void _emitIf(IfStatement statement) {
     final List<JumpInstruction> exits = <JumpInstruction>[];
 
     for (final ConditionalBranch branch in statement.branches) {
-      final BranchIfFalseInstruction test =
-          BranchIfFalseInstruction(branch.condition, -1, statement.span);
+      final BranchIfFalseInstruction test = BranchIfFalseInstruction(
+        branch.condition,
+        -1,
+        statement.span,
+      );
       _emit(test);
       _emitStatements(branch.body);
       final JumpInstruction exit = JumpInstruction(-1, statement.span);
@@ -221,13 +237,15 @@ class ScriptCompiler {
 
   void _emitSwitch(SwitchStatement statement) {
     final String temp = _unique('switch');
-    _emit(AssignInstruction(
-      target: temp,
-      operator: AssignmentOperator.assign,
-      value: statement.subject,
-      namespace: VariableNamespace.variable,
-      span: statement.span,
-    ));
+    _emit(
+      AssignInstruction(
+        target: temp,
+        operator: AssignmentOperator.assign,
+        value: statement.subject,
+        namespace: VariableNamespace.variable,
+        span: statement.span,
+      ),
+    );
 
     final List<JumpInstruction> exits = <JumpInstruction>[];
 
@@ -238,8 +256,11 @@ class ScriptCompiler {
         entry.match,
         statement.span,
       );
-      final BranchIfFalseInstruction test =
-          BranchIfFalseInstruction(condition, -1, statement.span);
+      final BranchIfFalseInstruction test = BranchIfFalseInstruction(
+        condition,
+        -1,
+        statement.span,
+      );
       _emit(test);
       _emitStatements(entry.body);
       final JumpInstruction exit = JumpInstruction(-1, statement.span);
@@ -258,8 +279,11 @@ class ScriptCompiler {
 
   void _emitWhile(WhileStatement statement) {
     final int start = _here;
-    final BranchIfFalseInstruction test =
-        BranchIfFalseInstruction(statement.condition, -1, statement.span);
+    final BranchIfFalseInstruction test = BranchIfFalseInstruction(
+      statement.condition,
+      -1,
+      statement.span,
+    );
     _emit(test);
 
     final _LoopContext context = _LoopContext(continueTarget: start);
@@ -277,20 +301,24 @@ class ScriptCompiler {
     final String counter = _unique('repeat_i');
     final String limit = _unique('repeat_n');
 
-    _emit(AssignInstruction(
-      target: counter,
-      operator: AssignmentOperator.assign,
-      value: const LiteralExpression(EngineValue.zero, SourceSpan.unknown),
-      namespace: VariableNamespace.variable,
-      span: statement.span,
-    ));
-    _emit(AssignInstruction(
-      target: limit,
-      operator: AssignmentOperator.assign,
-      value: statement.count,
-      namespace: VariableNamespace.variable,
-      span: statement.span,
-    ));
+    _emit(
+      AssignInstruction(
+        target: counter,
+        operator: AssignmentOperator.assign,
+        value: const LiteralExpression(EngineValue.zero, SourceSpan.unknown),
+        namespace: VariableNamespace.variable,
+        span: statement.span,
+      ),
+    );
+    _emit(
+      AssignInstruction(
+        target: limit,
+        operator: AssignmentOperator.assign,
+        value: statement.count,
+        namespace: VariableNamespace.variable,
+        span: statement.span,
+      ),
+    );
 
     final int start = _here;
     final BranchIfFalseInstruction test = BranchIfFalseInstruction(
@@ -311,14 +339,18 @@ class ScriptCompiler {
     _loops.removeLast();
 
     final int increment = _here;
-    _emit(AssignInstruction(
-      target: counter,
-      operator: AssignmentOperator.add,
-      value: const LiteralExpression(
-          EngineValue.number(1), SourceSpan.unknown),
-      namespace: VariableNamespace.variable,
-      span: statement.span,
-    ));
+    _emit(
+      AssignInstruction(
+        target: counter,
+        operator: AssignmentOperator.add,
+        value: const LiteralExpression(
+          EngineValue.number(1),
+          SourceSpan.unknown,
+        ),
+        namespace: VariableNamespace.variable,
+        span: statement.span,
+      ),
+    );
     _emit(JumpInstruction(start, statement.span));
 
     final int end = _here;
@@ -330,31 +362,33 @@ class ScriptCompiler {
     final String list = _unique('for_list');
     final String index = _unique('for_i');
 
-    _emit(AssignInstruction(
-      target: list,
-      operator: AssignmentOperator.assign,
-      value: statement.iterable,
-      namespace: VariableNamespace.variable,
-      span: statement.span,
-    ));
-    _emit(AssignInstruction(
-      target: index,
-      operator: AssignmentOperator.assign,
-      value: const LiteralExpression(EngineValue.zero, SourceSpan.unknown),
-      namespace: VariableNamespace.variable,
-      span: statement.span,
-    ));
+    _emit(
+      AssignInstruction(
+        target: list,
+        operator: AssignmentOperator.assign,
+        value: statement.iterable,
+        namespace: VariableNamespace.variable,
+        span: statement.span,
+      ),
+    );
+    _emit(
+      AssignInstruction(
+        target: index,
+        operator: AssignmentOperator.assign,
+        value: const LiteralExpression(EngineValue.zero, SourceSpan.unknown),
+        namespace: VariableNamespace.variable,
+        span: statement.span,
+      ),
+    );
 
     final int start = _here;
     final BranchIfFalseInstruction test = BranchIfFalseInstruction(
       BinaryExpression(
         '<',
         VariableExpression(index, statement.span),
-        CallExpression(
-          'len',
-          <Expression>[VariableExpression(list, statement.span)],
-          statement.span,
-        ),
+        CallExpression('len', <Expression>[
+          VariableExpression(list, statement.span),
+        ], statement.span),
         statement.span,
       ),
       -1,
@@ -362,20 +396,18 @@ class ScriptCompiler {
     );
     _emit(test);
 
-    _emit(AssignInstruction(
-      target: statement.variable,
-      operator: AssignmentOperator.assign,
-      value: CallExpression(
-        'at',
-        <Expression>[
+    _emit(
+      AssignInstruction(
+        target: statement.variable,
+        operator: AssignmentOperator.assign,
+        value: CallExpression('at', <Expression>[
           VariableExpression(list, statement.span),
           VariableExpression(index, statement.span),
-        ],
-        statement.span,
+        ], statement.span),
+        namespace: VariableNamespace.variable,
+        span: statement.span,
       ),
-      namespace: VariableNamespace.variable,
-      span: statement.span,
-    ));
+    );
 
     final _LoopContext context = _LoopContext(continueTarget: -1);
     _loops.add(context);
@@ -383,14 +415,18 @@ class ScriptCompiler {
     _loops.removeLast();
 
     final int increment = _here;
-    _emit(AssignInstruction(
-      target: index,
-      operator: AssignmentOperator.add,
-      value: const LiteralExpression(
-          EngineValue.number(1), SourceSpan.unknown),
-      namespace: VariableNamespace.variable,
-      span: statement.span,
-    ));
+    _emit(
+      AssignInstruction(
+        target: index,
+        operator: AssignmentOperator.add,
+        value: const LiteralExpression(
+          EngineValue.number(1),
+          SourceSpan.unknown,
+        ),
+        namespace: VariableNamespace.variable,
+        span: statement.span,
+      ),
+    );
     _emit(JumpInstruction(start, statement.span));
 
     final int end = _here;
@@ -421,23 +457,11 @@ class ScriptCompiler {
 
     for (final ChoiceOptionNode option in statement.options) {
       final int slot = options.length;
-      options.add(CompiledChoiceOption(
-        id: option.stableId,
-        label: option.label,
-        target: -1,
-        targetLabel: option.target,
-        kind: option.kind,
-        cost: option.cost,
-        condition: option.condition,
-        requirement: option.requirement,
-        hint: option.hint,
-        once: option.once,
-      ));
-      patches.add(_PendingLabelJump(option.target, option.span, (int address) {
-        options[slot] = CompiledChoiceOption(
+      options.add(
+        CompiledChoiceOption(
           id: option.stableId,
           label: option.label,
-          target: address,
+          target: -1,
           targetLabel: option.target,
           kind: option.kind,
           cost: option.cost,
@@ -445,31 +469,47 @@ class ScriptCompiler {
           requirement: option.requirement,
           hint: option.hint,
           once: option.once,
-        );
-      }));
+        ),
+      );
+      patches.add(
+        _PendingLabelJump(option.target, option.span, (int address) {
+          options[slot] = CompiledChoiceOption(
+            id: option.stableId,
+            label: option.label,
+            target: address,
+            targetLabel: option.target,
+            kind: option.kind,
+            cost: option.cost,
+            condition: option.condition,
+            requirement: option.requirement,
+            hint: option.hint,
+            once: option.once,
+          );
+        }),
+      );
     }
     _pending.addAll(patches);
 
-    _emit(ChoiceInstruction(
-      options: options,
-      span: statement.span,
-      prompt: statement.prompt,
-      timeout: statement.timeout,
-      // Timed choices resolve their fallback through the label table at
-      // runtime, which keeps the instruction immutable.
-      defaultLabel: statement.defaultTarget,
-      shuffle: statement.shuffle,
-      style: statement.style,
-    ));
+    _emit(
+      ChoiceInstruction(
+        options: options,
+        span: statement.span,
+        prompt: statement.prompt,
+        timeout: statement.timeout,
+        // Timed choices resolve their fallback through the label table at
+        // runtime, which keeps the instruction immutable.
+        defaultLabel: statement.defaultTarget,
+        shuffle: statement.shuffle,
+        style: statement.style,
+      ),
+    );
 
     if (statement.defaultTarget != null) {
       // Registered purely so an unknown default label is reported at compile
       // time like any other bad jump.
-      _pending.add(_PendingLabelJump(
-        statement.defaultTarget!,
-        statement.span,
-        (int _) {},
-      ));
+      _pending.add(
+        _PendingLabelJump(statement.defaultTarget!, statement.span, (int _) {}),
+      );
     }
   }
 

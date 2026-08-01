@@ -20,9 +20,8 @@ class ScriptScope implements ExpressionScope {
 
   @override
   EngineValue callFunction(String name, List<EngineValue> arguments) {
-    EngineValue arg(int index) => index < arguments.length
-        ? arguments[index]
-        : EngineValue.nullValue;
+    EngineValue arg(int index) =>
+        index < arguments.length ? arguments[index] : EngineValue.nullValue;
 
     switch (name.toLowerCase()) {
       // ── Randomness ──────────────────────────────────────────────────────
@@ -35,18 +34,21 @@ class ScriptScope implements ExpressionScope {
       case 'chance':
         return EngineValue.boolean(random.chance(arg(0).asNum));
       case 'pick':
-        final List<EngineValue> pool =
-            arguments.length == 1 && arg(0).isList ? arg(0).asList : arguments;
+        final List<EngineValue> pool = arguments.length == 1 && arg(0).isList
+            ? arg(0).asList
+            : arguments;
         if (pool.isEmpty) return EngineValue.nullValue;
         return pool[random.between(0, pool.length - 1)];
 
       // ── Math ────────────────────────────────────────────────────────────
       case 'min':
         return EngineValue.number(
-            arg(0).asNum < arg(1).asNum ? arg(0).asNum : arg(1).asNum);
+          arg(0).asNum < arg(1).asNum ? arg(0).asNum : arg(1).asNum,
+        );
       case 'max':
         return EngineValue.number(
-            arg(0).asNum > arg(1).asNum ? arg(0).asNum : arg(1).asNum);
+          arg(0).asNum > arg(1).asNum ? arg(0).asNum : arg(1).asNum,
+        );
       case 'abs':
         return EngineValue.number(arg(0).asNum.abs());
       case 'round':
@@ -60,7 +62,8 @@ class ScriptScope implements ExpressionScope {
         final num low = arg(1).asNum;
         final num high = arg(2).asNum;
         return EngineValue.number(
-            value < low ? low : (value > high ? high : value));
+          value < low ? low : (value > high ? high : value),
+        );
 
       // ── Strings & collections ───────────────────────────────────────────
       case 'len':
@@ -75,19 +78,21 @@ class ScriptScope implements ExpressionScope {
         return list[index];
       case 'contains':
         if (arg(0).isList) {
-          return EngineValue.boolean(arg(0)
-              .asList
-              .any((EngineValue e) => e.looseEquals(arg(1))));
+          return EngineValue.boolean(
+            arg(0).asList.any((EngineValue e) => e.looseEquals(arg(1))),
+          );
         }
         return EngineValue.boolean(
-            arg(0).asString.toLowerCase().contains(arg(1).asString.toLowerCase()));
+          arg(0).asString.toLowerCase().contains(arg(1).asString.toLowerCase()),
+        );
       case 'upper':
         return EngineValue.string(arg(0).asString.toUpperCase());
       case 'lower':
         return EngineValue.string(arg(0).asString.toLowerCase());
       case 'concat':
         return EngineValue.string(
-            arguments.map((EngineValue v) => v.asString).join());
+          arguments.map((EngineValue v) => v.asString).join(),
+        );
 
       // ── Story predicates ────────────────────────────────────────────────
       case 'has_flag':
@@ -118,7 +123,8 @@ class ScriptScope implements ExpressionScope {
         return EngineValue.number(state.phone.unreadNotifications);
       case 'item_count':
         return EngineValue.number(
-            state.inventory[arg(0).asString.toLowerCase()]?.count ?? 0);
+          state.inventory[arg(0).asString.toLowerCase()]?.count ?? 0,
+        );
 
       // ── Relationships ───────────────────────────────────────────────────
       case 'trust':
@@ -129,17 +135,22 @@ class ScriptScope implements ExpressionScope {
         final RelationshipAxis? axis = relationshipAxisFromName(name);
         if (axis == null) return EngineValue.zero;
         return EngineValue.number(
-            state.relationship(arg(0).asString).axis(axis));
+          state.relationship(arg(0).asString).axis(axis),
+        );
       case 'bond':
-        return EngineValue.string(state.relationship(arg(0).asString).bondLabel);
+        return EngineValue.string(
+          state.relationship(arg(0).asString).bondLabel,
+        );
 
       // ── Character helpers ───────────────────────────────────────────────
       case 'character_name':
         return EngineValue.string(
-            state.character(arg(0).asString)?.name ?? arg(0).asString);
+          state.character(arg(0).asString)?.name ?? arg(0).asString,
+        );
       case 'is_online':
         return EngineValue.boolean(
-            state.character(arg(0).asString)?.isOnline ?? false);
+          state.character(arg(0).asString)?.isOnline ?? false,
+        );
     }
 
     return EngineValue.nullValue;

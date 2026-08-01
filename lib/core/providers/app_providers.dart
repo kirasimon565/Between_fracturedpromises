@@ -31,8 +31,9 @@ class Bootstrap {
 }
 
 /// Runs once at startup, before the studio animation finishes.
-final FutureProvider<Bootstrap> bootstrapProvider =
-    FutureProvider<Bootstrap>((ref) async {
+final FutureProvider<Bootstrap> bootstrapProvider = FutureProvider<Bootstrap>((
+  ref,
+) async {
   final PlayerRepository players = ref.watch(playerRepositoryProvider);
   final SaveRepository saves = ref.watch(saveRepositoryProvider);
 
@@ -75,21 +76,22 @@ class SettingsController extends Notifier<EngineSettings> {
 }
 
 final NotifierProvider<SettingsController, EngineSettings>
-    settingsControllerProvider =
+settingsControllerProvider =
     NotifierProvider<SettingsController, EngineSettings>(
-        SettingsController.new);
+      SettingsController.new,
+    );
 
 /// The player's saved games, refreshed by `ref.invalidate`.
 final FutureProvider<List<SaveSlotSummary>> saveSlotsProvider =
     FutureProvider<List<SaveSlotSummary>>(
-        (ref) => ref.watch(saveRepositoryProvider).listSlots());
+      (ref) => ref.watch(saveRepositoryProvider).listSlots(),
+    );
 
 /// Profile editing (Player Setup screen and Settings → Profile).
 class ProfileController extends Notifier<PlayerProfile> {
   @override
   PlayerProfile build() =>
-      ref.watch(bootstrapProvider).value?.profile ??
-      const PlayerProfile();
+      ref.watch(bootstrapProvider).value?.profile ?? const PlayerProfile();
 
   Future<void> save(PlayerProfile profile, {bool onboarded = true}) async {
     state = profile;
@@ -101,5 +103,6 @@ class ProfileController extends Notifier<PlayerProfile> {
 }
 
 final NotifierProvider<ProfileController, PlayerProfile>
-    profileControllerProvider =
-    NotifierProvider<ProfileController, PlayerProfile>(ProfileController.new);
+profileControllerProvider = NotifierProvider<ProfileController, PlayerProfile>(
+  ProfileController.new,
+);

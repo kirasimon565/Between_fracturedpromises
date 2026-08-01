@@ -9,8 +9,9 @@ extension CommandContextHelpers on CommandContext {
 
   /// Id of the character the player embodies (scripts may override it).
   String get playerId {
-    final String configured =
-        engine.variables.getString(EngineDefaults.playerIdVariable);
+    final String configured = engine.variables.getString(
+      EngineDefaults.playerIdVariable,
+    );
     return configured.isEmpty
         ? EngineDefaults.playerCharacterId
         : configured.toLowerCase();
@@ -47,7 +48,8 @@ extension CommandContextHelpers on CommandContext {
     if (explicit.isNotEmpty) return explicit.toLowerCase();
 
     final String sender = senderId.toLowerCase();
-    final bool systemish = sender == EngineDefaults.systemCharacterId ||
+    final bool systemish =
+        sender == EngineDefaults.systemCharacterId ||
         sender == EngineDefaults.narratorCharacterId ||
         sender.isEmpty;
 
@@ -78,8 +80,8 @@ extension CommandContextHelpers on CommandContext {
     final Duration clamped = raw < EngineDefaults.minMessagePause
         ? EngineDefaults.minMessagePause
         : (raw > EngineDefaults.maxMessagePause
-            ? EngineDefaults.maxMessagePause
-            : raw);
+              ? EngineDefaults.maxMessagePause
+              : raw);
     return engine.pace(clamped);
   }
 

@@ -15,8 +15,9 @@ class PlayerRepository {
   // ── Profile ─────────────────────────────────────────────────────────────
 
   Future<PlayerProfile> loadProfile() async {
-    final QueryRow? row =
-        await _db.row('SELECT * FROM player_profile WHERE id = 1');
+    final QueryRow? row = await _db.row(
+      'SELECT * FROM player_profile WHERE id = 1',
+    );
     if (row == null) return const PlayerProfile();
     return PlayerProfile(
       name: row.read<String>('name'),
@@ -28,8 +29,9 @@ class PlayerRepository {
   }
 
   Future<bool> isOnboarded() async {
-    final QueryRow? row =
-        await _db.row('SELECT onboarded FROM player_profile WHERE id = 1');
+    final QueryRow? row = await _db.row(
+      'SELECT onboarded FROM player_profile WHERE id = 1',
+    );
     return (row?.read<int>('onboarded') ?? 0) == 1;
   }
 
@@ -52,16 +54,19 @@ class PlayerRepository {
 
   Future<Wallet> loadWallet() async {
     final QueryRow? row = await _db.row('SELECT * FROM wallet WHERE id = 1');
-    final List<QueryRow> skus =
-        await _db.rows('SELECT sku FROM wallet_entitlements');
-    final List<QueryRow> unlocks =
-        await _db.rows('SELECT choice_id FROM choice_unlocks');
+    final List<QueryRow> skus = await _db.rows(
+      'SELECT sku FROM wallet_entitlements',
+    );
+    final List<QueryRow> unlocks = await _db.rows(
+      'SELECT choice_id FROM choice_unlocks',
+    );
 
     if (row == null) {
       return Wallet(
         ownedSkus: skus.map((QueryRow r) => r.read<String>('sku')).toList(),
-        unlockedChoices:
-            unlocks.map((QueryRow r) => r.read<String>('choice_id')).toList(),
+        unlockedChoices: unlocks
+            .map((QueryRow r) => r.read<String>('choice_id'))
+            .toList(),
       );
     }
 
@@ -72,11 +77,13 @@ class PlayerRepository {
       lifetimeSpent: row.read<int>('lifetime_spent'),
       lifetimePurchased: row.read<int>('lifetime_purchased'),
       adFreePurchased: row.read<int>('ad_free') == 1,
-      lastRestoreAt:
-          restore == null ? null : DateTime.fromMillisecondsSinceEpoch(restore),
+      lastRestoreAt: restore == null
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(restore),
       ownedSkus: skus.map((QueryRow r) => r.read<String>('sku')).toList(),
-      unlockedChoices:
-          unlocks.map((QueryRow r) => r.read<String>('choice_id')).toList(),
+      unlockedChoices: unlocks
+          .map((QueryRow r) => r.read<String>('choice_id'))
+          .toList(),
     );
   }
 
@@ -122,23 +129,22 @@ class PlayerRepository {
     int crystals = 0,
     bool acknowledged = false,
     Map<String, Object?> payload = const <String, Object?>{},
-  }) =>
-      _db.exec(
-        'INSERT OR REPLACE INTO purchase_receipts '
-        '(id, sku, provider, state, quantity, crystals, purchased_at, '
-        ' acknowledged, payload) VALUES (?,?,?,?,?,?,?,?,?)',
-        <Object?>[
-          id,
-          sku,
-          provider,
-          state,
-          quantity,
-          crystals,
-          DateTime.now().millisecondsSinceEpoch,
-          acknowledged ? 1 : 0,
-          jsonEncode(payload),
-        ],
-      );
+  }) => _db.exec(
+    'INSERT OR REPLACE INTO purchase_receipts '
+    '(id, sku, provider, state, quantity, crystals, purchased_at, '
+    ' acknowledged, payload) VALUES (?,?,?,?,?,?,?,?,?)',
+    <Object?>[
+      id,
+      sku,
+      provider,
+      state,
+      quantity,
+      crystals,
+      DateTime.now().millisecondsSinceEpoch,
+      acknowledged ? 1 : 0,
+      jsonEncode(payload),
+    ],
+  );
 
   Future<bool> hasReceipt(String id) async {
     final QueryRow? row = await _db.row(
@@ -164,16 +170,17 @@ class PlayerRepository {
     if (row == null) return const EngineSettings();
     try {
       return EngineSettings.fromJson(
-          jsonDecode(row.read<String>('value')) as Map<String, dynamic>);
+        jsonDecode(row.read<String>('value')) as Map<String, dynamic>,
+      );
     } catch (_) {
       return const EngineSettings();
     }
   }
 
   Future<void> saveSettings(EngineSettings settings) => _db.exec(
-        'INSERT OR REPLACE INTO settings (key, value) VALUES (?,?)',
-        <Object?>['engine', jsonEncode(settings.toJson())],
-      );
+    'INSERT OR REPLACE INTO settings (key, value) VALUES (?,?)',
+    <Object?>['engine', jsonEncode(settings.toJson())],
+  );
 
   Future<String?> readSetting(String key) async {
     final QueryRow? row = await _db.row(
@@ -184,7 +191,7 @@ class PlayerRepository {
   }
 
   Future<void> writeSetting(String key, String value) => _db.exec(
-        'INSERT OR REPLACE INTO settings (key, value) VALUES (?,?)',
-        <Object?>[key, value],
-      );
+    'INSERT OR REPLACE INTO settings (key, value) VALUES (?,?)',
+    <Object?>[key, value],
+  );
 }

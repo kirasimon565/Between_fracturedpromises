@@ -174,13 +174,15 @@ class EngineScheduler {
     final DateTime now = clock.now();
     return _tasks.values
         .where((ScheduledTask t) => t.tag == tag)
-        .map((ScheduledTask t) => <String, dynamic>{
-              'id': t.id,
-              'remainingMs': (t.remaining ?? t.deadline.difference(now))
-                  .inMilliseconds
-                  .clamp(0, 1 << 31),
-              'repeatMs': t.repeatEvery?.inMilliseconds,
-            })
+        .map(
+          (ScheduledTask t) => <String, dynamic>{
+            'id': t.id,
+            'remainingMs': (t.remaining ?? t.deadline.difference(now))
+                .inMilliseconds
+                .clamp(0, 1 << 31),
+            'repeatMs': t.repeatEvery?.inMilliseconds,
+          },
+        )
         .toList();
   }
 }

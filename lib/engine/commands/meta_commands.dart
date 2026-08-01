@@ -3,32 +3,29 @@ import 'command.dart';
 
 /// Metadata, save/checkpoint and developer tooling.
 List<CommandHandler> metaCommands() => <CommandHandler>[
-      const FunctionCommand(
-        <String>[
-          'title',
-          'episode',
-          'chapter',
-          'author',
-          'difficulty',
-          'version',
-          'tags',
-          'synopsis',
-          'cover',
-          'requires_episode',
-        ],
-        _metadata,
-      ),
-      const FunctionCommand(<String>['include'], _include),
-      const FunctionCommand(<String>['checkpoint'], _checkpoint),
-      const FunctionCommand(<String>['save'], _save),
-      const FunctionCommand(<String>['debug'], _debug),
-      const FunctionCommand(<String>['log'], _log),
-      const FunctionCommand(<String>['assert'], _assert),
-      const FunctionCommand(<String>['breakpoint'], _breakpoint),
-      const FunctionCommand(<String>['trace'], _trace),
-      const FunctionCommand(<String>['plugin'], _plugin),
-      const FunctionCommand(<String>['use'], _use),
-    ];
+  const FunctionCommand(<String>[
+    'title',
+    'episode',
+    'chapter',
+    'author',
+    'difficulty',
+    'version',
+    'tags',
+    'synopsis',
+    'cover',
+    'requires_episode',
+  ], _metadata),
+  const FunctionCommand(<String>['include'], _include),
+  const FunctionCommand(<String>['checkpoint'], _checkpoint),
+  const FunctionCommand(<String>['save'], _save),
+  const FunctionCommand(<String>['debug'], _debug),
+  const FunctionCommand(<String>['log'], _log),
+  const FunctionCommand(<String>['assert'], _assert),
+  const FunctionCommand(<String>['breakpoint'], _breakpoint),
+  const FunctionCommand(<String>['trace'], _trace),
+  const FunctionCommand(<String>['plugin'], _plugin),
+  const FunctionCommand(<String>['use'], _use),
+];
 
 CommandOutcome _metadata(CommandContext ctx) {
   // Metadata is captured by the parser; storing it as a variable lets the
@@ -65,7 +62,8 @@ CommandOutcome _use(CommandContext ctx) {
 
 CommandOutcome _checkpoint(CommandContext ctx) {
   ctx.engine.requestCheckpoint(
-      name: ctx.namedStrOrNull('name') ?? (ctx.count > 0 ? ctx.str(0) : null));
+    name: ctx.namedStrOrNull('name') ?? (ctx.count > 0 ? ctx.str(0) : null),
+  );
   return CommandOutcome.next;
 }
 
@@ -90,16 +88,20 @@ CommandOutcome _log(CommandContext ctx) {
 CommandOutcome _assert(CommandContext ctx) {
   final bool ok = ctx.flag(0, false);
   if (ok) return CommandOutcome.next;
-  final String message =
-      ctx.namedStr('message', 'Assertion failed at ${ctx.span}');
+  final String message = ctx.namedStr(
+    'message',
+    'Assertion failed at ${ctx.span}',
+  );
   ctx.engine.log(message, level: 'error');
   ctx.engine.emitEffect(DebugEffect(message, level: 'error'));
   return CommandOutcome.next;
 }
 
 CommandOutcome _breakpoint(CommandContext ctx) {
-  ctx.engine.log('Breakpoint at ${ctx.span} (${ctx.engine.currentLabel})',
-      level: 'warning');
+  ctx.engine.log(
+    'Breakpoint at ${ctx.span} (${ctx.engine.currentLabel})',
+    level: 'warning',
+  );
   return CommandOutcome.next;
 }
 

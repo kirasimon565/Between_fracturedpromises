@@ -92,8 +92,9 @@ class _DebugScreenState extends ConsumerState<DebugScreen> {
                                   selected: _episodeId == e.id,
                                   showCheckmark: false,
                                   backgroundColor: AppColors.surfaceHigh,
-                                  selectedColor: AppColors.ember
-                                      .withValues(alpha: 0.22),
+                                  selectedColor: AppColors.ember.withValues(
+                                    alpha: 0.22,
+                                  ),
                                   onSelected: (_) =>
                                       setState(() => _episodeId = e.id),
                                 ),
@@ -109,10 +110,13 @@ class _DebugScreenState extends ConsumerState<DebugScreen> {
                                       width: 15,
                                       height: 15,
                                       child: CircularProgressIndicator(
-                                          strokeWidth: 2),
+                                        strokeWidth: 2,
+                                      ),
                                     )
-                                  : const Icon(Icons.play_circle_outline,
-                                      size: 18),
+                                  : const Icon(
+                                      Icons.play_circle_outline,
+                                      size: 18,
+                                    ),
                               label: const Text('Compile script'),
                             ),
                           ),
@@ -130,14 +134,22 @@ class _DebugScreenState extends ConsumerState<DebugScreen> {
                             const SizedBox(height: 14),
                             _kv('Title', _compiled!.title),
                             _kv('Episode', '${_compiled!.episodeNumber}'),
-                            _kv('Sources',
-                                '${_compiled!.sources.length} file(s)'),
-                            _kv('Instructions',
-                                '${_compiled!.program.instructions.length}'),
-                            _kv('Labels',
-                                '${_compiled!.program.labels.length}'),
-                            _kv('Diagnostics',
-                                '${_compiled!.diagnostics.length}'),
+                            _kv(
+                              'Sources',
+                              '${_compiled!.sources.length} file(s)',
+                            ),
+                            _kv(
+                              'Instructions',
+                              '${_compiled!.program.instructions.length}',
+                            ),
+                            _kv(
+                              'Labels',
+                              '${_compiled!.program.labels.length}',
+                            ),
+                            _kv(
+                              'Diagnostics',
+                              '${_compiled!.diagnostics.length}',
+                            ),
                             if (_compiled!.diagnostics.isNotEmpty) ...<Widget>[
                               const SizedBox(height: 10),
                               for (final Diagnostic d
@@ -170,9 +182,12 @@ class _DebugScreenState extends ConsumerState<DebugScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           _kv('Status', session.status.name),
-                          _kv('Episode', session.episodeId.isEmpty
-                              ? '—'
-                              : '${session.episodeId} · ${session.episodeTitle}'),
+                          _kv(
+                            'Episode',
+                            session.episodeId.isEmpty
+                                ? '—'
+                                : '${session.episodeId} · ${session.episodeTitle}',
+                          ),
                           _kv('Revision', '${session.revision}'),
                           _kv(
                             'Label',
@@ -186,8 +201,10 @@ class _DebugScreenState extends ConsumerState<DebugScreen> {
                             'PC',
                             '${ref.read(gameSessionProvider.notifier).runtime?.programCounter ?? 0}',
                           ),
-                          _kv('Pending choice',
-                              session.choice?.options.length.toString() ?? '—'),
+                          _kv(
+                            'Pending choice',
+                            session.choice?.options.length.toString() ?? '—',
+                          ),
                           if (session.error != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 8),
@@ -215,8 +232,10 @@ class _DebugScreenState extends ConsumerState<DebugScreen> {
                             value: settings.instantMode,
                             onChanged: (bool v) => ref
                                 .read(settingsControllerProvider.notifier)
-                                .patch((EngineSettings s) =>
-                                    s.copyWith(instantMode: v)),
+                                .patch(
+                                  (EngineSettings s) =>
+                                      s.copyWith(instantMode: v),
+                                ),
                           ),
                           SwitchListTile(
                             title: const Text('Debug overlay'),
@@ -224,8 +243,10 @@ class _DebugScreenState extends ConsumerState<DebugScreen> {
                             value: settings.debugOverlay,
                             onChanged: (bool v) => ref
                                 .read(settingsControllerProvider.notifier)
-                                .patch((EngineSettings s) =>
-                                    s.copyWith(debugOverlay: v)),
+                                .patch(
+                                  (EngineSettings s) =>
+                                      s.copyWith(debugOverlay: v),
+                                ),
                           ),
                         ],
                       ),
@@ -236,9 +257,9 @@ class _DebugScreenState extends ConsumerState<DebugScreen> {
                       const SizedBox(height: 10),
                       _MapCard(
                         entries: state.variables.toJson().map(
-                              (String k, Object? v) =>
-                                  MapEntry<String, String>(k, '$v'),
-                            ),
+                          (String k, Object? v) =>
+                              MapEntry<String, String>(k, '$v'),
+                        ),
                         empty: 'No variables set yet.',
                       ),
                       const SizedBox(height: 22),
@@ -257,7 +278,8 @@ class _DebugScreenState extends ConsumerState<DebugScreen> {
                         entries: <String, String>{
                           for (final MapEntry<String, Relationship> e
                               in ref.watch(relationshipsProvider).entries)
-                            e.key: 'trust ${e.value.trust} · '
+                            e.key:
+                                'trust ${e.value.trust} · '
                                 'love ${e.value.love} · '
                                 'friendship ${e.value.friendship}',
                         },
@@ -275,33 +297,30 @@ class _DebugScreenState extends ConsumerState<DebugScreen> {
   }
 
   Widget _kv(String key, String value) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: 108,
-              child: Text(
-                key,
-                style: const TextStyle(
-                  color: AppColors.textFaint,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Text(
-                value,
-                style: const TextStyle(
-                  color: AppColors.text,
-                  fontSize: 12,
-                  fontFamily: 'monospace',
-                ),
-              ),
-            ),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 3),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        SizedBox(
+          width: 108,
+          child: Text(
+            key,
+            style: const TextStyle(color: AppColors.textFaint, fontSize: 12),
+          ),
         ),
-      );
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.text,
+              fontSize: 12,
+              fontFamily: 'monospace',
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _MapCard extends StatelessWidget {

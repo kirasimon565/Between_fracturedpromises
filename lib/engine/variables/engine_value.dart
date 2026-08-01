@@ -24,12 +24,16 @@ class EngineValue implements Comparable<EngineValue> {
     if (value is String) return EngineValue._(value);
     if (value is List) {
       return EngineValue._(
-          value.map((Object? e) => EngineValue.of(e).raw).toList());
+        value.map((Object? e) => EngineValue.of(e).raw).toList(),
+      );
     }
     if (value is Map) {
-      return EngineValue._(value.map<String, Object?>(
-          (Object? k, Object? v) => MapEntry<String, Object?>(
-              k.toString(), EngineValue.of(v).raw)));
+      return EngineValue._(
+        value.map<String, Object?>(
+          (Object? k, Object? v) =>
+              MapEntry<String, Object?>(k.toString(), EngineValue.of(v).raw),
+        ),
+      );
     }
     return EngineValue._(value.toString());
   }
@@ -108,8 +112,10 @@ class EngineValue implements Comparable<EngineValue> {
   Map<String, EngineValue> get asMap {
     final Object? v = raw;
     if (v is Map) {
-      return v.map<String, EngineValue>((Object? k, Object? value) =>
-          MapEntry<String, EngineValue>(k.toString(), EngineValue.of(value)));
+      return v.map<String, EngineValue>(
+        (Object? k, Object? value) =>
+            MapEntry<String, EngineValue>(k.toString(), EngineValue.of(value)),
+      );
     }
     return <String, EngineValue>{};
   }
@@ -119,12 +125,16 @@ class EngineValue implements Comparable<EngineValue> {
   EngineValue operator +(EngineValue other) {
     if (isString || other.isString) {
       // String concatenation only when neither side parses as a number.
-      final bool numeric = (isNum || num.tryParse(asString) != null) &&
+      final bool numeric =
+          (isNum || num.tryParse(asString) != null) &&
           (other.isNum || num.tryParse(other.asString) != null);
       if (!numeric) return EngineValue.string(asString + other.asString);
     }
     if (isList) {
-      return EngineValue.of(<Object?>[...asList.map((EngineValue e) => e.raw), other.raw]);
+      return EngineValue.of(<Object?>[
+        ...asList.map((EngineValue e) => e.raw),
+        other.raw,
+      ]);
     }
     return EngineValue.number(asNum + other.asNum);
   }
@@ -175,8 +185,7 @@ class EngineValue implements Comparable<EngineValue> {
   Object? toJson() => raw;
 
   @override
-  bool operator ==(Object other) =>
-      other is EngineValue && looseEquals(other);
+  bool operator ==(Object other) => other is EngineValue && looseEquals(other);
 
   @override
   int get hashCode => raw is num ? (raw! as num).hashCode : asString.hashCode;

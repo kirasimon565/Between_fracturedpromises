@@ -20,31 +20,31 @@ class InventoryItem {
   final String category;
 
   InventoryItem copyWith({int? count}) => InventoryItem(
-        id: id,
-        name: name,
-        count: count ?? this.count,
-        icon: icon,
-        description: description,
-        category: category,
-      );
+    id: id,
+    name: name,
+    count: count ?? this.count,
+    icon: icon,
+    description: description,
+    category: category,
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'name': name,
-        'count': count,
-        if (icon != null) 'icon': icon,
-        if (description != null) 'desc': description,
-        'category': category,
-      };
+    'id': id,
+    'name': name,
+    'count': count,
+    if (icon != null) 'icon': icon,
+    if (description != null) 'desc': description,
+    'category': category,
+  };
 
   factory InventoryItem.fromJson(Map<String, dynamic> json) => InventoryItem(
-        id: json['id'] as String,
-        name: json['name'] as String? ?? json['id'] as String,
-        count: (json['count'] as num?)?.toInt() ?? 1,
-        icon: json['icon'] as String?,
-        description: json['desc'] as String?,
-        category: json['category'] as String? ?? 'general',
-      );
+    id: json['id'] as String,
+    name: json['name'] as String? ?? json['id'] as String,
+    count: (json['count'] as num?)?.toInt() ?? 1,
+    icon: json['icon'] as String?,
+    description: json['desc'] as String?,
+    category: json['category'] as String? ?? 'general',
+  );
 }
 
 class EvidenceEntry {
@@ -69,42 +69,43 @@ class EvidenceEntry {
   final List<String> linkedTo;
 
   EvidenceEntry copyWith({List<String>? linkedTo}) => EvidenceEntry(
-        id: id,
-        title: title,
-        description: description,
-        image: image,
-        source: source,
-        category: category,
-        discoveredAt: discoveredAt,
-        linkedTo: linkedTo ?? this.linkedTo,
-      );
+    id: id,
+    title: title,
+    description: description,
+    image: image,
+    source: source,
+    category: category,
+    discoveredAt: discoveredAt,
+    linkedTo: linkedTo ?? this.linkedTo,
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'title': title,
-        'desc': description,
-        if (image != null) 'image': image,
-        if (source != null) 'source': source,
-        'category': category,
-        if (discoveredAt != null) 'at': discoveredAt!.millisecondsSinceEpoch,
-        'links': linkedTo,
-      };
+    'id': id,
+    'title': title,
+    'desc': description,
+    if (image != null) 'image': image,
+    if (source != null) 'source': source,
+    'category': category,
+    if (discoveredAt != null) 'at': discoveredAt!.millisecondsSinceEpoch,
+    'links': linkedTo,
+  };
 
   factory EvidenceEntry.fromJson(Map<String, dynamic> json) => EvidenceEntry(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? json['id'] as String,
-        description: json['desc'] as String? ?? '',
-        image: json['image'] as String?,
-        source: json['source'] as String?,
-        category: json['category'] as String? ?? 'general',
-        discoveredAt: json['at'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch((json['at'] as num).toInt()),
-        linkedTo: (json['links'] as List<dynamic>?)
-                ?.map((dynamic e) => e.toString())
-                .toList() ??
-            const <String>[],
-      );
+    id: json['id'] as String,
+    title: json['title'] as String? ?? json['id'] as String,
+    description: json['desc'] as String? ?? '',
+    image: json['image'] as String?,
+    source: json['source'] as String?,
+    category: json['category'] as String? ?? 'general',
+    discoveredAt: json['at'] == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch((json['at'] as num).toInt()),
+    linkedTo:
+        (json['links'] as List<dynamic>?)
+            ?.map((dynamic e) => e.toString())
+            .toList() ??
+        const <String>[],
+  );
 }
 
 class JournalEntry {
@@ -129,38 +130,39 @@ class JournalEntry {
   final bool pinned;
 
   JournalEntry copyWith({String? body, bool? pinned}) => JournalEntry(
-        id: id,
-        title: title,
-        body: body ?? this.body,
-        createdAt: createdAt,
-        category: category,
-        mood: mood,
-        image: image,
-        pinned: pinned ?? this.pinned,
-      );
+    id: id,
+    title: title,
+    body: body ?? this.body,
+    createdAt: createdAt,
+    category: category,
+    mood: mood,
+    image: image,
+    pinned: pinned ?? this.pinned,
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'title': title,
-        'body': body,
-        'at': createdAt.millisecondsSinceEpoch,
-        'category': category,
-        if (mood != null) 'mood': mood,
-        if (image != null) 'image': image,
-        'pinned': pinned,
-      };
+    'id': id,
+    'title': title,
+    'body': body,
+    'at': createdAt.millisecondsSinceEpoch,
+    'category': category,
+    if (mood != null) 'mood': mood,
+    if (image != null) 'image': image,
+    'pinned': pinned,
+  };
 
   factory JournalEntry.fromJson(Map<String, dynamic> json) => JournalEntry(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? '',
-        body: json['body'] as String? ?? '',
-        createdAt: DateTime.fromMillisecondsSinceEpoch(
-            (json['at'] as num?)?.toInt() ?? 0),
-        category: json['category'] as String? ?? 'story',
-        mood: json['mood'] as String?,
-        image: json['image'] as String?,
-        pinned: json['pinned'] as bool? ?? false,
-      );
+    id: json['id'] as String,
+    title: json['title'] as String? ?? '',
+    body: json['body'] as String? ?? '',
+    createdAt: DateTime.fromMillisecondsSinceEpoch(
+      (json['at'] as num?)?.toInt() ?? 0,
+    ),
+    category: json['category'] as String? ?? 'story',
+    mood: json['mood'] as String?,
+    image: json['image'] as String?,
+    pinned: json['pinned'] as bool? ?? false,
+  );
 }
 
 enum ObjectiveStatus { active, completed, failed }
@@ -198,29 +200,29 @@ class Objective {
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'title': title,
-        'desc': description,
-        'status': status.name,
-        'optional': optional,
-        'group': group,
-        if (updatedAt != null) 'at': updatedAt!.millisecondsSinceEpoch,
-      };
+    'id': id,
+    'title': title,
+    'desc': description,
+    'status': status.name,
+    'optional': optional,
+    'group': group,
+    if (updatedAt != null) 'at': updatedAt!.millisecondsSinceEpoch,
+  };
 
   factory Objective.fromJson(Map<String, dynamic> json) => Objective(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? json['id'] as String,
-        description: json['desc'] as String? ?? '',
-        status: ObjectiveStatus.values.firstWhere(
-          (ObjectiveStatus s) => s.name == json['status'],
-          orElse: () => ObjectiveStatus.active,
-        ),
-        optional: json['optional'] as bool? ?? false,
-        group: json['group'] as String? ?? 'main',
-        updatedAt: json['at'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch((json['at'] as num).toInt()),
-      );
+    id: json['id'] as String,
+    title: json['title'] as String? ?? json['id'] as String,
+    description: json['desc'] as String? ?? '',
+    status: ObjectiveStatus.values.firstWhere(
+      (ObjectiveStatus s) => s.name == json['status'],
+      orElse: () => ObjectiveStatus.active,
+    ),
+    optional: json['optional'] as bool? ?? false,
+    group: json['group'] as String? ?? 'main',
+    updatedAt: json['at'] == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch((json['at'] as num).toInt()),
+  );
 }
 
 class Achievement {
@@ -250,11 +252,7 @@ class Achievement {
 
   double get ratio => goal <= 0 ? 1 : (progress / goal).clamp(0, 1).toDouble();
 
-  Achievement copyWith({
-    DateTime? unlockedAt,
-    num? progress,
-    num? goal,
-  }) =>
+  Achievement copyWith({DateTime? unlockedAt, num? progress, num? goal}) =>
       Achievement(
         id: id,
         title: title,
@@ -268,30 +266,30 @@ class Achievement {
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'title': title,
-        'desc': description,
-        if (icon != null) 'icon': icon,
-        'hidden': hidden,
-        'points': points,
-        if (unlockedAt != null) 'at': unlockedAt!.millisecondsSinceEpoch,
-        'progress': progress,
-        'goal': goal,
-      };
+    'id': id,
+    'title': title,
+    'desc': description,
+    if (icon != null) 'icon': icon,
+    'hidden': hidden,
+    'points': points,
+    if (unlockedAt != null) 'at': unlockedAt!.millisecondsSinceEpoch,
+    'progress': progress,
+    'goal': goal,
+  };
 
   factory Achievement.fromJson(Map<String, dynamic> json) => Achievement(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? json['id'] as String,
-        description: json['desc'] as String? ?? '',
-        icon: json['icon'] as String?,
-        hidden: json['hidden'] as bool? ?? false,
-        points: (json['points'] as num?)?.toInt() ?? 10,
-        unlockedAt: json['at'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch((json['at'] as num).toInt()),
-        progress: (json['progress'] as num?) ?? 0,
-        goal: (json['goal'] as num?) ?? 1,
-      );
+    id: json['id'] as String,
+    title: json['title'] as String? ?? json['id'] as String,
+    description: json['desc'] as String? ?? '',
+    icon: json['icon'] as String?,
+    hidden: json['hidden'] as bool? ?? false,
+    points: (json['points'] as num?)?.toInt() ?? 10,
+    unlockedAt: json['at'] == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch((json['at'] as num).toInt()),
+    progress: (json['progress'] as num?) ?? 0,
+    goal: (json['goal'] as num?) ?? 1,
+  );
 }
 
 class GalleryUnlock {
@@ -314,24 +312,24 @@ class GalleryUnlock {
   final String? episode;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'title': title,
-        'image': image,
-        'category': category,
-        'nsfw': nsfw,
-        if (unlockedAt != null) 'at': unlockedAt!.millisecondsSinceEpoch,
-        if (episode != null) 'episode': episode,
-      };
+    'id': id,
+    'title': title,
+    'image': image,
+    'category': category,
+    'nsfw': nsfw,
+    if (unlockedAt != null) 'at': unlockedAt!.millisecondsSinceEpoch,
+    if (episode != null) 'episode': episode,
+  };
 
   factory GalleryUnlock.fromJson(Map<String, dynamic> json) => GalleryUnlock(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? json['id'] as String,
-        image: json['image'] as String? ?? '',
-        category: json['category'] as String? ?? 'story',
-        nsfw: json['nsfw'] as bool? ?? false,
-        unlockedAt: json['at'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch((json['at'] as num).toInt()),
-        episode: json['episode'] as String?,
-      );
+    id: json['id'] as String,
+    title: json['title'] as String? ?? json['id'] as String,
+    image: json['image'] as String? ?? '',
+    category: json['category'] as String? ?? 'story',
+    nsfw: json['nsfw'] as bool? ?? false,
+    unlockedAt: json['at'] == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch((json['at'] as num).toInt()),
+    episode: json['episode'] as String?,
+  );
 }

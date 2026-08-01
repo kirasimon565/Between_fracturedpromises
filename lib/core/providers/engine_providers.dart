@@ -14,7 +14,8 @@ import 'database_providers.dart';
 /// Reads scripts out of the asset bundle.
 final Provider<StoryLoader> storyLoaderProvider = Provider<StoryLoader>(
   (ref) => StoryLoader(
-    resolver: (String path) => rootBundle.loadString('${AppConfig.storyRoot}$path'),
+    resolver: (String path) =>
+        rootBundle.loadString('${AppConfig.storyRoot}$path'),
   ),
 );
 
@@ -67,20 +68,19 @@ class GameSession {
     String? episodeTitle,
     Object? error = _sentinel,
     List<String>? diagnostics,
-  }) =>
-      GameSession(
-        status: status ?? this.status,
-        state: state ?? this.state,
-        choice: identical(choice, _sentinel)
-            ? this.choice
-            : choice as PendingChoice?,
-        revision: revision ?? this.revision,
-        busy: busy ?? this.busy,
-        episodeId: episodeId ?? this.episodeId,
-        episodeTitle: episodeTitle ?? this.episodeTitle,
-        error: identical(error, _sentinel) ? this.error : error as String?,
-        diagnostics: diagnostics ?? this.diagnostics,
-      );
+  }) => GameSession(
+    status: status ?? this.status,
+    state: state ?? this.state,
+    choice: identical(choice, _sentinel)
+        ? this.choice
+        : choice as PendingChoice?,
+    revision: revision ?? this.revision,
+    busy: busy ?? this.busy,
+    episodeId: episodeId ?? this.episodeId,
+    episodeTitle: episodeTitle ?? this.episodeTitle,
+    error: identical(error, _sentinel) ? this.error : error as String?,
+    diagnostics: diagnostics ?? this.diagnostics,
+  );
 
   static const Object _sentinel = Object();
 }
@@ -135,7 +135,9 @@ class GameSessionController extends Notifier<GameSession> {
       final GameState fresh = await _freshState();
       _attach(fresh, story);
 
-      await ref.read(collectionRepositoryProvider).markEpisodeStarted(
+      await ref
+          .read(collectionRepositoryProvider)
+          .markEpisodeStarted(
             episodeId,
             number: story.episodeNumber,
             title: story.title,
@@ -162,7 +164,9 @@ class GameSessionController extends Notifier<GameSession> {
       }
 
       final CompiledStory story = await _compile(
-        snapshot.episodeId.isEmpty ? AppConfig.defaultEpisodeId : snapshot.episodeId,
+        snapshot.episodeId.isEmpty
+            ? AppConfig.defaultEpisodeId
+            : snapshot.episodeId,
       );
 
       final GameState restored = await _freshState(applyDefaults: false);
@@ -249,13 +253,15 @@ class GameSessionController extends Notifier<GameSession> {
     if (applyDefaults) {
       final DateTime now = DateTime.now();
       for (final String appId in EngineDefaults.preinstalledApps) {
-        gameState.installApp(InstalledApp(
-          id: appId,
-          name: _appName(appId),
-          icon: 'assets/icons/app_$appId.png',
-          installedAt: now,
-          system: true,
-        ));
+        gameState.installApp(
+          InstalledApp(
+            id: appId,
+            name: _appName(appId),
+            icon: 'assets/icons/app_$appId.png',
+            installedAt: now,
+            system: true,
+          ),
+        );
       }
       gameState.updateProfile((PlayerProfile p) => p);
     }
@@ -314,9 +320,7 @@ class GameSessionController extends Notifier<GameSession> {
   }
 
   Future<bool> loadSlot(int slot) async {
-    await ref
-        .read(saveRepositoryProvider)
-        .copySlot(slot, AppSchema.autoSlot);
+    await ref.read(saveRepositoryProvider).copySlot(slot, AppSchema.autoSlot);
     return continueGame();
   }
 
@@ -353,15 +357,15 @@ class GameSessionController extends Notifier<GameSession> {
       gameState.activeThreadId = threadId;
       gameState.markThreadRead(threadId);
     }
-    gameState.updatePhone((PhoneState p) => p.copyWith(
-          currentApp: appId,
-          locked: false,
-        ));
+    gameState.updatePhone(
+      (PhoneState p) => p.copyWith(currentApp: appId, locked: false),
+    );
   }
 
   void closeApp() {
     _state?.updatePhone(
-        (PhoneState p) => p.copyWith(currentApp: null, currentScreen: null));
+      (PhoneState p) => p.copyWith(currentApp: null, currentScreen: null),
+    );
   }
 
   void openThread(String threadId) {
@@ -402,7 +406,10 @@ class GameSessionController extends Notifier<GameSession> {
       );
     });
     gameState.recordVisit(url);
-    emitUiEvent(EngineEvents.browserVisited, data: <String, Object?>{'url': url});
+    emitUiEvent(
+      EngineEvents.browserVisited,
+      data: <String, Object?>{'url': url},
+    );
   }
 
   void selectTab(String tabId) {
@@ -413,9 +420,10 @@ class GameSessionController extends Notifier<GameSession> {
   static String _canonicalUrl(String input) {
     final String value = input.trim();
     if (value.contains('://')) return value;
-    final bool looksLikeDomain =
-        RegExp(r'^[\w.-]+\.[a-z]{2,}(/.*)?$', caseSensitive: false)
-            .hasMatch(value);
+    final bool looksLikeDomain = RegExp(
+      r'^[\w.-]+\.[a-z]{2,}(/.*)?$',
+      caseSensitive: false,
+    ).hasMatch(value);
     if (looksLikeDomain) return 'https://$value';
     return 'https://q-search.com/?q=${Uri.encodeComponent(value)}';
   }
@@ -425,7 +433,10 @@ class GameSessionController extends Notifier<GameSession> {
   /// This is how player-driven moments (tapping *Install* in the browser,
   /// answering a call, closing an app) hand control back to the story without
   /// any of that logic living in Dart.
-  void emitUiEvent(String name, {Map<String, Object?> data = const <String, Object?>{}}) {
+  void emitUiEvent(
+    String name, {
+    Map<String, Object?> data = const <String, Object?>{},
+  }) {
     _runtime?.events.emit(EngineEvent(name, data: data, source: 'ui'));
   }
 
@@ -436,11 +447,15 @@ class GameSessionController extends Notifier<GameSession> {
   void dismissNotification(String id) {
     final GameState? gameState = _state;
     if (gameState == null) return;
-    gameState.updatePhone((PhoneState p) => p.copyWith(
-          notifications: p.notifications
-              .map((GameNotification n) => n.id == id ? n.copyWith(read: true) : n)
-              .toList(),
-        ));
+    gameState.updatePhone(
+      (PhoneState p) => p.copyWith(
+        notifications: p.notifications
+            .map(
+              (GameNotification n) => n.id == id ? n.copyWith(read: true) : n,
+            )
+            .toList(),
+      ),
+    );
   }
 
   // ── Runtime signals ─────────────────────────────────────────────────────
@@ -485,7 +500,9 @@ class GameSessionController extends Notifier<GameSession> {
   Future<void> _onEpisodeFinished() async {
     final GameState? gameState = _state;
     if (gameState == null) return;
-    await ref.read(collectionRepositoryProvider).markEpisodeCompleted(
+    await ref
+        .read(collectionRepositoryProvider)
+        .markEpisodeCompleted(
           gameState.episodeId,
           _runtime?.currentLabel ?? '',
         );
@@ -517,7 +534,9 @@ class GameSessionController extends Notifier<GameSession> {
     _saveDebounce?.cancel();
     try {
       final EngineSnapshot snapshot = runtime.snapshot();
-      await ref.read(saveRepositoryProvider).write(
+      await ref
+          .read(saveRepositoryProvider)
+          .write(
             slot: slot,
             snapshot: snapshot,
             state: gameState,
@@ -542,7 +561,9 @@ class GameSessionController extends Notifier<GameSession> {
         : gameState.thread(gameState.activeThreadId!);
     final ChatMessage? last = thread?.lastMessage;
     if (last != null && last.text.isNotEmpty) {
-      return last.text.length > 90 ? '${last.text.substring(0, 87)}…' : last.text;
+      return last.text.length > 90
+          ? '${last.text.substring(0, 87)}…'
+          : last.text;
     }
     return gameState.currentScene;
   }
@@ -558,8 +579,9 @@ class GameSessionController extends Notifier<GameSession> {
   Future<void> _persistGallery() async {
     final GameState? gameState = _state;
     if (gameState == null) return;
-    final CollectionRepository collections =
-        ref.read(collectionRepositoryProvider);
+    final CollectionRepository collections = ref.read(
+      collectionRepositoryProvider,
+    );
     for (final GalleryUnlock item in gameState.gallery.values) {
       await collections.unlockGallery(item);
     }
@@ -568,8 +590,9 @@ class GameSessionController extends Notifier<GameSession> {
   Future<void> _persistAchievements() async {
     final GameState? gameState = _state;
     if (gameState == null) return;
-    final CollectionRepository collections =
-        ref.read(collectionRepositoryProvider);
+    final CollectionRepository collections = ref.read(
+      collectionRepositoryProvider,
+    );
     for (final Achievement achievement in gameState.achievements.values) {
       await collections.saveAchievement(achievement);
     }
@@ -604,9 +627,11 @@ class GameSessionController extends Notifier<GameSession> {
 
 final NotifierProvider<GameSessionController, GameSession> gameSessionProvider =
     NotifierProvider<GameSessionController, GameSession>(
-        GameSessionController.new);
+      GameSessionController.new,
+    );
 
 /// Stream of one-shot engine effects for the shell to react to.
 final StreamProvider<EngineEffect> engineEffectProvider =
     StreamProvider<EngineEffect>(
-        (ref) => ref.watch(gameSessionProvider.notifier).effects);
+      (ref) => ref.watch(gameSessionProvider.notifier).effects,
+    );

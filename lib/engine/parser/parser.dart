@@ -201,7 +201,10 @@ class Parser extends TokenReader with ExpressionParsing {
   }
 
   Statement _parseGenericCommand(
-      String name, Token nameToken, SourceSpan span) {
+    String name,
+    Token nameToken,
+    SourceSpan span,
+  ) {
     final ArgumentList arguments = _parseArguments(name);
     if (!registry.isKnown(name)) {
       diagnostics.warn(
@@ -247,8 +250,7 @@ class Parser extends TokenReader with ExpressionParsing {
     } else {
       diagnostics.error('@include expects a literal file name.', span);
     }
-    return CommandStatement(
-        name: 'include', arguments: arguments, span: span);
+    return CommandStatement(name: 'include', arguments: arguments, span: span);
   }
 
   Statement? _parseInlineLabel(SourceSpan span) {
@@ -266,7 +268,10 @@ class Parser extends TokenReader with ExpressionParsing {
       diagnostics.error('Expected a variable name.', current.span);
       skipToLineEnd();
       return CommandStatement(
-          name: 'debug', arguments: ArgumentList.empty, span: span);
+        name: 'debug',
+        arguments: ArgumentList.empty,
+        span: span,
+      );
     }
     final String target = advance().lexeme.toLowerCase();
     AssignmentOperator op = fallback;
@@ -279,7 +284,10 @@ class Parser extends TokenReader with ExpressionParsing {
           : parseExpression();
     } else if (atLineEnd) {
       // `@set some_flag` → truthy assignment.
-      value = const LiteralExpression(EngineValue.trueValue, SourceSpan.unknown);
+      value = const LiteralExpression(
+        EngineValue.trueValue,
+        SourceSpan.unknown,
+      );
       op = AssignmentOperator.assign;
     } else {
       value = parseExpression();
@@ -312,12 +320,7 @@ class Parser extends TokenReader with ExpressionParsing {
     Expression condition = parseExpression();
     _consumeLineEnd();
 
-    const Set<String> terminators = <String>{
-      'elseif',
-      'else',
-      'endif',
-      'end',
-    };
+    const Set<String> terminators = <String>{'elseif', 'else', 'endif', 'end'};
     List<Statement> body = _parseBlock(terminators);
     branches.add(ConditionalBranch(condition, body));
 
@@ -439,8 +442,7 @@ class Parser extends TokenReader with ExpressionParsing {
       '<=',
       CallExpression('random', <Expression>[
         const LiteralExpression(EngineValue.zero, SourceSpan.unknown),
-        const LiteralExpression(
-            EngineValue.number(100), SourceSpan.unknown),
+        const LiteralExpression(EngineValue.number(100), SourceSpan.unknown),
       ], span),
       probability,
       span,
@@ -461,8 +463,11 @@ class Parser extends TokenReader with ExpressionParsing {
     }
 
     _consumeLineEnd();
-    final List<Statement> body =
-        _parseBlock(<String>{'endchance', 'else', 'end'});
+    final List<Statement> body = _parseBlock(<String>{
+      'endchance',
+      'else',
+      'end',
+    });
     List<Statement> elseBody = const <Statement>[];
     if (_peekDirectiveName() == 'else') {
       _consumeDirective();
@@ -538,8 +543,8 @@ class Parser extends TokenReader with ExpressionParsing {
       shuffle: arguments.hasNamed('shuffle'),
       style: arguments.namedOrNull('style') is LiteralExpression
           ? (arguments.namedOrNull('style')! as LiteralExpression)
-              .value
-              .asString
+                .value
+                .asString
           : null,
     );
   }
@@ -585,7 +590,8 @@ class Parser extends TokenReader with ExpressionParsing {
     }
 
     // Some scripts stack markers, e.g. `💎🔒 "text"`.
-    while (check(TokenType.gem) || check(TokenType.lock) ||
+    while (check(TokenType.gem) ||
+        check(TokenType.lock) ||
         check(TokenType.clock)) {
       if (check(TokenType.gem)) kind = ChoiceOptionKind.premium;
       if (check(TokenType.lock) && kind == ChoiceOptionKind.normal) {
@@ -604,7 +610,9 @@ class Parser extends TokenReader with ExpressionParsing {
         buffer.write('${advance().lexeme} ');
       }
       label = LiteralExpression(
-          EngineValue.string(buffer.toString().trim()), span);
+        EngineValue.string(buffer.toString().trim()),
+        span,
+      );
     }
 
     Expression? cost;
@@ -621,7 +629,9 @@ class Parser extends TokenReader with ExpressionParsing {
           if (check(TokenType.number)) {
             final Token number = advance();
             cost = LiteralExpression(
-                EngineValue.of(number.value ?? 0), number.span);
+              EngineValue.of(number.value ?? 0),
+              number.span,
+            );
           }
           while (!check(TokenType.rparen) && !atLineEnd) {
             advance(); // "crystals" / "💎" / etc.
@@ -725,8 +735,7 @@ class Parser extends TokenReader with ExpressionParsing {
     advance(); // name
   }
 
-  void _consumeTerminator(
-      Set<String> names, String opener, SourceSpan span) {
+  void _consumeTerminator(Set<String> names, String opener, SourceSpan span) {
     final String? directive = _peekDirectiveName();
     if (directive != null && names.contains(directive)) {
       _consumeDirective();
@@ -772,7 +781,8 @@ class Parser extends TokenReader with ExpressionParsing {
         final String key = current.lexeme.toLowerCase();
         final bool isNamed = registry.isNamedParameter(directive, key);
         final Token next = peek();
-        final bool hasValue = next.type == TokenType.string ||
+        final bool hasValue =
+            next.type == TokenType.string ||
             next.type == TokenType.number ||
             next.type == TokenType.identifier ||
             next.type == TokenType.at ||
@@ -790,7 +800,9 @@ class Parser extends TokenReader with ExpressionParsing {
           // Boolean switch, e.g. `shuffle`.
           advance();
           named[key] = const LiteralExpression(
-              EngineValue.trueValue, SourceSpan.unknown);
+            EngineValue.trueValue,
+            SourceSpan.unknown,
+          );
           raw.write('$key ');
           continue;
         }
@@ -832,8 +844,9 @@ class Parser extends TokenReader with ExpressionParsing {
       case TokenType.number:
         advance();
         return LiteralExpression(
-            EngineValue.of(token.value ?? num.tryParse(token.lexeme) ?? 0),
-            token.span);
+          EngineValue.of(token.value ?? num.tryParse(token.lexeme) ?? 0),
+          token.span,
+        );
 
       case TokenType.arithmetic:
         if (token.lexeme == '-' && peek().type == TokenType.number) {
@@ -845,8 +858,7 @@ class Parser extends TokenReader with ExpressionParsing {
           );
         }
         advance();
-        return LiteralExpression(
-            EngineValue.string(token.lexeme), token.span);
+        return LiteralExpression(EngineValue.string(token.lexeme), token.span);
 
       case TokenType.lparen:
         advance();
@@ -868,18 +880,21 @@ class Parser extends TokenReader with ExpressionParsing {
         advance();
         if (check(TokenType.identifier) || check(TokenType.number)) {
           final Token name = advance();
-          return LiteralExpression(
-              EngineValue.string(name.lexeme), token.span);
+          return LiteralExpression(EngineValue.string(name.lexeme), token.span);
         }
         return const LiteralExpression(
-            EngineValue.emptyString, SourceSpan.unknown);
+          EngineValue.emptyString,
+          SourceSpan.unknown,
+        );
 
       case TokenType.identifier:
         advance();
         final String lexeme = token.lexeme;
         if (lexeme.startsWith(r'$')) {
           return VariableExpression(
-              lexeme.substring(1).toLowerCase(), token.span);
+            lexeme.substring(1).toLowerCase(),
+            token.span,
+          );
         }
         final String lower = lexeme.toLowerCase();
         if (lower == 'true' || lower == 'yes') {
@@ -904,8 +919,11 @@ ScriptNode parseScript(
   DirectiveRegistry? registry,
   DiagnosticBag? into,
 }) {
-  final Parser parser =
-      Parser.fromSource(source, sourceName: sourceName, registry: registry);
+  final Parser parser = Parser.fromSource(
+    source,
+    sourceName: sourceName,
+    registry: registry,
+  );
   final ScriptNode script = parser.parse();
   into?.addAll(parser.diagnostics.all);
   return script;

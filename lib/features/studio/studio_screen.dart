@@ -64,18 +64,18 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
                   alignment: Alignment.center,
                   children: <Widget>[
                     const _Thread(
-                      color: AppColors.messenger,
-                      alignment: Alignment.topCenter,
-                    )
+                          color: AppColors.messenger,
+                          alignment: Alignment.topCenter,
+                        )
                         .animate()
                         .fadeIn(duration: 700.ms)
                         .moveY(begin: 14, end: 0, duration: 1100.ms)
                         .then(delay: 300.ms)
                         .moveY(begin: 0, end: -8, duration: 900.ms),
                     const _Thread(
-                      color: AppColors.makelove,
-                      alignment: Alignment.bottomCenter,
-                    )
+                          color: AppColors.makelove,
+                          alignment: Alignment.bottomCenter,
+                        )
                         .animate(delay: 200.ms)
                         .fadeIn(duration: 700.ms)
                         .moveY(begin: -14, end: 0, duration: 1100.ms)
@@ -86,14 +86,14 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
               ),
               const SizedBox(height: 34),
               Text(
-                AppConfig.studio.toUpperCase(),
-                style: const TextStyle(
-                  color: AppColors.text,
-                  fontSize: 13,
-                  letterSpacing: 8,
-                  fontWeight: FontWeight.w300,
-                ),
-              )
+                    AppConfig.studio.toUpperCase(),
+                    style: const TextStyle(
+                      color: AppColors.text,
+                      fontSize: 13,
+                      letterSpacing: 8,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  )
                   .animate(delay: 1200.ms)
                   .fadeIn(duration: 900.ms)
                   .shimmer(
@@ -126,19 +126,15 @@ class _Thread extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Align(
-        alignment: alignment,
-        child: Container(
-          width: 190,
-          height: 2,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: <Color>[
-                Colors.transparent,
-                color,
-                Colors.transparent,
-              ],
-            ),
-          ),
+    alignment: alignment,
+    child: Container(
+      width: 190,
+      height: 2,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: <Color>[Colors.transparent, color, Colors.transparent],
         ),
-      );
+      ),
+    ),
+  );
 }

@@ -30,8 +30,10 @@ abstract class Expression {
       case 'str':
         return InterpolatedStringExpression(
           (json['p'] as List<dynamic>)
-              .map((dynamic e) =>
-                  StringPart.fromJson(Map<String, dynamic>.from(e as Map)))
+              .map(
+                (dynamic e) =>
+                    StringPart.fromJson(Map<String, dynamic>.from(e as Map)),
+              )
               .toList(),
           span,
         );
@@ -52,16 +54,20 @@ abstract class Expression {
         return CallExpression(
           json['n'] as String,
           (json['a'] as List<dynamic>)
-              .map((dynamic e) =>
-                  Expression.fromJson(Map<String, dynamic>.from(e as Map)))
+              .map(
+                (dynamic e) =>
+                    Expression.fromJson(Map<String, dynamic>.from(e as Map)),
+              )
               .toList(),
           span,
         );
       case 'list':
         return ListExpression(
           (json['i'] as List<dynamic>)
-              .map((dynamic e) =>
-                  Expression.fromJson(Map<String, dynamic>.from(e as Map)))
+              .map(
+                (dynamic e) =>
+                    Expression.fromJson(Map<String, dynamic>.from(e as Map)),
+              )
               .toList(),
           span,
         );
@@ -80,8 +86,11 @@ class LiteralExpression extends Expression {
   EngineValue evaluate(ExpressionScope scope) => value;
 
   @override
-  Map<String, dynamic> toJson() =>
-      <String, dynamic>{'k': 'lit', 'v': value.raw, 'sp': span.toJson()};
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'k': 'lit',
+    'v': value.raw,
+    'sp': span.toJson(),
+  };
 
   @override
   String toString() => value.isString ? '"${value.asString}"' : value.asString;
@@ -96,8 +105,11 @@ class VariableExpression extends Expression {
   EngineValue evaluate(ExpressionScope scope) => scope.lookup(name);
 
   @override
-  Map<String, dynamic> toJson() =>
-      <String, dynamic>{'k': 'var', 'n': name, 'sp': span.toJson()};
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'k': 'var',
+    'n': name,
+    'sp': span.toJson(),
+  };
 
   @override
   String toString() => name;
@@ -120,7 +132,8 @@ class StringPart {
   static StringPart fromJson(Map<String, dynamic> json) {
     if (json.containsKey('t')) return StringPart.text(json['t'] as String);
     return StringPart.expression(
-        Expression.fromJson(Map<String, dynamic>.from(json['e'] as Map)));
+      Expression.fromJson(Map<String, dynamic>.from(json['e'] as Map)),
+    );
   }
 }
 
@@ -144,10 +157,10 @@ class InterpolatedStringExpression extends Expression {
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'k': 'str',
-        'p': parts.map((StringPart p) => p.toJson()).toList(),
-        'sp': span.toJson(),
-      };
+    'k': 'str',
+    'p': parts.map((StringPart p) => p.toJson()).toList(),
+    'sp': span.toJson(),
+  };
 
   @override
   String toString() => parts
@@ -157,7 +170,7 @@ class InterpolatedStringExpression extends Expression {
 
 class UnaryExpression extends Expression {
   const UnaryExpression(this.operator, this.operand, SourceSpan span)
-      : super(span);
+    : super(span);
 
   final String operator;
   final Expression operand;
@@ -180,11 +193,11 @@ class UnaryExpression extends Expression {
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'k': 'un',
-        'o': operator,
-        'e': operand.toJson(),
-        'sp': span.toJson(),
-      };
+    'k': 'un',
+    'o': operator,
+    'e': operand.toJson(),
+    'sp': span.toJson(),
+  };
 
   @override
   String toString() => '$operator$operand';
@@ -192,7 +205,7 @@ class UnaryExpression extends Expression {
 
 class BinaryExpression extends Expression {
   const BinaryExpression(this.operator, this.left, this.right, SourceSpan span)
-      : super(span);
+    : super(span);
 
   final String operator;
   final Expression left;
@@ -203,11 +216,13 @@ class BinaryExpression extends Expression {
     // Short-circuit logical operators.
     if (operator == '&&' || operator == 'and') {
       return EngineValue.boolean(
-          left.evaluate(scope).isTruthy && right.evaluate(scope).isTruthy);
+        left.evaluate(scope).isTruthy && right.evaluate(scope).isTruthy,
+      );
     }
     if (operator == '||' || operator == 'or') {
       return EngineValue.boolean(
-          left.evaluate(scope).isTruthy || right.evaluate(scope).isTruthy);
+        left.evaluate(scope).isTruthy || right.evaluate(scope).isTruthy,
+      );
     }
 
     final EngineValue a = left.evaluate(scope);
@@ -242,12 +257,12 @@ class BinaryExpression extends Expression {
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'k': 'bin',
-        'o': operator,
-        'l': left.toJson(),
-        'r': right.toJson(),
-        'sp': span.toJson(),
-      };
+    'k': 'bin',
+    'o': operator,
+    'l': left.toJson(),
+    'r': right.toJson(),
+    'sp': span.toJson(),
+  };
 
   @override
   String toString() => '($left $operator $right)';
@@ -255,24 +270,24 @@ class BinaryExpression extends Expression {
 
 class CallExpression extends Expression {
   const CallExpression(this.name, this.arguments, SourceSpan span)
-      : super(span);
+    : super(span);
 
   final String name;
   final List<Expression> arguments;
 
   @override
   EngineValue evaluate(ExpressionScope scope) => scope.callFunction(
-        name,
-        arguments.map((Expression e) => e.evaluate(scope)).toList(),
-      );
+    name,
+    arguments.map((Expression e) => e.evaluate(scope)).toList(),
+  );
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'k': 'call',
-        'n': name,
-        'a': arguments.map((Expression e) => e.toJson()).toList(),
-        'sp': span.toJson(),
-      };
+    'k': 'call',
+    'n': name,
+    'a': arguments.map((Expression e) => e.toJson()).toList(),
+    'sp': span.toJson(),
+  };
 
   @override
   String toString() => '$name(${arguments.join(', ')})';
@@ -285,15 +300,15 @@ class ListExpression extends Expression {
 
   @override
   EngineValue evaluate(ExpressionScope scope) => EngineValue.of(
-        items.map((Expression e) => e.evaluate(scope).raw).toList(),
-      );
+    items.map((Expression e) => e.evaluate(scope).raw).toList(),
+  );
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'k': 'list',
-        'i': items.map((Expression e) => e.toJson()).toList(),
-        'sp': span.toJson(),
-      };
+    'k': 'list',
+    'i': items.map((Expression e) => e.toJson()).toList(),
+    'sp': span.toJson(),
+  };
 
   @override
   String toString() => '[${items.join(', ')}]';
