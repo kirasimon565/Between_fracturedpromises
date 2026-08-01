@@ -16,16 +16,15 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          distribution: zulu
+          java-version: "17"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: stable
           cache: true
 
-      # ✅ Android SDK
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
@@ -46,26 +45,41 @@ jobs:
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
 
-      # ✅ Decode keystore file from base64 secret (no key.properties used)
-      - name: Decode Keystore
+      - name: Decode Release Keystore
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.jks
 
-      # ✅ Flutter build — pass keystore secrets as env vars so your Gradle can read them from System.getenv()
+      - name: Verify Release Keystore
+        run: |
+          ls -lah android/app
+          if [ ! -f android/app/release.jks ]; then
+            echo "ERROR: release.jks was not created."
+            exit 1
+          fi
+
       - name: Build Release APK
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: flutter build apk --release
+        run: flutter build apk --release --verbose
 
-      # ✅ Collect APK
-      - name: Organize APKs for Download
+      - name: List Build Outputs
+        if: always()
         run: |
-          mkdir -p build/app/outputs/flutter-apk/
-          cp build/app/outputs/flutter-apk/*.apk build/app/outputs/flutter-apk/ || true
+          echo "=== APKs ==="
+          find build -name "*.apk" || true
 
-      - name: Upload Signed APK
+          echo ""
+          echo "=== AABs ==="
+          find build -name "*.aab" || true
+
+          echo ""
+          echo "=== Flutter outputs ==="
+          ls -R build || true
+
+      - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Between-Production-APK
