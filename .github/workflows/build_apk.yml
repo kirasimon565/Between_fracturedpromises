@@ -57,6 +57,20 @@ jobs:
             exit 1
           fi
 
+      - name: Disable Gradle file watching (CI)
+        run: |
+          # Ensure gradle.properties exists, then disable the VFS watcher that can cause "Already watching path" errors in CI
+          mkdir -p android
+          touch android/gradle.properties
+          # Avoid duplicating the property if this runs multiple times
+          if ! grep -q "^org.gradle.vfs.watch=false$" android/gradle.properties; then
+            echo "org.gradle.vfs.watch=false" >> android/gradle.properties
+          fi
+          # Optional: raise JVM heap for Gradle to avoid OOMs in CI
+          if ! grep -q "^org.gradle.jvmargs=-Xmx1536M$" android/gradle.properties; then
+            echo "org.gradle.jvmargs=-Xmx1536M" >> android/gradle.properties
+          fi
+
       - name: Build Release APK
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
