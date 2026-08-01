@@ -1,70 +1,67 @@
 name: between_fractured_promises
-description: A Flutter + Firebase Live Episode System.
+description: "Between: Fractured Promises — an offline interactive psychological drama running on a custom story engine (DSL) inside a simulated phone OS."
 publish_to: 'none'
-version: 1.0.0+1
+version: 2.0.0+200
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  # Riverpod 3.0.0 needs Dart >= 3.8.0; go_router 17 / drift 2.34 / sqlite3 3.5 /
+  # google_fonts 8 / package_info_plus 10 / path_provider 2.1.6 need >= 3.10.0.
+  sdk: ">=3.10.0 <4.0.0"
 
+# No Firebase, no Firestore, no Storage, no Auth, no cloud sync, no
+# SharedPreferences, no Hive, no Isar. Persistence is Drift/SQLite only and the
+# game never opens a socket except to verify a store purchase.
 dependencies:
   flutter:
     sdk: flutter
 
-  # State Management & Reactivity
-  get: ^4.6.6
-  rxdart: ^0.27.7
+  # ── State management (runtime state only) ────────────────────────────────
+  flutter_riverpod: ^3.0.0
 
-  # Firebase
-  firebase_core: ^3.6.0
-  firebase_auth: ^5.3.1
-  cloud_firestore: ^5.4.4
+  # ── Navigation ───────────────────────────────────────────────────────────
+  go_router: ^17.3.0
 
-  # Audio
-  audioplayers: ^6.1.0
+  # ── Persistence (Drift / SQLite) ─────────────────────────────────────────
+  drift: ^2.34.3
+  # sqlite3_flutter_libs is end-of-life; SQLite 3.x (package:sqlite3) bundles its
+  # native library automatically via Flutter asset hooks.
+  sqlite3: ^3.5.0
+  path_provider: ^2.1.6
+  path: ^1.9.1
 
-  # Visuals, FX & Physics
-  flutter_animate: ^4.5.0
-  vector_math: ^2.1.4     
-  path_drawing: ^1.0.1    
-  flutter_shaders: ^0.1.3 
-  flutter_svg: ^2.0.10    
-  flutter_staggered_grid_view: ^0.7.0 
+  # ── Audio ────────────────────────────────────────────────────────────────
+  just_audio: ^0.10.6
+  audio_session: ^0.2.4
 
-  # Utils
-  google_fonts: ^6.1.0
-  intl: ^0.19.0
-  uuid: ^4.2.2
-  cached_network_image: ^3.3.0
-  path_provider: ^2.1.2   
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
+  # ── Motion / visuals ─────────────────────────────────────────────────────
+  flutter_animate: ^4.5.2
+  google_fonts: ^8.2.1
 
-  # JSON
-  json_annotation: ^4.9.0
+  # ── Utilities ────────────────────────────────────────────────────────────
+  intl: ^0.20.3
 
+  # Used by the billing layer to detect which storefront installed the app
+  # (Huawei AppGallery / Amazon Appstore / Samsung Galaxy Store).
+  package_info_plus: ^10.2.1
+
+# The engine, the Drift schema and every model are hand-written, so there is no
+# build_runner step: `flutter pub get && flutter run` is the whole setup.
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
-  build_runner: ^2.4.6
-  json_serializable: ^6.8.0
-  isar_generator: ^3.1.0+1
-  # Tool to generate your custom launcher icons
+  flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
 
-# 🎨 CUSTOM LAUNCHER CONFIGURATION
 flutter_launcher_icons:
   android: "launcher_icon"
-  ios: false # 🛠️ FIXED: Set to false to prevent iOS path errors
+  ios: false
   image_path: "assets/icons/launcher_icon.png"
-  # Adaptive icons ensure your icon looks perfect on modern Android
-  adaptive_icon_background: "#000000" 
+  adaptive_icon_background: "#05060A"
   adaptive_icon_foreground: "assets/icons/launcher_icon.png"
 
 flutter:
   uses-material-design: true
 
-  # Asset Registry
   assets:
     - assets/logo/
     - assets/backgrounds/
@@ -74,8 +71,9 @@ flutter:
     - assets/gallery/
     - assets/fx/
     - assets/music/
+    - assets/story/episodes/
+    - assets/data/
 
-  # 🧪 Shader Registry
   shaders:
     - shaders/glitch.frag
     - shaders/bloom.frag

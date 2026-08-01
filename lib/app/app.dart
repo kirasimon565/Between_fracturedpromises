@@ -1,76 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../app/routes.dart';
-import '../theme/theme.dart';
-import 'constants.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+import '../core/app_config.dart';
+import '../core/providers/audio_controller.dart';
+import '../shared/theme/app_theme.dart';
+import 'router.dart';
+
+/// Root widget.
+///
+/// Everything below this point is offline: the router, the Drift database and
+/// the story interpreter are all created inside the [ProviderScope] that wraps
+/// this widget in `main()`.
+class BetweenApp extends ConsumerStatefulWidget {
+  const BetweenApp({super.key});
+
+  @override
+  ConsumerState<BetweenApp> createState() => _BetweenAppState();
+}
+
+class _BetweenAppState extends ConsumerState<BetweenApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Create the audio engine up front so the first `@music` has no latency.
+    ref.read(audioControllerProvider);
+  }
 
   @override
   Widget build(BuildContext context) {
-    // 🚀 FIX: We move the ThemeService logic inside the Obx to ensure 
-    // it only attempts to access the service when GetX is ready.
-    return Obx(() {
-      // Finding the service inside the builder prevents the "Race Condition" crash.
-      final ThemeService themeService = Get.find<ThemeService>();
+    final GoRouter router = ref.watch(routerProvider);
 
-      return GetMaterialApp(
-        title: AppConstants.appName,
-        theme: themeService.safeTheme,
-        darkTheme: themeService.secretTheme,
-        themeMode: themeService.isSecretMode ? ThemeMode.dark : ThemeMode.light,
-        initialRoute: AppRoutes.creatorIntro,
-        getPages: AppRoutes.routes,
-        debugShowCheckedModeBanner: false,
-        
-        // 🛠️ THE SAFETY SHIELD: 
-        // If the app hits another error, this will show the error text 
-        // instead of a grey screen, making it easier to debug on your device.
-        builder: (context, widget) {
-          ErrorWidget.builder = (FlutterErrorDetails details) {
-            return Scaffold(
-              backgroundColor: Colors.black, // Explicitly black
-              body: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
-                      const SizedBox(height: 16),
-                      SelectableText(
-                        "UI ERROR:\n${details.exception}",
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 14,
-                          fontFamily: 'Courier', // Monospace for better readability
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent.withOpacity(0.2),
-                          foregroundColor: Colors.redAccent,
-                          side: const BorderSide(color: Colors.redAccent),
-                        ),
-                        onPressed: () {
-                          // Simple way to restart: Re-launch the main app or go to Splash
-                          // But since this is a global crash, Get.offAllNamed is safest.
-                          Get.offAllNamed(AppRoutes.splash);
-                        },
-                        child: const Text("RESTART APP"),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          };
-          return widget!;
-        },
-      );
-    });
+    return MaterialApp.router(
+      title: '${AppConfig.appName}: ${AppConfig.subtitle}',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.build(),
+      darkTheme: AppTheme.build(),
+      themeMode: ThemeMode.dark,
+      routerConfig: router,
+      builder: (BuildContext context, Widget? child) {
+        // The whole game is a phone screen: never let the OS font scale
+        // break a chat bubble layout.
+        final MediaQueryData media = MediaQuery.of(context);
+        return MediaQuery(
+          data: media.copyWith(
+            textScaler: media.textScaler.clamp(
+              minScaleFactor: 0.9,
+              maxScaleFactor: 1.15,
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+    );
   }
 }

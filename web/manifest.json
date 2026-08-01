@@ -1,11 +1,11 @@
 {
-    "name": "between_fractured_promises",
+    "name": "Between: Fractured Promises",
     "short_name": "Between",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A Flutter + Firebase Live Episode System.",
+    "background_color": "#0B0B12",
+    "theme_color": "#0B0B12",
+    "description": "An offline interactive drama told through a phone you hold.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
