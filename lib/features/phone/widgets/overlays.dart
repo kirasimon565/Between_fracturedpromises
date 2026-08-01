@@ -449,7 +449,7 @@ class _ImageOverlay extends StatelessWidget {
                   child: Image.asset(
                     effect.asset,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const EmptyState(
+                    errorBuilder: (_, _, _) => const EmptyState(
                       icon: Icons.image_not_supported_outlined,
                       title: 'Image unavailable',
                     ),
@@ -606,10 +606,9 @@ class _AchievementToast extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                    colors: AppColors.crystalGradient),
+                gradient: LinearGradient(colors: AppColors.crystalGradient),
               ),
               child: const Icon(Icons.military_tech_rounded,
                   color: Colors.white, size: 21),

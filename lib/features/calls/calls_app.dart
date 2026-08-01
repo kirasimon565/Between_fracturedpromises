@@ -39,7 +39,7 @@ class CallsApp extends ConsumerWidget {
                 )
               : ListView.separated(
                   itemCount: calls.length,
-                  separatorBuilder: (_, __) => const Divider(
+                  separatorBuilder: (_, _) => const Divider(
                       indent: 72, height: 1, color: AppColors.outline),
                   itemBuilder: (BuildContext context, int index) {
                     final PhoneCall call = calls[index];

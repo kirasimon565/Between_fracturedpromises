@@ -8,23 +8,23 @@ import 'command_helpers.dart';
 
 /// Phone OS surface: apps, notifications, status bar, contacts.
 List<CommandHandler> phoneCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['phone'], _phone),
-      FunctionCommand(const <String>['phone_battery', 'battery'], _battery),
-      FunctionCommand(const <String>['phone_signal'], _signal),
-      FunctionCommand(const <String>['phone_lock'], _lock),
-      FunctionCommand(const <String>['phone_unlock'], _unlock),
-      FunctionCommand(const <String>['open_app', 'app_open'], _openApp),
-      FunctionCommand(const <String>['close_app', 'app_close'], _closeApp),
-      FunctionCommand(
-          const <String>['install_app', 'app_install'], installAppCommand),
-      FunctionCommand(
-          const <String>['uninstall_app', 'app_uninstall'], _uninstallApp),
-      FunctionCommand(const <String>['notification', 'notify'], _notification),
-      FunctionCommand(
-          const <String>['clear_notifications'], _clearNotifications),
-      FunctionCommand(const <String>['contact'], _contact),
-      FunctionCommand(const <String>['wallpaper'], _wallpaper),
-      FunctionCommand(const <String>['badge'], _badge),
+      const FunctionCommand(<String>['phone'], _phone),
+      const FunctionCommand(<String>['phone_battery', 'battery'], _battery),
+      const FunctionCommand(<String>['phone_signal'], _signal),
+      const FunctionCommand(<String>['phone_lock'], _lock),
+      const FunctionCommand(<String>['phone_unlock'], _unlock),
+      const FunctionCommand(<String>['open_app', 'app_open'], _openApp),
+      const FunctionCommand(<String>['close_app', 'app_close'], _closeApp),
+      const FunctionCommand(
+          <String>['install_app', 'app_install'], installAppCommand),
+      const FunctionCommand(
+          <String>['uninstall_app', 'app_uninstall'], _uninstallApp),
+      const FunctionCommand(<String>['notification', 'notify'], _notification),
+      const FunctionCommand(
+          <String>['clear_notifications'], _clearNotifications),
+      const FunctionCommand(<String>['contact'], _contact),
+      const FunctionCommand(<String>['wallpaper'], _wallpaper),
+      const FunctionCommand(<String>['badge'], _badge),
     ];
 
 CommandOutcome _phone(CommandContext ctx) {
@@ -87,9 +87,13 @@ CommandOutcome _openApp(CommandContext ctx) {
         currentScreen: screen,
         locked: false,
       ));
-  ctx.engine.emitEffect(OpenAppEffect(appId, screen: screen, arguments: {
-    if (thread != null) 'thread': thread,
-  }));
+  ctx.engine.emitEffect(OpenAppEffect(
+    appId,
+    screen: screen,
+    arguments: thread == null
+        ? const <String, Object?>{}
+        : <String, Object?>{'thread': thread},
+  ));
   ctx.engine.emitEvent(EngineEvents.appOpened,
       data: <String, Object?>{'app': appId});
   return CommandOutcome.next;

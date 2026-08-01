@@ -5,30 +5,39 @@ import 'command.dart';
 
 /// Flags, ad-hoc variables, randomness and relationship axes.
 List<CommandHandler> variableCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['flag'], _flag),
-      FunctionCommand(
-          const <String>['unset', 'unflag', 'clear_flag'], _unset),
-      FunctionCommand(const <String>['toggle'], _toggle),
-      FunctionCommand(
-          const <String>['unset_var', 'delete_var'], _unsetVariable),
-      FunctionCommand(const <String>['random'], _random),
-      FunctionCommand(const <String>['random_pick'], _randomPick),
-      FunctionCommand(const <String>['seed'], _seed),
+      const FunctionCommand(<String>['flag'], _flag),
+      const FunctionCommand(
+          <String>['unset', 'unflag', 'clear_flag'], _unset),
+      const FunctionCommand(<String>['toggle'], _toggle),
+      const FunctionCommand(
+          <String>['unset_var', 'delete_var'], _unsetVariable),
+      const FunctionCommand(<String>['random'], _random),
+      const FunctionCommand(<String>['random_pick'], _randomPick),
+      const FunctionCommand(<String>['seed'], _seed),
     ];
 
 List<CommandHandler> relationshipCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['trust'],
-          (CommandContext ctx) => _axis(ctx, RelationshipAxis.trust)),
-      FunctionCommand(const <String>['friendship'],
-          (CommandContext ctx) => _axis(ctx, RelationshipAxis.friendship)),
-      FunctionCommand(const <String>['love'],
-          (CommandContext ctx) => _axis(ctx, RelationshipAxis.love)),
-      FunctionCommand(const <String>['tension'],
-          (CommandContext ctx) => _axis(ctx, RelationshipAxis.tension)),
-      FunctionCommand(const <String>['suspicion'],
-          (CommandContext ctx) => _axis(ctx, RelationshipAxis.suspicion)),
-      FunctionCommand(const <String>['relationship'], _relationship),
+      const FunctionCommand(<String>['trust'], _trust),
+      const FunctionCommand(<String>['friendship'], _friendship),
+      const FunctionCommand(<String>['love'], _love),
+      const FunctionCommand(<String>['tension'], _tension),
+      const FunctionCommand(<String>['suspicion'], _suspicion),
+      const FunctionCommand(<String>['relationship'], _relationship),
     ];
+
+
+CommandOutcome _trust(CommandContext ctx) => _axis(ctx, RelationshipAxis.trust);
+
+CommandOutcome _friendship(CommandContext ctx) =>
+    _axis(ctx, RelationshipAxis.friendship);
+
+CommandOutcome _love(CommandContext ctx) => _axis(ctx, RelationshipAxis.love);
+
+CommandOutcome _tension(CommandContext ctx) =>
+    _axis(ctx, RelationshipAxis.tension);
+
+CommandOutcome _suspicion(CommandContext ctx) =>
+    _axis(ctx, RelationshipAxis.suspicion);
 
 CommandOutcome _flag(CommandContext ctx) {
   final String name = ctx.id(0);

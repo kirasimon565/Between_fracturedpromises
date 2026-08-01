@@ -11,7 +11,7 @@
 /// final runtime = StoryRuntime(registry: createCommandRegistry());
 /// await runtime.start(story.program);
 /// ```
-library engine;
+library;
 
 export 'commands/command.dart';
 export 'commands/command_helpers.dart';

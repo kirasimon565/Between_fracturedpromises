@@ -182,19 +182,19 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
                         ],
                       ),
                       const SizedBox(height: 26),
-                      GlassCard(
-                        padding: const EdgeInsets.all(16),
+                      const GlassCard(
+                        padding: EdgeInsets.all(16),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            const Icon(Icons.lock_outline_rounded,
+                            Icon(Icons.lock_outline_rounded,
                                 size: 18, color: AppColors.textFaint),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 'Saved to this device only. You can change it '
                                 'later in ${AppConfig.appName} → Settings.',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppColors.textFaint,
                                   fontSize: 12,
                                   height: 1.5,

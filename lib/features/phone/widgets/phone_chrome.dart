@@ -143,7 +143,7 @@ class _Battery extends StatelessWidget {
           ),
         ),
         if (charging)
-          Icon(Icons.bolt, size: 12, color: AppColors.success),
+          const Icon(Icons.bolt, size: 12, color: AppColors.success),
       ],
     );
   }

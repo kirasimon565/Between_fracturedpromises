@@ -4,29 +4,34 @@ import 'command.dart';
 /// Presentation-layer commands: overlays, dialogs, title cards and the
 /// animation family (`@shake`, `@glitch`, `@flash`, …).
 List<CommandHandler> uiCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['ui'], _ui),
-      FunctionCommand(const <String>['toast'], _toast),
-      FunctionCommand(const <String>['banner'], _banner),
-      FunctionCommand(const <String>['overlay'], _overlay),
-      FunctionCommand(const <String>['screen'], _screen),
-      FunctionCommand(const <String>['dialog'], _dialog),
-      FunctionCommand(const <String>['hud'], _hud),
-      FunctionCommand(const <String>['title_card'], _titleCard),
-      FunctionCommand(const <String>['credits'], _credits),
+      const FunctionCommand(<String>['ui'], _ui),
+      const FunctionCommand(<String>['toast'], _toast),
+      const FunctionCommand(<String>['banner'], _banner),
+      const FunctionCommand(<String>['overlay'], _overlay),
+      const FunctionCommand(<String>['screen'], _screen),
+      const FunctionCommand(<String>['dialog'], _dialog),
+      const FunctionCommand(<String>['hud'], _hud),
+      const FunctionCommand(<String>['title_card'], _titleCard),
+      const FunctionCommand(<String>['credits'], _credits),
     ];
 
 List<CommandHandler> animationCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['animate'], _animate),
-      FunctionCommand(const <String>['shake'],
-          (CommandContext ctx) => _screenEffect(ctx, 'shake')),
-      FunctionCommand(const <String>['flash'],
-          (CommandContext ctx) => _screenEffect(ctx, 'flash')),
-      FunctionCommand(const <String>['glitch'],
-          (CommandContext ctx) => _screenEffect(ctx, 'glitch')),
-      FunctionCommand(const <String>['fade'],
-          (CommandContext ctx) => _screenEffect(ctx, 'fade')),
-      FunctionCommand(const <String>['shatter'], _shatter),
+      const FunctionCommand(<String>['animate'], _animate),
+      const FunctionCommand(<String>['shake'], _shake),
+      const FunctionCommand(<String>['flash'], _flash),
+      const FunctionCommand(<String>['glitch'], _glitch),
+      const FunctionCommand(<String>['fade'], _fade),
+      const FunctionCommand(<String>['shatter'], _shatter),
     ];
+
+
+CommandOutcome _shake(CommandContext ctx) => _screenEffect(ctx, 'shake');
+
+CommandOutcome _flash(CommandContext ctx) => _screenEffect(ctx, 'flash');
+
+CommandOutcome _glitch(CommandContext ctx) => _screenEffect(ctx, 'glitch');
+
+CommandOutcome _fade(CommandContext ctx) => _screenEffect(ctx, 'fade');
 
 CommandOutcome _ui(CommandContext ctx) {
   ctx.engine.emitEffect(GenericEffect('ui', <String, Object?>{

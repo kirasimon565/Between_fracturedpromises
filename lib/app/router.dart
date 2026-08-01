@@ -31,11 +31,11 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>((ref) {
   final _RouterRefresh refresh = _RouterRefresh();
   ref.listen<AsyncValue<Bootstrap>>(
     bootstrapProvider,
-    (AsyncValue<Bootstrap>? _, AsyncValue<Bootstrap> __) => refresh.bump(),
+    (AsyncValue<Bootstrap>? _, AsyncValue<Bootstrap> _) => refresh.bump(),
   );
   ref.listen<bool>(
     gameSessionProvider.select((GameSession s) => s.isLoaded),
-    (bool? _, bool __) => refresh.bump(),
+    (bool? _, bool _) => refresh.bump(),
   );
   ref.onDispose(refresh.dispose);
 

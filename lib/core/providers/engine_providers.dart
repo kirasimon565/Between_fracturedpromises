@@ -201,7 +201,7 @@ class GameSessionController extends Notifier<GameSession> {
       registry: ref.read(commandRegistryProvider),
       state: gameState,
       settings: _settings,
-      onCheckpoint: (String? name) => _persist(force: true, name: name),
+      onCheckpoint: (String? name) => _persist(force: true, name: name ?? ''),
     );
     _runtime = runtime;
 

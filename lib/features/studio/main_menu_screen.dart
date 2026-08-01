@@ -99,7 +99,7 @@ class _MainMenuScreenState extends ConsumerState<MainMenuScreen> {
           Image.asset(
             'assets/backgrounds/bg_home.jpg',
             fit: BoxFit.cover,
-            errorBuilder: (BuildContext _, Object __, StackTrace? ___) =>
+            errorBuilder: (BuildContext _, Object _, StackTrace? _) =>
                 const ColoredBox(color: AppColors.night),
           ),
           const DecoratedBox(
@@ -230,10 +230,10 @@ class _MainMenuScreenState extends ConsumerState<MainMenuScreen> {
                     ],
                   ).animate(delay: 500.ms).fadeIn(duration: 600.ms),
                   const SizedBox(height: 14),
-                  Center(
+                  const Center(
                     child: Text(
                       '${AppConfig.studio} · plays entirely offline',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textFaint,
                         fontSize: 10,
                         letterSpacing: 1.2,

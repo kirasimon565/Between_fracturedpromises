@@ -13,15 +13,15 @@ import 'phone_commands.dart';
 /// Episode 1 installs Makelove through these commands instead of hard-coding
 /// the install in Dart.
 List<CommandHandler> browserCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['browser_open'], _open),
-      FunctionCommand(const <String>['browser_visit'], _visit),
-      FunctionCommand(const <String>['browser_popup'], _popup),
-      FunctionCommand(const <String>['browser_download'], _download),
-      FunctionCommand(const <String>['browser_close'], _close),
-      FunctionCommand(const <String>['browser_bookmark'], _bookmark),
-      FunctionCommand(const <String>['browser_history_clear'], _clearHistory),
-      FunctionCommand(const <String>['browser_redirect'], _redirect),
-      FunctionCommand(const <String>['browser_tab'], _tab),
+      const FunctionCommand(<String>['browser_open'], _open),
+      const FunctionCommand(<String>['browser_visit'], _visit),
+      const FunctionCommand(<String>['browser_popup'], _popup),
+      const FunctionCommand(<String>['browser_download'], _download),
+      const FunctionCommand(<String>['browser_close'], _close),
+      const FunctionCommand(<String>['browser_bookmark'], _bookmark),
+      const FunctionCommand(<String>['browser_history_clear'], _clearHistory),
+      const FunctionCommand(<String>['browser_redirect'], _redirect),
+      const FunctionCommand(<String>['browser_tab'], _tab),
     ];
 
 CommandOutcome _open(CommandContext ctx) {

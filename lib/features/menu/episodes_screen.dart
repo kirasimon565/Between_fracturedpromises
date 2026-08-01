@@ -68,7 +68,7 @@ class _EpisodesScreenState extends ConsumerState<EpisodesScreen> {
                 child: ListView.separated(
                   padding: const EdgeInsets.fromLTRB(18, 14, 18, 30),
                   itemCount: AppConfig.episodes.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (BuildContext context, int index) {
                     final EpisodeManifest episode = AppConfig.episodes[index];
                     return _EpisodeCard(
@@ -153,9 +153,9 @@ class _EpisodeCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: locked
-                  ? OutlinedButton(
+                  ? const OutlinedButton(
                       onPressed: null,
-                      child: const Text('Coming soon'),
+                      child: Text('Coming soon'),
                     )
                   : FilledButton(
                       onPressed: busy ? null : onStart,

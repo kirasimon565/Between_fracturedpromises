@@ -63,7 +63,7 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: <Widget>[
-                    _Thread(
+                    const _Thread(
                       color: AppColors.messenger,
                       alignment: Alignment.topCenter,
                     )
@@ -72,7 +72,7 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
                         .moveY(begin: 14, end: 0, duration: 1100.ms)
                         .then(delay: 300.ms)
                         .moveY(begin: 0, end: -8, duration: 900.ms),
-                    _Thread(
+                    const _Thread(
                       color: AppColors.makelove,
                       alignment: Alignment.bottomCenter,
                     )

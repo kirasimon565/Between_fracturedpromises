@@ -7,7 +7,6 @@ import '../../core/providers/app_providers.dart';
 import '../../core/providers/database_providers.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/common.dart';
-import '../phone/widgets/phone_chrome.dart';
 import '../settings/phone_settings_app.dart';
 
 /// Settings reached from the main menu.

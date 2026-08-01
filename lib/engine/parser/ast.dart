@@ -258,12 +258,12 @@ class GotoStatement extends Statement {
 
 /// `@return`
 class ReturnStatement extends Statement {
-  const ReturnStatement(SourceSpan span) : super(span);
+  const ReturnStatement(super.span);
 }
 
 /// `@end` — stops the episode.
 class HaltStatement extends Statement {
-  const HaltStatement(SourceSpan span, {this.reason}) : super(span);
+  const HaltStatement(super.span, {this.reason});
 
   final Expression? reason;
 }

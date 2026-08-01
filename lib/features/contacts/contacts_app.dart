@@ -44,7 +44,7 @@ class ContactsApp extends ConsumerWidget {
                 )
               : ListView.separated(
                   itemCount: people.length,
-                  separatorBuilder: (_, __) => const Divider(
+                  separatorBuilder: (_, _) => const Divider(
                       indent: 76, height: 1, color: AppColors.outline),
                   itemBuilder: (BuildContext context, int index) => _ContactTile(
                     character: people[index],

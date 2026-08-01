@@ -170,7 +170,8 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen>
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
         final bool leave = await _handleBack();
-        if (leave && mounted) context.go(Routes.menu);
+        if (!context.mounted) return;
+        if (leave) context.go(Routes.menu);
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: AppTheme.overlayStyle,
@@ -256,7 +257,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen>
       case 'camera':
         return CameraApp(onExit: exit);
       default:
-        return _UnknownApp(appId: appId!, onExit: exit);
+        return _UnknownApp(appId: appId, onExit: exit);
     }
   }
 }

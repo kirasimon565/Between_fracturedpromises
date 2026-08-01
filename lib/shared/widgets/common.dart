@@ -103,7 +103,7 @@ class CharacterAvatar extends StatelessWidget {
                   : DecorationImage(
                       image: AssetImage(image!),
                       fit: BoxFit.cover,
-                      onError: (_, __) {},
+                      onError: (_, _) {},
                     ),
             ),
             alignment: Alignment.center,
@@ -322,7 +322,7 @@ class NightBackdrop extends StatelessWidget {
                 image: AssetImage(image!),
                 fit: BoxFit.cover,
                 opacity: 0.22,
-                onError: (_, __) {},
+                onError: (_, _) {},
               ),
       ),
       child: child,
@@ -354,7 +354,7 @@ class SectionLabel extends StatelessWidget {
               ),
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing
         ],
       ),
     );

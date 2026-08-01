@@ -29,7 +29,7 @@ class WelcomeScreen extends ConsumerWidget {
           Image.asset(
             'assets/backgrounds/bg_welcome.jpg',
             fit: BoxFit.cover,
-            errorBuilder: (BuildContext _, Object __, StackTrace? ___) =>
+            errorBuilder: (BuildContext _, Object _, StackTrace? _) =>
                 const ColoredBox(color: AppColors.night),
           ),
           const DecoratedBox(

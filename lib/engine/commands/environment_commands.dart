@@ -5,17 +5,17 @@ import 'command_helpers.dart';
 
 /// Scene framing, in-fiction clock, weather, theme and network conditions.
 List<CommandHandler> environmentCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['scene'], _scene),
-      FunctionCommand(const <String>['time', 'clock'], _time),
-      FunctionCommand(const <String>['date'], _date),
-      FunctionCommand(const <String>['location'], _location),
-      FunctionCommand(const <String>['weather'], _weather),
-      FunctionCommand(const <String>['theme'], _theme),
-      FunctionCommand(const <String>['advance_time'], _advanceTime),
-      FunctionCommand(const <String>['network'], _network),
-      FunctionCommand(const <String>['airplane_mode'], _airplane),
-      FunctionCommand(const <String>['wifi'], _wifi),
-      FunctionCommand(const <String>['sync_fail'], _syncFail),
+      const FunctionCommand(<String>['scene'], _scene),
+      const FunctionCommand(<String>['time', 'clock'], _time),
+      const FunctionCommand(<String>['date'], _date),
+      const FunctionCommand(<String>['location'], _location),
+      const FunctionCommand(<String>['weather'], _weather),
+      const FunctionCommand(<String>['theme'], _theme),
+      const FunctionCommand(<String>['advance_time'], _advanceTime),
+      const FunctionCommand(<String>['network'], _network),
+      const FunctionCommand(<String>['airplane_mode'], _airplane),
+      const FunctionCommand(<String>['wifi'], _wifi),
+      const FunctionCommand(<String>['sync_fail'], _syncFail),
     ];
 
 CommandOutcome _scene(CommandContext ctx) {
