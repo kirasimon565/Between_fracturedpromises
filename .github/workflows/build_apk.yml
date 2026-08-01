@@ -49,15 +49,15 @@ jobs:
       # ✅ Create key.properties dynamically from secrets
       - name: Create key.properties
         run: |
-          echo "storePassword=${{ secrets.RELEASE_STORE_PASSWORD }}" >> android/key.properties
-          echo "keyPassword=${{ secrets.RELEASE_KEY_PASSWORD }}" >> android/key.properties
-          echo "keyAlias=${{ secrets.RELEASE_KEY_ALIAS }}" >> android/key.properties
+          echo "storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/key.properties
           echo "storeFile=release.jks" >> android/key.properties
 
       # ✅ Decode keystore file from base64 secret
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.jks
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.jks
 
       # ✅ Flutter build (THIS is the main fix)
       - name: Build Release APK
