@@ -21,7 +21,7 @@ generation, no service account, no `google-services.json`.
 |---|---|
 | **Runs offline** | 100%. The only socket the app ever opens is the store-billing channel used to verify a purchase. |
 | **Persistence** | Drift / SQLite only. |
-| **State** | Riverpod (plain `Notifier` / `AsyncNotifier` / `Provider`). |
+| **State** | Riverpod 3 (plain `Notifier` / `AsyncNotifier` / `Provider`); `AsyncValue.value` is used in place of the removed `valueOrNull`. |
 | **Story** | A custom DSL (`assets/story/episodes/*.txt`) compiled and interpreted at runtime. |
 | **Monetisation** | Crystals, behind a store-agnostic gateway (Huawei AppGallery, Amazon Appstore, Samsung Galaxy Store). |
 

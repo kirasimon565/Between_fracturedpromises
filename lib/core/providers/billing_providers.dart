@@ -60,7 +60,7 @@ class BillingController extends AsyncNotifier<BillingSnapshot> {
 
   Future<PurchaseResult?> buy(String sku) async {
     final BillingSnapshot current =
-        state.valueOrNull ?? const BillingSnapshot();
+        state.value ?? const BillingSnapshot();
     state = AsyncData<BillingSnapshot>(
         current.copyWith(busySku: sku, error: null, lastResult: null));
 
@@ -83,7 +83,7 @@ class BillingController extends AsyncNotifier<BillingSnapshot> {
 
   Future<int> restore() async {
     final BillingSnapshot current =
-        state.valueOrNull ?? const BillingSnapshot();
+        state.value ?? const BillingSnapshot();
     state = AsyncData<BillingSnapshot>(
         current.copyWith(busySku: '__restore__', error: null));
     try {
@@ -106,7 +106,7 @@ class BillingController extends AsyncNotifier<BillingSnapshot> {
   }
 
   List<StoreProduct> get catalog =>
-      state.valueOrNull?.products ?? StoreCatalog.all;
+      state.value?.products ?? StoreCatalog.all;
 }
 
 final AsyncNotifierProvider<BillingController, BillingSnapshot>

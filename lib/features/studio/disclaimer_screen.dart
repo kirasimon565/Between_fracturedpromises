@@ -44,7 +44,7 @@ class DisclaimerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bool onboarded =
-        ref.watch(bootstrapProvider).valueOrNull?.onboarded ?? false;
+        ref.watch(bootstrapProvider).value?.onboarded ?? false;
 
     return Scaffold(
       backgroundColor: AppColors.night,

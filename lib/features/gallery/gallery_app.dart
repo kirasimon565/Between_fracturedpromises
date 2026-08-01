@@ -40,7 +40,7 @@ class GalleryApp extends ConsumerWidget {
       children: <Widget>[
         AppHeader(
           title: 'Gallery',
-          subtitle: library.valueOrNull == null
+          subtitle: library.value == null
               ? null
               : '${library.value!.length} unlocked',
           accent: AppColors.forApp('gallery'),

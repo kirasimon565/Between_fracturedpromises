@@ -41,7 +41,7 @@ class _MainMenuScreenState extends ConsumerState<MainMenuScreen> {
   Future<void> _newGame({bool confirmOverwrite = true}) async {
     if (_busy) return;
     final bool hasSave =
-        ref.read(bootstrapProvider).valueOrNull?.hasSave ?? false;
+        ref.read(bootstrapProvider).value?.hasSave ?? false;
 
     if (hasSave && confirmOverwrite) {
       final bool ok = await showDialog<bool>(
@@ -88,8 +88,8 @@ class _MainMenuScreenState extends ConsumerState<MainMenuScreen> {
   Widget build(BuildContext context) {
     final AsyncValue<Bootstrap> boot = ref.watch(bootstrapProvider);
     final PlayerProfile profile = ref.watch(profileControllerProvider);
-    final SaveSlotSummary? last = boot.valueOrNull?.lastSave;
-    final int crystals = boot.valueOrNull?.wallet.crystals ?? 0;
+    final SaveSlotSummary? last = boot.value?.lastSave;
+    final int crystals = boot.value?.wallet.crystals ?? 0;
 
     return Scaffold(
       backgroundColor: AppColors.voidBlack,

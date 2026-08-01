@@ -106,7 +106,7 @@ class _StoreViewState extends ConsumerState<StoreView> {
       children: <Widget>[
         AppHeader(
           title: 'Crystals',
-          subtitle: async.valueOrNull == null
+          subtitle: async.value == null
               ? null
               : _storeLabel(async.value!.target),
           accent: AppColors.crystal,

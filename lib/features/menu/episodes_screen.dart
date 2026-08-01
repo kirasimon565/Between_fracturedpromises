@@ -50,7 +50,7 @@ class _EpisodesScreenState extends ConsumerState<EpisodesScreen> {
   @override
   Widget build(BuildContext context) {
     final Map<String, bool> completed =
-        ref.watch(completedEpisodesProvider).valueOrNull ??
+        ref.watch(completedEpisodesProvider).value ??
             const <String, bool>{};
 
     return Scaffold(

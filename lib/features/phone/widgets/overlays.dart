@@ -192,7 +192,7 @@ class _EffectOverlayHostState extends ConsumerState<EffectOverlayHost>
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<EngineEffect>>(engineEffectProvider,
         (AsyncValue<EngineEffect>? previous, AsyncValue<EngineEffect> next) {
-      final EngineEffect? effect = next.valueOrNull;
+      final EngineEffect? effect = next.value;
       if (effect != null) _handle(effect);
     });
 

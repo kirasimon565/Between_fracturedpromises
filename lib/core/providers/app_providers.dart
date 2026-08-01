@@ -59,7 +59,7 @@ final FutureProvider<Bootstrap> bootstrapProvider =
 class SettingsController extends Notifier<EngineSettings> {
   @override
   EngineSettings build() {
-    final Bootstrap? boot = ref.watch(bootstrapProvider).valueOrNull;
+    final Bootstrap? boot = ref.watch(bootstrapProvider).value;
     return boot?.settings ?? const EngineSettings();
   }
 
@@ -88,7 +88,7 @@ final FutureProvider<List<SaveSlotSummary>> saveSlotsProvider =
 class ProfileController extends Notifier<PlayerProfile> {
   @override
   PlayerProfile build() =>
-      ref.watch(bootstrapProvider).valueOrNull?.profile ??
+      ref.watch(bootstrapProvider).value?.profile ??
       const PlayerProfile();
 
   Future<void> save(PlayerProfile profile, {bool onboarded = true}) async {

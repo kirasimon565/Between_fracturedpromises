@@ -42,7 +42,7 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
   void _advance() {
     if (_moved || !mounted) return;
     _moved = true;
-    final Bootstrap? boot = ref.read(bootstrapProvider).valueOrNull;
+    final Bootstrap? boot = ref.read(bootstrapProvider).value;
     context.go((boot?.onboarded ?? false) ? Routes.menu : Routes.disclaimer);
   }
 
