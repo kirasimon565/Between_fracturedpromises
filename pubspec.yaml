@@ -72,7 +72,6 @@ flutter:
     - assets/fx/
     - assets/music/
     - assets/story/episodes/
-    - assets/data/
 
   shaders:
     - shaders/glitch.frag
