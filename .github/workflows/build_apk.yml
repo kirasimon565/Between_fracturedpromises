@@ -2,7 +2,7 @@ name: Production Build
 
 on:
   push:
-    branches: [ setup-between-project-11757872405521559736 ]
+    branches: [ Between ]
   workflow_dispatch:
 
 jobs:
@@ -39,6 +39,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
 
       - name: Generate Launcher Icons
         run: dart run flutter_launcher_icons
