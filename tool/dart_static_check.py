@@ -316,7 +316,14 @@ def main():
                     stack.append(s)
             if chain_unknown:
                 continue
-            scope = u.code[m.end():m.end() + 1200]
+            scope_limit = 1200
+            scope = u.code[m.end():m.end() + scope_limit]
+            # Avoid false positives when the fixed-size window ends in the
+            # middle of an identifier (for example `.currentSce` from
+            # `.currentScene`). In that case the member regex below would see a
+            # synthetic, non-existent member name.
+            if len(scope) == scope_limit:
+                scope = re.sub(r'[A-Za-z_$][\w$]*$', '', scope)
             nxt = re.search(r'\b[A-Z][\w$]*[?]?\s+' + re.escape(var) + r'\s*=', scope)
             if nxt:
                 scope = scope[:nxt.start()]
