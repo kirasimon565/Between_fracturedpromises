@@ -3,18 +3,18 @@ import 'command.dart';
 
 /// Images, backgrounds, music, sound effects and haptics.
 List<CommandHandler> mediaCommands() => <CommandHandler>[
-      FunctionCommand(
-          const <String>['image', 'show_image', 'photo'], _image),
-      FunctionCommand(const <String>['hide_image'], _hideImage),
-      FunctionCommand(const <String>['background', 'bg'], _background),
-      FunctionCommand(const <String>['video'], _video),
-      FunctionCommand(const <String>['music'], _music),
-      FunctionCommand(const <String>['stop_music'], _stopMusic),
-      FunctionCommand(const <String>['sound', 'sfx', 'play'], _sound),
-      FunctionCommand(const <String>['ambience'], _ambience),
-      FunctionCommand(const <String>['vibrate'], _vibrate),
-      FunctionCommand(const <String>['mute'], _mute),
-      FunctionCommand(const <String>['unmute'], _unmute),
+      const FunctionCommand(
+          <String>['image', 'show_image', 'photo'], _image),
+      const FunctionCommand(<String>['hide_image'], _hideImage),
+      const FunctionCommand(<String>['background', 'bg'], _background),
+      const FunctionCommand(<String>['video'], _video),
+      const FunctionCommand(<String>['music'], _music),
+      const FunctionCommand(<String>['stop_music'], _stopMusic),
+      const FunctionCommand(<String>['sound', 'sfx', 'play'], _sound),
+      const FunctionCommand(<String>['ambience'], _ambience),
+      const FunctionCommand(<String>['vibrate'], _vibrate),
+      const FunctionCommand(<String>['mute'], _mute),
+      const FunctionCommand(<String>['unmute'], _unmute),
     ];
 
 CommandOutcome _image(CommandContext ctx) {

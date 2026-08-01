@@ -97,7 +97,7 @@ class GalleryApp extends ConsumerWidget {
               borderRadius: AppRadii.card,
               child: Image.asset(
                 item.image,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   height: 260,
                   color: AppColors.surfaceHigh,
                   alignment: Alignment.center,
@@ -139,7 +139,7 @@ class _GalleryTile extends StatelessWidget {
             image: AssetImage(item.image),
             fit: BoxFit.cover,
             opacity: 0.9,
-            onError: (_, __) {},
+            onError: (_, _) {},
           ),
         ),
         child: Column(

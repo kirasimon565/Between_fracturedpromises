@@ -78,7 +78,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                     'assets/logo/logo.png',
                     width: 132,
                     errorBuilder:
-                        (BuildContext _, Object __, StackTrace? ___) =>
+                        (BuildContext _, Object _, StackTrace? _) =>
                             const Icon(Icons.blur_on_rounded,
                                 size: 92, color: AppColors.ember),
                   )
@@ -101,9 +101,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                     ),
                   ).animate(delay: 260.ms).fadeIn(duration: 800.ms),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     AppConfig.subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textFaint,
                       fontSize: 11,
                       letterSpacing: 4,

@@ -9,10 +9,10 @@ import 'command.dart';
 /// The engine only ever moves numbers around; buying crystals with real money
 /// is the billing layer's job, which credits the wallet through the same API.
 List<CommandHandler> premiumCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['crystals'], _crystals),
-      FunctionCommand(const <String>['require_crystals'], _requireCrystals),
-      FunctionCommand(const <String>['open_store'], _openStore),
-      FunctionCommand(const <String>['premium_unlock'], _premiumUnlock),
+      const FunctionCommand(<String>['crystals'], _crystals),
+      const FunctionCommand(<String>['require_crystals'], _requireCrystals),
+      const FunctionCommand(<String>['open_store'], _openStore),
+      const FunctionCommand(<String>['premium_unlock'], _premiumUnlock),
     ];
 
 /// `@crystals +25 reason "daily"` / `@crystals -15`

@@ -48,8 +48,7 @@ final Provider<int> unreadCountProvider = Provider<int>((ref) => _read(
     ));
 
 /// Conversations for one app (`messenger`, `makelove`…), newest first.
-final ProviderFamily<List<ChatThread>, String> threadsForAppProvider =
-    Provider.family<List<ChatThread>, String>(
+final threadsForAppProvider = Provider.family<List<ChatThread>, String>(
   (ref, String app) => _read(
     ref,
     (GameState s) => s.threadsForApp(app),
@@ -57,8 +56,7 @@ final ProviderFamily<List<ChatThread>, String> threadsForAppProvider =
   ),
 );
 
-final ProviderFamily<ChatThread?, String> threadProvider =
-    Provider.family<ChatThread?, String>(
+final threadProvider = Provider.family<ChatThread?, String>(
   (ref, String id) => _read(ref, (GameState s) => s.thread(id), null),
 );
 
@@ -76,8 +74,7 @@ final Provider<Map<String, CharacterState>> charactersProvider =
           const <String, CharacterState>{},
         ));
 
-final ProviderFamily<CharacterState?, String> characterProvider =
-    Provider.family<CharacterState?, String>(
+final characterProvider = Provider.family<CharacterState?, String>(
   (ref, String id) => _read(ref, (GameState s) => s.character(id), null),
 );
 

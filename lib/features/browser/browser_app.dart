@@ -466,7 +466,7 @@ class _PageView extends ConsumerWidget {
               Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(13),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: AppRadii.card,
                 ),

@@ -5,12 +5,12 @@ import 'command_helpers.dart';
 
 /// Voice / video call flow.
 List<CommandHandler> callCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['call_incoming'], _incoming),
-      FunctionCommand(const <String>['call_start'], _start),
-      FunctionCommand(const <String>['call_line'], _line),
-      FunctionCommand(const <String>['call_end'], _end),
-      FunctionCommand(const <String>['voicemail'], _voicemail),
-      FunctionCommand(const <String>['missed_call'], _missed),
+      const FunctionCommand(<String>['call_incoming'], _incoming),
+      const FunctionCommand(<String>['call_start'], _start),
+      const FunctionCommand(<String>['call_line'], _line),
+      const FunctionCommand(<String>['call_end'], _end),
+      const FunctionCommand(<String>['voicemail'], _voicemail),
+      const FunctionCommand(<String>['missed_call'], _missed),
     ];
 
 CommandOutcome _incoming(CommandContext ctx) {
@@ -52,7 +52,7 @@ CommandOutcome _start(CommandContext ctx) {
         activeCall: call,
         calls: <PhoneCall>[call, ...p.calls],
       ));
-  ctx.engine.emitEffect(OpenAppEffect('calls', screen: 'active'));
+  ctx.engine.emitEffect(const OpenAppEffect('calls', screen: 'active'));
   return CommandOutcome.next;
 }
 

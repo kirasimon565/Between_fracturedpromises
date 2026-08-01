@@ -29,7 +29,7 @@ class LabelInstruction extends Instruction {
 }
 
 class NopInstruction extends Instruction {
-  NopInstruction(SourceSpan span) : super(span);
+  NopInstruction(super.span);
 
   @override
   String get debugLabel => 'nop';
@@ -102,14 +102,14 @@ class CallInstruction extends Instruction {
 }
 
 class ReturnInstruction extends Instruction {
-  ReturnInstruction(SourceSpan span) : super(span);
+  ReturnInstruction(super.span);
 
   @override
   String get debugLabel => 'return';
 }
 
 class HaltInstruction extends Instruction {
-  HaltInstruction(SourceSpan span, {this.reason}) : super(span);
+  HaltInstruction(super.span, {this.reason});
 
   final Expression? reason;
 

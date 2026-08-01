@@ -1,11 +1,10 @@
 import '../runtime/engine_effect.dart';
 import 'command.dart';
-import 'command_helpers.dart';
 
 /// Metadata, save/checkpoint and developer tooling.
 List<CommandHandler> metaCommands() => <CommandHandler>[
-      FunctionCommand(
-        const <String>[
+      const FunctionCommand(
+        <String>[
           'title',
           'episode',
           'chapter',
@@ -19,16 +18,16 @@ List<CommandHandler> metaCommands() => <CommandHandler>[
         ],
         _metadata,
       ),
-      FunctionCommand(const <String>['include'], _include),
-      FunctionCommand(const <String>['checkpoint'], _checkpoint),
-      FunctionCommand(const <String>['save'], _save),
-      FunctionCommand(const <String>['debug'], _debug),
-      FunctionCommand(const <String>['log'], _log),
-      FunctionCommand(const <String>['assert'], _assert),
-      FunctionCommand(const <String>['breakpoint'], _breakpoint),
-      FunctionCommand(const <String>['trace'], _trace),
-      FunctionCommand(const <String>['plugin'], _plugin),
-      FunctionCommand(const <String>['use'], _use),
+      const FunctionCommand(<String>['include'], _include),
+      const FunctionCommand(<String>['checkpoint'], _checkpoint),
+      const FunctionCommand(<String>['save'], _save),
+      const FunctionCommand(<String>['debug'], _debug),
+      const FunctionCommand(<String>['log'], _log),
+      const FunctionCommand(<String>['assert'], _assert),
+      const FunctionCommand(<String>['breakpoint'], _breakpoint),
+      const FunctionCommand(<String>['trace'], _trace),
+      const FunctionCommand(<String>['plugin'], _plugin),
+      const FunctionCommand(<String>['use'], _use),
     ];
 
 CommandOutcome _metadata(CommandContext ctx) {

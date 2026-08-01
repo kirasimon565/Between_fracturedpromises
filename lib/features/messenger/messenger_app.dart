@@ -81,7 +81,7 @@ class _MessengerAppState extends ConsumerState<MessengerApp> {
               : ListView.separated(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   itemCount: threads.length,
-                  separatorBuilder: (_, __) => const Divider(
+                  separatorBuilder: (_, _) => const Divider(
                     indent: 76,
                     height: 1,
                     color: AppColors.outline,

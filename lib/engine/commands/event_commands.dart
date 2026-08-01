@@ -7,14 +7,14 @@ import 'command_helpers.dart';
 /// These are what make the runtime *event driven* rather than a straight line:
 /// a script can arm a timer, keep talking, and be interrupted later.
 List<CommandHandler> eventCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['emit'], _emit),
-      FunctionCommand(const <String>['schedule'], _schedule),
-      FunctionCommand(const <String>['cancel_schedule'], _cancelSchedule),
-      FunctionCommand(const <String>['timer'], _timer),
-      FunctionCommand(const <String>['await'], _await),
-      FunctionCommand(const <String>['async'], _async),
-      FunctionCommand(const <String>['pause_engine'], _pauseEngine),
-      FunctionCommand(const <String>['resume_engine'], _resumeEngine),
+      const FunctionCommand(<String>['emit'], _emit),
+      const FunctionCommand(<String>['schedule'], _schedule),
+      const FunctionCommand(<String>['cancel_schedule'], _cancelSchedule),
+      const FunctionCommand(<String>['timer'], _timer),
+      const FunctionCommand(<String>['await'], _await),
+      const FunctionCommand(<String>['async'], _async),
+      const FunctionCommand(<String>['pause_engine'], _pauseEngine),
+      const FunctionCommand(<String>['resume_engine'], _resumeEngine),
     ];
 
 CommandOutcome _emit(CommandContext ctx) {

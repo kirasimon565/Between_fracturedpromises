@@ -6,23 +6,23 @@ import 'command_helpers.dart';
 
 /// Inventory, evidence, journal, objectives, achievements and gallery.
 List<CommandHandler> progressCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['item', 'give', 'add_item'], _addItem),
-      FunctionCommand(const <String>['remove_item', 'take'], _removeItem),
-      FunctionCommand(const <String>['inventory'], _inventory),
-      FunctionCommand(const <String>['evidence'], _evidence),
-      FunctionCommand(const <String>['evidence_link'], _evidenceLink),
-      FunctionCommand(const <String>['journal'], _journal),
-      FunctionCommand(const <String>['journal_update'], _journalUpdate),
-      FunctionCommand(const <String>['objective'], _objective),
-      FunctionCommand(
-          const <String>['objective_complete', 'complete'], _objectiveComplete),
-      FunctionCommand(const <String>['objective_fail'], _objectiveFail),
-      FunctionCommand(
-          const <String>['achievement', 'unlock_achievement'], _achievement),
-      FunctionCommand(
-          const <String>['achievement_progress'], _achievementProgress),
-      FunctionCommand(
-          const <String>['gallery_unlock', 'unlock_gallery'], _galleryUnlock),
+      const FunctionCommand(<String>['item', 'give', 'add_item'], _addItem),
+      const FunctionCommand(<String>['remove_item', 'take'], _removeItem),
+      const FunctionCommand(<String>['inventory'], _inventory),
+      const FunctionCommand(<String>['evidence'], _evidence),
+      const FunctionCommand(<String>['evidence_link'], _evidenceLink),
+      const FunctionCommand(<String>['journal'], _journal),
+      const FunctionCommand(<String>['journal_update'], _journalUpdate),
+      const FunctionCommand(<String>['objective'], _objective),
+      const FunctionCommand(
+          <String>['objective_complete', 'complete'], _objectiveComplete),
+      const FunctionCommand(<String>['objective_fail'], _objectiveFail),
+      const FunctionCommand(
+          <String>['achievement', 'unlock_achievement'], _achievement),
+      const FunctionCommand(
+          <String>['achievement_progress'], _achievementProgress),
+      const FunctionCommand(
+          <String>['gallery_unlock', 'unlock_gallery'], _galleryUnlock),
     ];
 
 CommandOutcome _addItem(CommandContext ctx) {

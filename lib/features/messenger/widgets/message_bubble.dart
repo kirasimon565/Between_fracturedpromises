@@ -83,8 +83,8 @@ class _Bubble extends StatelessWidget {
         : AppColors.surfaceHigh;
     final Color textColor = mine ? Colors.white : AppColors.text;
 
-    final Radius corner = const Radius.circular(20);
-    final Radius pinched = const Radius.circular(6);
+    const Radius corner = Radius.circular(20);
+    const Radius pinched = Radius.circular(6);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -252,7 +252,7 @@ class _Attachment extends StatelessWidget {
           asset,
           width: 210,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
+          errorBuilder: (_, _, _) => Container(
             width: 210,
             height: 130,
             color: AppColors.outline,

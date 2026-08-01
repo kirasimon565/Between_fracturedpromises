@@ -9,19 +9,19 @@ import 'command_helpers.dart';
 ///
 /// This family is what turns a text file into a conversation.
 List<CommandHandler> messagingCommands() => <CommandHandler>[
-      FunctionCommand(const <String>['message', 'msg', 'say'], _message),
-      FunctionCommand(const <String>['typing'], _typing),
-      FunctionCommand(
-          const <String>['narration', 'narrate', 'narrator'], _narration),
-      FunctionCommand(const <String>['thought', 'think'], _thought),
-      FunctionCommand(const <String>['system'], _system),
-      FunctionCommand(const <String>['delay', 'wait', 'pause_for'], _delay),
-      FunctionCommand(const <String>['seen'], _seen),
-      FunctionCommand(const <String>['reaction'], _reaction),
-      FunctionCommand(const <String>['unsend'], _unsend),
-      FunctionCommand(const <String>['clear_chat'], _clearChat),
-      FunctionCommand(const <String>['thread'], _thread),
-      FunctionCommand(const <String>['character'], _character),
+      const FunctionCommand(<String>['message', 'msg', 'say'], _message),
+      const FunctionCommand(<String>['typing'], _typing),
+      const FunctionCommand(
+          <String>['narration', 'narrate', 'narrator'], _narration),
+      const FunctionCommand(<String>['thought', 'think'], _thought),
+      const FunctionCommand(<String>['system'], _system),
+      const FunctionCommand(<String>['delay', 'wait', 'pause_for'], _delay),
+      const FunctionCommand(<String>['seen'], _seen),
+      const FunctionCommand(<String>['reaction'], _reaction),
+      const FunctionCommand(<String>['unsend'], _unsend),
+      const FunctionCommand(<String>['clear_chat'], _clearChat),
+      const FunctionCommand(<String>['thread'], _thread),
+      const FunctionCommand(<String>['character'], _character),
     ];
 
 CommandOutcome _message(CommandContext ctx) {

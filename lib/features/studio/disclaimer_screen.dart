@@ -83,7 +83,7 @@ class DisclaimerScreen extends ConsumerWidget {
                   child: ListView.separated(
                     padding: EdgeInsets.zero,
                     itemCount: _points.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (BuildContext context, int index) {
                       final (IconData icon, String title, String body) =
                           _points[index];
@@ -135,10 +135,10 @@ class DisclaimerScreen extends ConsumerWidget {
                   child: const Text('I understand'),
                 ).animate(delay: 700.ms).fadeIn(duration: 500.ms),
                 const SizedBox(height: 10),
-                Center(
+                const Center(
                   child: Text(
                     '${AppConfig.studio} · ${AppConfig.appName}: ${AppConfig.subtitle}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textFaint,
                       fontSize: 10,
                       letterSpacing: 1.2,
