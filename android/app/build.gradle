@@ -2,7 +2,6 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
-    id "com.google.gms.google-services"
 }
 
 android {
@@ -73,10 +72,8 @@ flutter {
 }
 
 dependencies {
-    // Firebase BoM ensures version consistency across all Firebase services
-    implementation platform('com.google.firebase:firebase-bom:33.7.0')
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation 'com.google.firebase:firebase-auth' // Added for Nadia's user profile logic
-    
+    // No Firebase, no Play Services, no network SDKs: the game is 100% offline.
+    // Store billing is reached through platform channels implemented per
+    // flavour (Huawei IAP / Amazon IAP / Samsung IAP), so nothing is linked here.
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }

@@ -1,6 +1,9 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.between.fracturedpromises">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The story itself never touches the network. INTERNET is required only
+         so the store billing channels (Huawei / Amazon / Samsung IAP) can
+         verify a purchase; remove it for a no-IAP build. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <application
         android:label="Between"
         android:name="${applicationName}"

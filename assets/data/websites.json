@@ -1,0 +1,224 @@
+{
+  "version": 1,
+  "sites": [
+    {
+      "url": "between://home",
+      "title": "Orbit",
+      "kind": "home",
+      "blocks": [
+        { "type": "hero", "title": "Orbit", "subtitle": "Private browsing is on." },
+        {
+          "type": "shortcuts",
+          "items": [
+            { "label": "Makelove", "url": "makelove.app", "accent": "makelove" },
+            { "label": "Lumen Architects", "url": "lumen-architects.com" },
+            { "label": "Night Owl", "url": "nightowl-forum.net" },
+            { "label": "Claire Bennett", "url": "claire-bennett.photo" }
+          ]
+        },
+        {
+          "type": "text",
+          "value": "Nothing you open tonight is going to help you sleep."
+        }
+      ]
+    },
+    {
+      "url": "q-search.com",
+      "title": "Q Search",
+      "kind": "search",
+      "blocks": [
+        { "type": "hero", "title": "Q", "subtitle": "The web, quietly." },
+        {
+          "type": "results",
+          "items": [
+            {
+              "title": "Makelove — talk to someone who actually answers",
+              "url": "makelove.app",
+              "snippet": "Free to install. Conversations, not commitments. 4.6★ from 2.1M people."
+            },
+            {
+              "title": "Is it cheating if it's only messages? — Night Owl Forum",
+              "url": "nightowl-forum.net/threads/is-it-cheating",
+              "snippet": "417 replies. 'You already know the answer or you wouldn't be asking at 2am.'"
+            },
+            {
+              "title": "Lumen Architects — Studio",
+              "url": "lumen-architects.com",
+              "snippet": "Ethan Carter, Senior Associate. Projects, awards, late nights."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "url": "makelove.app",
+      "title": "Makelove",
+      "accent": "makelove",
+      "blocks": [
+        {
+          "type": "hero",
+          "title": "makelove",
+          "subtitle": "Someone is awake. Someone always is."
+        },
+        {
+          "type": "text",
+          "value": "Twelve million people use Makelove to say the things they can't say at home."
+        },
+        { "type": "rating", "value": 4.6, "count": "2.1M reviews", "size": "38.4 MB" },
+        {
+          "type": "list",
+          "items": [
+            "Anonymous until you choose otherwise",
+            "Messages disappear if you want them to",
+            "No photos required. No names required."
+          ]
+        },
+        { "type": "link", "label": "Get the app", "url": "makelove.app/download" },
+        {
+          "type": "quote",
+          "value": "\"I wasn't looking for anything. That's what everyone says.\" — Anonymous, 3 days ago"
+        }
+      ]
+    },
+    {
+      "url": "makelove.app/download",
+      "title": "Makelove — Download",
+      "accent": "makelove",
+      "blocks": [
+        { "type": "heading", "value": "Makelove" },
+        { "type": "text", "value": "Version 8.2.1 · Requires Android 9.0+ · 38.4 MB" },
+        { "type": "rating", "value": 4.6, "count": "2.1M reviews", "size": "38.4 MB" },
+        {
+          "type": "install",
+          "app": "makelove",
+          "name": "Makelove",
+          "size": "38.4 MB",
+          "label": "Install"
+        },
+        {
+          "type": "warning",
+          "value": "This app is not distributed through your device's store. Install anyway?"
+        },
+        {
+          "type": "reviews",
+          "items": [
+            { "author": "K.", "stars": 5, "body": "Downloaded it to prove I wouldn't use it." },
+            { "author": "anon_2214", "stars": 4, "body": "Deleted it twice. Reinstalled it three times." },
+            { "author": "M. R.", "stars": 5, "body": "It's not the app that's the problem." }
+          ]
+        }
+      ]
+    },
+    {
+      "url": "nightowl-forum.net",
+      "title": "Night Owl Forum",
+      "blocks": [
+        { "type": "heading", "value": "Night Owl" },
+        { "type": "text", "value": "Threads for people who are up when they shouldn't be." },
+        {
+          "type": "results",
+          "items": [
+            {
+              "title": "Is it cheating if it's only messages?",
+              "url": "nightowl-forum.net/threads/is-it-cheating",
+              "snippet": "417 replies · last activity 4 minutes ago"
+            },
+            {
+              "title": "My husband works late. Every night.",
+              "url": "nightowl-forum.net/threads/works-late",
+              "snippet": "1.2k replies · last activity 11 minutes ago"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "url": "nightowl-forum.net/threads/is-it-cheating",
+      "title": "Is it cheating if it's only messages?",
+      "blocks": [
+        { "type": "heading", "value": "Is it cheating if it's only messages?" },
+        { "type": "text", "value": "posted by burntoast_44 · 417 replies" },
+        {
+          "type": "quote",
+          "value": "\"If you'd delete the thread before he saw it, you already know.\""
+        },
+        {
+          "type": "quote",
+          "value": "\"Nobody cheats in one night. They cheat in a hundred small permissions.\""
+        },
+        {
+          "type": "quote",
+          "value": "\"I told myself it was just talking for eight months.\""
+        },
+        { "type": "link", "label": "Back to Night Owl", "url": "nightowl-forum.net" }
+      ]
+    },
+    {
+      "url": "nightowl-forum.net/threads/works-late",
+      "title": "My husband works late. Every night.",
+      "blocks": [
+        { "type": "heading", "value": "My husband works late. Every night." },
+        { "type": "text", "value": "posted by anonymous · 1,204 replies" },
+        { "type": "quote", "value": "\"Have you asked him? Actually asked him?\"" },
+        { "type": "quote", "value": "\"Sometimes late is just late. Sometimes it isn't.\"" },
+        { "type": "quote", "value": "\"Check the calendar before you check the phone.\"" }
+      ]
+    },
+    {
+      "url": "lumen-architects.com",
+      "title": "Lumen Architects",
+      "accent": "browser",
+      "blocks": [
+        { "type": "heading", "value": "Lumen Architects" },
+        { "type": "text", "value": "Studio · Projects · People · Contact" },
+        {
+          "type": "text",
+          "value": "Ethan Carter — Senior Associate. Joined 2019. Leads the Riverside redevelopment."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Office hours: 09:00 – 18:00",
+            "Riverside site meetings: Tuesdays",
+            "Next public review: the 14th"
+          ]
+        },
+        {
+          "type": "text",
+          "value": "It is Thursday. There is no site meeting on Thursday."
+        }
+      ]
+    },
+    {
+      "url": "claire-bennett.photo",
+      "title": "Claire Bennett — Photography",
+      "blocks": [
+        { "type": "heading", "value": "Claire Bennett" },
+        { "type": "text", "value": "Portraits. Mostly of people pretending they're fine." },
+        {
+          "type": "quote",
+          "value": "\"I photograph the second after someone stops performing.\""
+        },
+        { "type": "link", "label": "Message Claire", "url": "between://messenger/claire" }
+      ]
+    },
+    {
+      "url": "adserv.pop/win",
+      "title": "You have been selected",
+      "blocks": [
+        { "type": "heading", "value": "CONGRATULATIONS" },
+        { "type": "text", "value": "You are visitor 1,000,000 tonight. Claim your reward." },
+        { "type": "ad", "value": "Meet singles near you. Right now. Tonight." },
+        { "type": "link", "label": "Go back", "url": "between://home" }
+      ]
+    }
+  ],
+  "notFound": {
+    "title": "Page not found",
+    "blocks": [
+      { "type": "heading", "value": "This page doesn't exist" },
+      { "type": "text", "value": "Or it was taken down. Or you typed it wrong at 2am." },
+      { "type": "link", "label": "Back to start", "url": "between://home" }
+    ]
+  }
+}

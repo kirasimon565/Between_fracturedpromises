@@ -447,14 +447,17 @@
 @flag olivia_suspicious true
 
 :: scene_02_the_app
-@scene makelove_install
+@scene makelove_install app "browser" theme "secret"
 @time 02:13
 @location "Bedroom - Nadia's Phone"
 @music "temptation_hum" volume 0.15
 @phone_battery 32
 
-@message system "An ad appears on your screen."
-@message system "Makelove - Connect with someone who gets you."
+@message system "You are not reading anymore. You are just scrolling."
+
+@browser_open "between://home" title "Orbit"
+@delay 2
+@browser_popup "Makelove" "Connect with someone who gets you." cta "See more" target "makelove.app"
 
 @choice
 "Another dating app. Pass." -> @scene_ignore_ad
@@ -462,20 +465,21 @@
 "I shouldn't..." -> @scene_guilty_ad
 
 :: scene_ignore_ad
-@thought nadia "I should delete this ad. I'm married."
+@thought nadia "I should close this. I'm married."
 
 @delay 3
-@message nadia "But I can't stop looking at it."
-
-@message system "You close the ad, but it stays in your head."
+@browser_visit "q-search.com/?q=is+it+cheating+if+it+is+only+messages" title "Q Search"
+@message system "You close the ad. Then you type the question anyway."
 
 @delay 2
-@message nadia "A minute passes."
+@browser_visit "nightowl-forum.net/threads/is-it-cheating" title "Night Owl"
+@message system "Four hundred and seventeen replies. All of them at 2am."
 
-@message system "You open the app store."
+@delay 2
+@thought nadia "'You already know the answer or you wouldn't be asking.'"
 
-@flag installed_makelove true
-@goto @scene_app_opens
+@set curiosity = 1
+@goto @scene_the_download
 
 :: scene_curious_ad
 @message nadia "Connect with someone who gets you."
@@ -483,12 +487,14 @@
 @message nadia "What does that even mean?"
 
 @delay 2
+@browser_visit "makelove.app" title "Makelove"
+@message system "Twelve million people, saying the things they can't say at home."
+
+@delay 2
 @message nadia "I've forgotten what that feels like."
 
-@message system "You click the ad. The download starts."
-
-@flag installed_makelove true
-@goto @scene_app_opens
+@set curiosity = 2
+@goto @scene_the_download
 
 :: scene_guilty_ad
 @message nadia "I shouldn't. I'm married."
@@ -499,17 +505,44 @@
 @delay 2
 @message nadia "I'm so tired of pretending."
 
-@message system "Your finger hovers over the download button."
+@browser_visit "makelove.app" title "Makelove"
+@message system "You read the whole page twice without admitting you are reading it."
 
-@message nadia "One click. What's the worst that could happen?"
+@set curiosity = 3
+@flag hesitated_before_install true
+@goto @scene_the_download
 
-@message system "You download the app."
+:: scene_the_download
+@browser_visit "makelove.app/download" title "Makelove - Download"
 
+@delay 2
+@message system "38.4 MB. One button. That is the entire distance."
+
+@thought nadia "One click. What's the worst that could happen?"
+
+@message system "Nobody is going to press it for you."
+
+@await browser_install_confirm timeout 180
+
+@browser_download app "makelove" name "Makelove" icon "assets/icons/app_makelove.png" size "38.4 MB" duration 2.6
+@message system "Installing..."
+
+@delay 3
 @flag installed_makelove true
+@browser_close
+
+@notification "Makelove is ready." app "makelove" title "Makelove"
+
+@achievement first_install title "One Click" description "Installed Makelove at 2am." points 10
+@journal the_download title "The download" body "I told myself it was curiosity. 38.4 megabytes of curiosity."
+@objective meet_someone title "See who is awake" description "Open Makelove and find out who answers."
+@checkpoint "makelove_installed"
+
 @goto @scene_app_opens
 
 :: scene_app_opens
 @scene makelove_chat
+@open_app makelove
 @music "first_contact" volume 0.2
 
 @message system "The app opens. It's sleek. Minimal. Addictive."
@@ -1728,3 +1761,11 @@
 @delay 2
 
 @message system "To be continued in Episode 2..."
+
+@objective_complete meet_someone
+@journal first_night title "The first night" body "I closed the app. I did not delete it. I know exactly what that means."
+@achievement episode_1_complete title "The Spark" description "Finished Episode 1." points 50
+@gallery_unlock ep1_the_spark title "The Spark" category "episode_1" image "assets/gallery/secret_1.png"
+
+@checkpoint "episode_1_complete"
+@end "episode_1_complete"

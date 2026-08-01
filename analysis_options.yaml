@@ -1,9 +1,26 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "build/**"
+  errors:
+    invalid_annotation_target: ignore
+  language:
+    strict-casts: true
+    strict-raw-types: false
+
 linter:
   rules:
-    avoid_print: false # Allowed for debugging in this specific project context
+    avoid_print: true
     prefer_const_constructors: true
-    prefer_const_literals_to_create_immutables: true
+    prefer_const_declarations: true
     prefer_final_fields: true
+    prefer_final_locals: false
     use_key_in_widget_constructors: true
+    always_declare_return_types: true
+    unawaited_futures: true
+    directives_ordering: false
+    sort_child_properties_last: false
+    library_private_types_in_public_api: false
