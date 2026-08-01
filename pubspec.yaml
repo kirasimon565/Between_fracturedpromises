@@ -43,12 +43,15 @@ dependencies:
   # Used by the billing layer to detect which storefront installed the app
   # (Huawei AppGallery / Amazon Appstore / Samsung Galaxy Store).
   package_info_plus: ^10.2.1
-
-  # ── icons ────────────────────────────────────────────────────────────
-  cupertino_icons: ^1.0.8
   
 # The engine, the Drift schema and every model are hand-written, so there is no
 # build_runner step: `flutter pub get && flutter run` is the whole setup.
+
+# ── icons ────────────────────────────────────────────────────────────
+cupertino_icons: ^1.0.8
+
+# for icons
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
