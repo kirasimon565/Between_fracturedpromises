@@ -46,59 +46,65 @@ class EngineSnapshot {
   final int version;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'v': version,
-        'episode': episodeId,
-        'program': programId,
-        'pc': programCounter,
-        'label': label,
-        'line': line,
-        'status': status.name,
-        'stack': callStack.map((CallFrame f) => f.toJson()).toList(),
-        'handlers': handlers
-            .map((EventHandlerRegistration h) => h.toJson())
-            .toList(),
-        'seed': randomSeed,
-        'state': gameState,
-        'timers': scheduledLabels,
-        'savedAt': savedAt.millisecondsSinceEpoch,
-      };
+    'v': version,
+    'episode': episodeId,
+    'program': programId,
+    'pc': programCounter,
+    'label': label,
+    'line': line,
+    'status': status.name,
+    'stack': callStack.map((CallFrame f) => f.toJson()).toList(),
+    'handlers': handlers
+        .map((EventHandlerRegistration h) => h.toJson())
+        .toList(),
+    'seed': randomSeed,
+    'state': gameState,
+    'timers': scheduledLabels,
+    'savedAt': savedAt.millisecondsSinceEpoch,
+  };
 
   String encode() => jsonEncode(toJson());
 
   factory EngineSnapshot.fromJson(Map<String, dynamic> json) => EngineSnapshot(
-        version: (json['v'] as num?)?.toInt() ?? 1,
-        episodeId: json['episode'] as String? ?? '',
-        programId: json['program'] as String? ?? '',
-        programCounter: (json['pc'] as num?)?.toInt() ?? 0,
-        label: json['label'] as String? ?? '',
-        line: (json['line'] as num?)?.toInt() ?? 0,
-        status: RuntimeStatus.values.firstWhere(
-          (RuntimeStatus s) => s.name == json['status'],
-          orElse: () => RuntimeStatus.running,
-        ),
-        callStack: (json['stack'] as List<dynamic>? ?? const <dynamic>[])
-            .map((dynamic e) =>
-                CallFrame.fromJson(Map<String, dynamic>.from(e as Map)))
-            .toList(),
-        handlers: (json['handlers'] as List<dynamic>? ?? const <dynamic>[])
-            .map((dynamic e) => EventHandlerRegistration.fromJson(
-                Map<String, dynamic>.from(e as Map)))
-            .toList(),
-        randomSeed: (json['seed'] as num?)?.toInt() ?? 1,
-        gameState: Map<String, dynamic>.from(
-            (json['state'] as Map?) ?? const <String, dynamic>{}),
-        scheduledLabels:
-            (json['timers'] as List<dynamic>? ?? const <dynamic>[])
-                .map((dynamic e) => Map<String, dynamic>.from(e as Map))
-                .toList(),
-        savedAt: DateTime.fromMillisecondsSinceEpoch(
-            (json['savedAt'] as num?)?.toInt() ??
-                DateTime.now().millisecondsSinceEpoch),
-      );
+    version: (json['v'] as num?)?.toInt() ?? 1,
+    episodeId: json['episode'] as String? ?? '',
+    programId: json['program'] as String? ?? '',
+    programCounter: (json['pc'] as num?)?.toInt() ?? 0,
+    label: json['label'] as String? ?? '',
+    line: (json['line'] as num?)?.toInt() ?? 0,
+    status: RuntimeStatus.values.firstWhere(
+      (RuntimeStatus s) => s.name == json['status'],
+      orElse: () => RuntimeStatus.running,
+    ),
+    callStack: (json['stack'] as List<dynamic>? ?? const <dynamic>[])
+        .map(
+          (dynamic e) =>
+              CallFrame.fromJson(Map<String, dynamic>.from(e as Map)),
+        )
+        .toList(),
+    handlers: (json['handlers'] as List<dynamic>? ?? const <dynamic>[])
+        .map(
+          (dynamic e) => EventHandlerRegistration.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          ),
+        )
+        .toList(),
+    randomSeed: (json['seed'] as num?)?.toInt() ?? 1,
+    gameState: Map<String, dynamic>.from(
+      (json['state'] as Map?) ?? const <String, dynamic>{},
+    ),
+    scheduledLabels: (json['timers'] as List<dynamic>? ?? const <dynamic>[])
+        .map((dynamic e) => Map<String, dynamic>.from(e as Map))
+        .toList(),
+    savedAt: DateTime.fromMillisecondsSinceEpoch(
+      (json['savedAt'] as num?)?.toInt() ??
+          DateTime.now().millisecondsSinceEpoch,
+    ),
+  );
 
-  factory EngineSnapshot.decode(String source) =>
-      EngineSnapshot.fromJson(Map<String, dynamic>.from(
-          jsonDecode(source) as Map));
+  factory EngineSnapshot.decode(String source) => EngineSnapshot.fromJson(
+    Map<String, dynamic>.from(jsonDecode(source) as Map),
+  );
 
   /// Short description used on save-slot cards.
   String get positionLabel =>

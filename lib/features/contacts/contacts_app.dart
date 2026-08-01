@@ -20,12 +20,16 @@ class ContactsApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Map<String, CharacterState> characters =
-        ref.watch(charactersProvider);
-    final List<CharacterState> people = characters.values
-        .where((CharacterState c) => c.id != 'system' && c.id != 'narrator')
-        .toList()
-      ..sort((CharacterState a, CharacterState b) => a.name.compareTo(b.name));
+    final Map<String, CharacterState> characters = ref.watch(
+      charactersProvider,
+    );
+    final List<CharacterState> people =
+        characters.values
+            .where((CharacterState c) => c.id != 'system' && c.id != 'narrator')
+            .toList()
+          ..sort(
+            (CharacterState a, CharacterState b) => a.name.compareTo(b.name),
+          );
 
     return Column(
       children: <Widget>[
@@ -45,11 +49,15 @@ class ContactsApp extends ConsumerWidget {
               : ListView.separated(
                   itemCount: people.length,
                   separatorBuilder: (_, _) => const Divider(
-                      indent: 76, height: 1, color: AppColors.outline),
-                  itemBuilder: (BuildContext context, int index) => _ContactTile(
-                    character: people[index],
-                    onTap: () => _showProfile(context, ref, people[index]),
+                    indent: 76,
+                    height: 1,
+                    color: AppColors.outline,
                   ),
+                  itemBuilder: (BuildContext context, int index) =>
+                      _ContactTile(
+                        character: people[index],
+                        onTap: () => _showProfile(context, ref, people[index]),
+                      ),
                 ),
         ),
       ],
@@ -113,7 +121,7 @@ class _ContactSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Relationship relationship =
         ref.watch(relationshipsProvider)[character.id] ??
-            Relationship(characterId: character.id);
+        Relationship(characterId: character.id);
 
     return SafeArea(
       top: false,
@@ -157,7 +165,10 @@ class _ContactSheet extends ConsumerWidget {
                 character.about!,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                    color: AppColors.textFaint, fontSize: 12.5, height: 1.5),
+                  color: AppColors.textFaint,
+                  fontSize: 12.5,
+                  height: 1.5,
+                ),
               ),
             ],
             const SizedBox(height: 22),
@@ -186,10 +197,12 @@ class _ContactSheet extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       Navigator.of(context).pop();
-                      ref.read(gameSessionProvider.notifier).emitUiEvent(
-                        'call_requested',
-                        data: <String, Object?>{'character': character.id},
-                      );
+                      ref
+                          .read(gameSessionProvider.notifier)
+                          .emitUiEvent(
+                            'call_requested',
+                            data: <String, Object?>{'character': character.id},
+                          );
                     },
                     icon: const Icon(Icons.call_outlined, size: 17),
                     label: const Text('Call'),
@@ -231,7 +244,9 @@ class _AxisBar extends StatelessWidget {
             child: Text(
               label,
               style: const TextStyle(
-                  color: AppColors.textFaint, fontSize: 11.5),
+                color: AppColors.textFaint,
+                fontSize: 11.5,
+              ),
             ),
           ),
           Expanded(

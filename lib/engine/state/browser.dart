@@ -23,33 +23,32 @@ class BrowserTab {
     String? title,
     bool? loading,
     double? scroll,
-  }) =>
-      BrowserTab(
-        id: id,
-        url: url ?? this.url,
-        title: title ?? this.title,
-        loading: loading ?? this.loading,
-        incognito: incognito,
-        scroll: scroll ?? this.scroll,
-      );
+  }) => BrowserTab(
+    id: id,
+    url: url ?? this.url,
+    title: title ?? this.title,
+    loading: loading ?? this.loading,
+    incognito: incognito,
+    scroll: scroll ?? this.scroll,
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'url': url,
-        'title': title,
-        'loading': loading,
-        'incognito': incognito,
-        'scroll': scroll,
-      };
+    'id': id,
+    'url': url,
+    'title': title,
+    'loading': loading,
+    'incognito': incognito,
+    'scroll': scroll,
+  };
 
   factory BrowserTab.fromJson(Map<String, dynamic> json) => BrowserTab(
-        id: json['id'] as String,
-        url: json['url'] as String? ?? 'about:blank',
-        title: json['title'] as String? ?? '',
-        loading: json['loading'] as bool? ?? false,
-        incognito: json['incognito'] as bool? ?? false,
-        scroll: (json['scroll'] as num?)?.toDouble() ?? 0,
-      );
+    id: json['id'] as String,
+    url: json['url'] as String? ?? 'about:blank',
+    title: json['title'] as String? ?? '',
+    loading: json['loading'] as bool? ?? false,
+    incognito: json['incognito'] as bool? ?? false,
+    scroll: (json['scroll'] as num?)?.toDouble() ?? 0,
+  );
 }
 
 class BrowserHistoryEntry {
@@ -64,17 +63,18 @@ class BrowserHistoryEntry {
   final DateTime visitedAt;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'url': url,
-        'title': title,
-        'at': visitedAt.millisecondsSinceEpoch,
-      };
+    'url': url,
+    'title': title,
+    'at': visitedAt.millisecondsSinceEpoch,
+  };
 
   factory BrowserHistoryEntry.fromJson(Map<String, dynamic> json) =>
       BrowserHistoryEntry(
         url: json['url'] as String? ?? '',
         title: json['title'] as String? ?? '',
         visitedAt: DateTime.fromMillisecondsSinceEpoch(
-            (json['at'] as num?)?.toInt() ?? 0),
+          (json['at'] as num?)?.toInt() ?? 0,
+        ),
       );
 }
 
@@ -100,24 +100,24 @@ class BrowserPopup {
   final bool closable;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'title': title,
-        'body': body,
-        if (image != null) 'image': image,
-        'cta': cta,
-        if (target != null) 'target': target,
-        'closable': closable,
-      };
+    'id': id,
+    'title': title,
+    'body': body,
+    if (image != null) 'image': image,
+    'cta': cta,
+    if (target != null) 'target': target,
+    'closable': closable,
+  };
 
   factory BrowserPopup.fromJson(Map<String, dynamic> json) => BrowserPopup(
-        id: json['id'] as String,
-        title: json['title'] as String? ?? '',
-        body: json['body'] as String? ?? '',
-        image: json['image'] as String?,
-        cta: json['cta'] as String? ?? 'Open',
-        target: json['target'] as String?,
-        closable: json['closable'] as bool? ?? true,
-      );
+    id: json['id'] as String,
+    title: json['title'] as String? ?? '',
+    body: json['body'] as String? ?? '',
+    image: json['image'] as String?,
+    cta: json['cta'] as String? ?? 'Open',
+    target: json['target'] as String?,
+    closable: json['closable'] as bool? ?? true,
+  );
 }
 
 class BrowserDownload {
@@ -151,14 +151,14 @@ class BrowserDownload {
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'app': appId,
-        'name': name,
-        if (icon != null) 'icon': icon,
-        'progress': progress,
-        'completed': completed,
-        'size': sizeLabel,
-      };
+    'id': id,
+    'app': appId,
+    'name': name,
+    if (icon != null) 'icon': icon,
+    'progress': progress,
+    'completed': completed,
+    'size': sizeLabel,
+  };
 
   factory BrowserDownload.fromJson(Map<String, dynamic> json) =>
       BrowserDownload(
@@ -226,42 +226,56 @@ class BrowserState {
   static const Object _sentinel = Object();
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'tabs': tabs.map((BrowserTab t) => t.toJson()).toList(),
-        if (activeTabId != null) 'active': activeTabId,
-        'history': history.map((BrowserHistoryEntry h) => h.toJson()).toList(),
-        'bookmarks':
-            bookmarks.map((BrowserHistoryEntry h) => h.toJson()).toList(),
-        if (popup != null) 'popup': popup!.toJson(),
-        'downloads': downloads.map((BrowserDownload d) => d.toJson()).toList(),
-        'open': open,
-      };
+    'tabs': tabs.map((BrowserTab t) => t.toJson()).toList(),
+    if (activeTabId != null) 'active': activeTabId,
+    'history': history.map((BrowserHistoryEntry h) => h.toJson()).toList(),
+    'bookmarks': bookmarks.map((BrowserHistoryEntry h) => h.toJson()).toList(),
+    if (popup != null) 'popup': popup!.toJson(),
+    'downloads': downloads.map((BrowserDownload d) => d.toJson()).toList(),
+    'open': open,
+  };
 
   factory BrowserState.fromJson(Map<String, dynamic> json) => BrowserState(
-        tabs: (json['tabs'] as List<dynamic>?)
-                ?.map((dynamic e) =>
-                    BrowserTab.fromJson(Map<String, dynamic>.from(e as Map)))
-                .toList() ??
-            const <BrowserTab>[],
-        activeTabId: json['active'] as String?,
-        history: (json['history'] as List<dynamic>?)
-                ?.map((dynamic e) => BrowserHistoryEntry.fromJson(
-                    Map<String, dynamic>.from(e as Map)))
-                .toList() ??
-            const <BrowserHistoryEntry>[],
-        bookmarks: (json['bookmarks'] as List<dynamic>?)
-                ?.map((dynamic e) => BrowserHistoryEntry.fromJson(
-                    Map<String, dynamic>.from(e as Map)))
-                .toList() ??
-            const <BrowserHistoryEntry>[],
-        popup: json['popup'] == null
-            ? null
-            : BrowserPopup.fromJson(
-                Map<String, dynamic>.from(json['popup'] as Map)),
-        downloads: (json['downloads'] as List<dynamic>?)
-                ?.map((dynamic e) => BrowserDownload.fromJson(
-                    Map<String, dynamic>.from(e as Map)))
-                .toList() ??
-            const <BrowserDownload>[],
-        open: json['open'] as bool? ?? false,
-      );
+    tabs:
+        (json['tabs'] as List<dynamic>?)
+            ?.map(
+              (dynamic e) =>
+                  BrowserTab.fromJson(Map<String, dynamic>.from(e as Map)),
+            )
+            .toList() ??
+        const <BrowserTab>[],
+    activeTabId: json['active'] as String?,
+    history:
+        (json['history'] as List<dynamic>?)
+            ?.map(
+              (dynamic e) => BrowserHistoryEntry.fromJson(
+                Map<String, dynamic>.from(e as Map),
+              ),
+            )
+            .toList() ??
+        const <BrowserHistoryEntry>[],
+    bookmarks:
+        (json['bookmarks'] as List<dynamic>?)
+            ?.map(
+              (dynamic e) => BrowserHistoryEntry.fromJson(
+                Map<String, dynamic>.from(e as Map),
+              ),
+            )
+            .toList() ??
+        const <BrowserHistoryEntry>[],
+    popup: json['popup'] == null
+        ? null
+        : BrowserPopup.fromJson(
+            Map<String, dynamic>.from(json['popup'] as Map),
+          ),
+    downloads:
+        (json['downloads'] as List<dynamic>?)
+            ?.map(
+              (dynamic e) =>
+                  BrowserDownload.fromJson(Map<String, dynamic>.from(e as Map)),
+            )
+            .toList() ??
+        const <BrowserDownload>[],
+    open: json['open'] as bool? ?? false,
+  );
 }

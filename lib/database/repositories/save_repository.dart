@@ -40,20 +40,19 @@ class SaveSlotSummary {
   bool get isEmpty => episodeId.isEmpty;
 
   factory SaveSlotSummary.fromRow(QueryRow row) => SaveSlotSummary(
-        slot: row.read<int>('slot'),
-        name: row.read<String>('name'),
-        episodeId: row.read<String>('episode_id'),
-        episodeNo: row.read<int>('episode_no'),
-        label: row.read<String>('label'),
-        line: row.read<int>('line'),
-        scene: row.read<String>('scene'),
-        summary: row.read<String>('summary'),
-        playtime: Duration(milliseconds: row.read<int>('playtime_ms')),
-        auto: row.read<int>('auto') == 1,
-        updatedAt:
-            DateTime.fromMillisecondsSinceEpoch(row.read<int>('updated_at')),
-        cover: row.readNullable<String>('cover'),
-      );
+    slot: row.read<int>('slot'),
+    name: row.read<String>('name'),
+    episodeId: row.read<String>('episode_id'),
+    episodeNo: row.read<int>('episode_no'),
+    label: row.read<String>('label'),
+    line: row.read<int>('line'),
+    scene: row.read<String>('scene'),
+    summary: row.read<String>('summary'),
+    playtime: Duration(milliseconds: row.read<int>('playtime_ms')),
+    auto: row.read<int>('auto') == 1,
+    updatedAt: DateTime.fromMillisecondsSinceEpoch(row.read<int>('updated_at')),
+    cover: row.readNullable<String>('cover'),
+  );
 }
 
 /// Reads and writes playthroughs.
@@ -94,8 +93,9 @@ class SaveRepository {
   }
 
   Future<bool> hasAnySave() async {
-    final QueryRow? row =
-        await _db.row('SELECT COUNT(*) AS n FROM runtime_checkpoints');
+    final QueryRow? row = await _db.row(
+      'SELECT COUNT(*) AS n FROM runtime_checkpoints',
+    );
     return (row?.read<int>('n') ?? 0) > 0;
   }
 
@@ -187,9 +187,9 @@ class SaveRepository {
   Future<void> deleteSlot(int slot) => _db.clearSlot(slot);
 
   Future<void> renameSlot(int slot, String name) => _db.exec(
-        'UPDATE save_slots SET name = ?, updated_at = ? WHERE slot = ?',
-        <Object?>[name, DateTime.now().millisecondsSinceEpoch, slot],
-      );
+    'UPDATE save_slots SET name = ?, updated_at = ? WHERE slot = ?',
+    <Object?>[name, DateTime.now().millisecondsSinceEpoch, slot],
+  );
 
   /// Copies the autosave into a manual slot.
   Future<void> copySlot(int from, int to, {String name = ''}) async {

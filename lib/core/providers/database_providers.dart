@@ -14,12 +14,15 @@ final Provider<AppDatabase> appDatabaseProvider = Provider<AppDatabase>((ref) {
 
 final Provider<SaveRepository> saveRepositoryProvider =
     Provider<SaveRepository>(
-        (ref) => SaveRepository(ref.watch(appDatabaseProvider)));
+      (ref) => SaveRepository(ref.watch(appDatabaseProvider)),
+    );
 
 final Provider<PlayerRepository> playerRepositoryProvider =
     Provider<PlayerRepository>(
-        (ref) => PlayerRepository(ref.watch(appDatabaseProvider)));
+      (ref) => PlayerRepository(ref.watch(appDatabaseProvider)),
+    );
 
 final Provider<CollectionRepository> collectionRepositoryProvider =
     Provider<CollectionRepository>(
-        (ref) => CollectionRepository(ref.watch(appDatabaseProvider)));
+      (ref) => CollectionRepository(ref.watch(appDatabaseProvider)),
+    );

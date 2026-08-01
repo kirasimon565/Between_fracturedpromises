@@ -17,21 +17,21 @@ import 'variable_commands.dart';
 /// A plugin adds behaviour by registering extra handlers *after* this call —
 /// nothing in the interpreter has to change.
 List<CommandHandler> builtinCommands() => <CommandHandler>[
-      ...messagingCommands(),
-      ...variableCommands(),
-      ...relationshipCommands(),
-      ...progressCommands(),
-      ...mediaCommands(),
-      ...phoneCommands(),
-      ...browserCommands(),
-      ...environmentCommands(),
-      ...uiCommands(),
-      ...animationCommands(),
-      ...eventCommands(),
-      ...premiumCommands(),
-      ...callCommands(),
-      ...metaCommands(),
-    ];
+  ...messagingCommands(),
+  ...variableCommands(),
+  ...relationshipCommands(),
+  ...progressCommands(),
+  ...mediaCommands(),
+  ...phoneCommands(),
+  ...browserCommands(),
+  ...environmentCommands(),
+  ...uiCommands(),
+  ...animationCommands(),
+  ...eventCommands(),
+  ...premiumCommands(),
+  ...callCommands(),
+  ...metaCommands(),
+];
 
 /// Builds the registry used by a fresh runtime.
 ///

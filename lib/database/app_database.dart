@@ -33,21 +33,21 @@ class AppDatabase extends GeneratedDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) async {
-          await _createAll();
-        },
-        onUpgrade: (Migrator m, int from, int to) async {
-          // The schema is additive: re-running the `IF NOT EXISTS` DDL brings
-          // an older file up to date without touching existing rows.
-          await _createAll();
-        },
-        beforeOpen: (OpeningDetails details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-          await customStatement('PRAGMA journal_mode = WAL');
-          await _createAll();
-          await _seed();
-        },
-      );
+    onCreate: (Migrator m) async {
+      await _createAll();
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      // The schema is additive: re-running the `IF NOT EXISTS` DDL brings
+      // an older file up to date without touching existing rows.
+      await _createAll();
+    },
+    beforeOpen: (OpeningDetails details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+      await customStatement('PRAGMA journal_mode = WAL');
+      await _createAll();
+      await _seed();
+    },
+  );
 
   Future<void> _createAll() async {
     for (final String statement in AppSchema.createStatements) {
@@ -74,14 +74,12 @@ class AppDatabase extends GeneratedDatabase {
   Future<List<QueryRow>> rows(
     String sql, [
     List<Variable<Object>> variables = const <Variable<Object>>[],
-  ]) =>
-      customSelect(sql, variables: variables).get();
+  ]) => customSelect(sql, variables: variables).get();
 
   Future<QueryRow?> row(
     String sql, [
     List<Variable<Object>> variables = const <Variable<Object>>[],
-  ]) =>
-      customSelect(sql, variables: variables).getSingleOrNull();
+  ]) => customSelect(sql, variables: variables).getSingleOrNull();
 
   Future<void> exec(String sql, [List<Object?> args = const <Object?>[]]) =>
       customStatement(sql, args);
@@ -90,10 +88,13 @@ class AppDatabase extends GeneratedDatabase {
   Future<void> clearSlot(int slot) async {
     await transaction(() async {
       for (final String table in AppSchema.slotScopedTables) {
-        await customStatement('DELETE FROM $table WHERE slot = ?', <Object?>[slot]);
+        await customStatement('DELETE FROM $table WHERE slot = ?', <Object?>[
+          slot,
+        ]);
       }
-      await customStatement(
-          'DELETE FROM save_slots WHERE slot = ?', <Object?>[slot]);
+      await customStatement('DELETE FROM save_slots WHERE slot = ?', <Object?>[
+        slot,
+      ]);
     });
   }
 
@@ -113,10 +114,13 @@ class AppDatabase extends GeneratedDatabase {
       for (final String table in tables) {
         await customStatement('DELETE FROM $table');
       }
-      await customStatement('UPDATE wallet SET crystals = 0, '
-          'lifetime_earned = 0, lifetime_spent = 0 WHERE id = 1');
       await customStatement(
-          'UPDATE player_profile SET onboarded = 0 WHERE id = 1');
+        'UPDATE wallet SET crystals = 0, '
+        'lifetime_earned = 0, lifetime_spent = 0 WHERE id = 1',
+      );
+      await customStatement(
+        'UPDATE player_profile SET onboarded = 0 WHERE id = 1',
+      );
     });
   }
 }

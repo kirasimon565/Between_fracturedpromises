@@ -5,26 +5,23 @@ import 'command.dart';
 
 /// Flags, ad-hoc variables, randomness and relationship axes.
 List<CommandHandler> variableCommands() => <CommandHandler>[
-      const FunctionCommand(<String>['flag'], _flag),
-      const FunctionCommand(
-          <String>['unset', 'unflag', 'clear_flag'], _unset),
-      const FunctionCommand(<String>['toggle'], _toggle),
-      const FunctionCommand(
-          <String>['unset_var', 'delete_var'], _unsetVariable),
-      const FunctionCommand(<String>['random'], _random),
-      const FunctionCommand(<String>['random_pick'], _randomPick),
-      const FunctionCommand(<String>['seed'], _seed),
-    ];
+  const FunctionCommand(<String>['flag'], _flag),
+  const FunctionCommand(<String>['unset', 'unflag', 'clear_flag'], _unset),
+  const FunctionCommand(<String>['toggle'], _toggle),
+  const FunctionCommand(<String>['unset_var', 'delete_var'], _unsetVariable),
+  const FunctionCommand(<String>['random'], _random),
+  const FunctionCommand(<String>['random_pick'], _randomPick),
+  const FunctionCommand(<String>['seed'], _seed),
+];
 
 List<CommandHandler> relationshipCommands() => <CommandHandler>[
-      const FunctionCommand(<String>['trust'], _trust),
-      const FunctionCommand(<String>['friendship'], _friendship),
-      const FunctionCommand(<String>['love'], _love),
-      const FunctionCommand(<String>['tension'], _tension),
-      const FunctionCommand(<String>['suspicion'], _suspicion),
-      const FunctionCommand(<String>['relationship'], _relationship),
-    ];
-
+  const FunctionCommand(<String>['trust'], _trust),
+  const FunctionCommand(<String>['friendship'], _friendship),
+  const FunctionCommand(<String>['love'], _love),
+  const FunctionCommand(<String>['tension'], _tension),
+  const FunctionCommand(<String>['suspicion'], _suspicion),
+  const FunctionCommand(<String>['relationship'], _relationship),
+];
 
 CommandOutcome _trust(CommandContext ctx) => _axis(ctx, RelationshipAxis.trust);
 
@@ -44,8 +41,10 @@ CommandOutcome _flag(CommandContext ctx) {
   if (name.isEmpty) return CommandOutcome.next;
   final bool value = ctx.count > 1 ? ctx.flag(1) : true;
   ctx.engine.state.setFlag(name, value: value);
-  ctx.engine.emitEvent(EngineEvents.flagSet,
-      data: <String, Object?>{'flag': name, 'value': value});
+  ctx.engine.emitEvent(
+    EngineEvents.flagSet,
+    data: <String, Object?>{'flag': name, 'value': value},
+  );
   return CommandOutcome.next;
 }
 
@@ -53,8 +52,10 @@ CommandOutcome _unset(CommandContext ctx) {
   final String name = ctx.id(0);
   if (name.isEmpty) return CommandOutcome.next;
   ctx.engine.state.setFlag(name, value: false);
-  ctx.engine.emitEvent(EngineEvents.flagSet,
-      data: <String, Object?>{'flag': name, 'value': false});
+  ctx.engine.emitEvent(
+    EngineEvents.flagSet,
+    data: <String, Object?>{'flag': name, 'value': false},
+  );
   return CommandOutcome.next;
 }
 
@@ -76,7 +77,9 @@ CommandOutcome _unsetVariable(CommandContext ctx) {
 CommandOutcome _random(CommandContext ctx) {
   final String target = ctx.namedStr('into', ctx.id(0, 'random_value'));
   final int min = ctx.has('min') ? ctx.namedInt('min') : ctx.integer(1, 0);
-  final int max = ctx.has('max') ? ctx.namedInt('max', 100) : ctx.integer(2, 100);
+  final int max = ctx.has('max')
+      ? ctx.namedInt('max', 100)
+      : ctx.integer(2, 100);
   final int value = ctx.engine.random.between(min, max);
   ctx.engine.variables.set(target, value);
   return CommandOutcome.next;
@@ -95,7 +98,8 @@ CommandOutcome _randomPick(CommandContext ctx) {
     }
   }
   if (pool.isEmpty) return CommandOutcome.next;
-  final EngineValue picked = pool[ctx.engine.random.between(0, pool.length - 1)];
+  final EngineValue picked =
+      pool[ctx.engine.random.between(0, pool.length - 1)];
   ctx.engine.variables.set(target, picked.raw);
   return CommandOutcome.next;
 }
@@ -127,12 +131,14 @@ CommandOutcome _axis(CommandContext ctx, RelationshipAxis axis) {
     max: max,
   );
 
-  ctx.engine.emitEvent(EngineEvents.relationshipChanged,
-      data: <String, Object?>{
-        'character': character,
-        'axis': axis.name,
-        'value': result,
-      });
+  ctx.engine.emitEvent(
+    EngineEvents.relationshipChanged,
+    data: <String, Object?>{
+      'character': character,
+      'axis': axis.name,
+      'value': result,
+    },
+  );
   return CommandOutcome.next;
 }
 

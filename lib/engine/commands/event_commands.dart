@@ -7,15 +7,15 @@ import 'command_helpers.dart';
 /// These are what make the runtime *event driven* rather than a straight line:
 /// a script can arm a timer, keep talking, and be interrupted later.
 List<CommandHandler> eventCommands() => <CommandHandler>[
-      const FunctionCommand(<String>['emit'], _emit),
-      const FunctionCommand(<String>['schedule'], _schedule),
-      const FunctionCommand(<String>['cancel_schedule'], _cancelSchedule),
-      const FunctionCommand(<String>['timer'], _timer),
-      const FunctionCommand(<String>['await'], _await),
-      const FunctionCommand(<String>['async'], _async),
-      const FunctionCommand(<String>['pause_engine'], _pauseEngine),
-      const FunctionCommand(<String>['resume_engine'], _resumeEngine),
-    ];
+  const FunctionCommand(<String>['emit'], _emit),
+  const FunctionCommand(<String>['schedule'], _schedule),
+  const FunctionCommand(<String>['cancel_schedule'], _cancelSchedule),
+  const FunctionCommand(<String>['timer'], _timer),
+  const FunctionCommand(<String>['await'], _await),
+  const FunctionCommand(<String>['async'], _async),
+  const FunctionCommand(<String>['pause_engine'], _pauseEngine),
+  const FunctionCommand(<String>['resume_engine'], _resumeEngine),
+];
 
 CommandOutcome _emit(CommandContext ctx) {
   final String name = ctx.id(0);
@@ -28,9 +28,11 @@ CommandOutcome _emit(CommandContext ctx) {
   if (delay <= Duration.zero) {
     ctx.engine.emitEvent(name, data: data);
   } else {
-    ctx.engine.scheduler
-        .after(delay, () => ctx.engine.emitEvent(name, data: data),
-            tag: 'story_event');
+    ctx.engine.scheduler.after(
+      delay,
+      () => ctx.engine.emitEvent(name, data: data),
+      tag: 'story_event',
+    );
   }
   return CommandOutcome.next;
 }
@@ -42,8 +44,9 @@ CommandOutcome _schedule(CommandContext ctx) {
   final Duration delay = ctx.has('in')
       ? ctx.namedDuration('in', const Duration(seconds: 5))
       : ctx.namedDuration('at', const Duration(seconds: 5));
-  final Duration? repeat =
-      ctx.has('repeat') ? ctx.namedDuration('repeat', Duration.zero) : null;
+  final Duration? repeat = ctx.has('repeat')
+      ? ctx.namedDuration('repeat', Duration.zero)
+      : null;
   ctx.engine.scheduleLabel(
     label,
     delay,
@@ -64,12 +67,14 @@ CommandOutcome _timer(CommandContext ctx) {
       ? Duration(milliseconds: (ctx.namedNum('seconds') * 1000).round())
       : Duration(milliseconds: (ctx.number(0, 10) * 1000).round());
   final String id = ctx.namedStr('id', ctx.uid('timer'));
-  ctx.engine.emitEffect(GenericEffect('timer', <String, Object?>{
-    'id': id,
-    'durationMs': duration.inMilliseconds,
-    'label': ctx.namedStr('label'),
-    'visible': ctx.namedBool('visible', true),
-  }));
+  ctx.engine.emitEffect(
+    GenericEffect('timer', <String, Object?>{
+      'id': id,
+      'durationMs': duration.inMilliseconds,
+      'label': ctx.namedStr('label'),
+      'visible': ctx.namedBool('visible', true),
+    }),
+  );
   ctx.engine.scheduler.after(
     duration,
     () => ctx.engine.emitEvent('timer_$id'),
@@ -83,8 +88,9 @@ CommandOutcome _timer(CommandContext ctx) {
 CommandOutcome _await(CommandContext ctx) {
   final String signal = ctx.id(0);
   if (signal.isEmpty) return CommandOutcome.next;
-  final Duration? timeout =
-      ctx.has('timeout') ? ctx.namedDuration('timeout', Duration.zero) : null;
+  final Duration? timeout = ctx.has('timeout')
+      ? ctx.namedDuration('timeout', Duration.zero)
+      : null;
   return CommandOutcome.waitFor(signal, timeout: timeout);
 }
 

@@ -10,15 +10,17 @@ import 'engine_providers.dart';
 
 /// The storefront adapter, wired so a successful purchase credits the wallet
 /// and writes a receipt in the same step.
-final Provider<BillingService> billingServiceProvider =
-    Provider<BillingService>((ref) {
+final Provider<BillingService>
+billingServiceProvider = Provider<BillingService>((ref) {
   final BillingService service = BillingService(
     onGrant: (BillingGrant grant) async {
       final bool duplicate = await ref
           .read(playerRepositoryProvider)
           .hasReceipt(grant.receiptId);
 
-      await ref.read(playerRepositoryProvider).recordReceipt(
+      await ref
+          .read(playerRepositoryProvider)
+          .recordReceipt(
             id: grant.receiptId,
             sku: grant.sku,
             provider: grant.provider,
@@ -27,8 +29,9 @@ final Provider<BillingService> billingServiceProvider =
             acknowledged: true,
           );
 
-      final GameSessionController session =
-          ref.read(gameSessionProvider.notifier);
+      final GameSessionController session = ref.read(
+        gameSessionProvider.notifier,
+      );
 
       if (grant.entitlement) {
         await session.grantEntitlement(grant.sku);
@@ -59,43 +62,46 @@ class BillingController extends AsyncNotifier<BillingSnapshot> {
   Future<BillingSnapshot> build() => _service.initialise();
 
   Future<PurchaseResult?> buy(String sku) async {
-    final BillingSnapshot current =
-        state.value ?? const BillingSnapshot();
+    final BillingSnapshot current = state.value ?? const BillingSnapshot();
     state = AsyncData<BillingSnapshot>(
-        current.copyWith(busySku: sku, error: null, lastResult: null));
+      current.copyWith(busySku: sku, error: null, lastResult: null),
+    );
 
     try {
       final PurchaseResult result = await _service.buy(sku);
-      state = AsyncData<BillingSnapshot>(current.copyWith(
-        busySku: null,
-        lastResult: result,
-        error: result.state == PurchaseState.failed
-            ? (result.message ?? 'Purchase failed')
-            : null,
-      ));
+      state = AsyncData<BillingSnapshot>(
+        current.copyWith(
+          busySku: null,
+          lastResult: result,
+          error: result.state == PurchaseState.failed
+              ? (result.message ?? 'Purchase failed')
+              : null,
+        ),
+      );
       return result;
     } catch (error) {
       state = AsyncData<BillingSnapshot>(
-          current.copyWith(busySku: null, error: '$error'));
+        current.copyWith(busySku: null, error: '$error'),
+      );
       return null;
     }
   }
 
   Future<int> restore() async {
-    final BillingSnapshot current =
-        state.value ?? const BillingSnapshot();
+    final BillingSnapshot current = state.value ?? const BillingSnapshot();
     state = AsyncData<BillingSnapshot>(
-        current.copyWith(busySku: '__restore__', error: null));
+      current.copyWith(busySku: '__restore__', error: null),
+    );
     try {
       final List<PurchaseResult> results = await _service.restore();
-      state = AsyncData<BillingSnapshot>(current.copyWith(
-        busySku: null,
-        lastRestoreAt: DateTime.now(),
-      ));
+      state = AsyncData<BillingSnapshot>(
+        current.copyWith(busySku: null, lastRestoreAt: DateTime.now()),
+      );
       return results.length;
     } catch (error) {
       state = AsyncData<BillingSnapshot>(
-          current.copyWith(busySku: null, error: '$error'));
+        current.copyWith(busySku: null, error: '$error'),
+      );
       return 0;
     }
   }
@@ -105,11 +111,11 @@ class BillingController extends AsyncNotifier<BillingSnapshot> {
     state = await AsyncValue.guard(_service.initialise);
   }
 
-  List<StoreProduct> get catalog =>
-      state.value?.products ?? StoreCatalog.all;
+  List<StoreProduct> get catalog => state.value?.products ?? StoreCatalog.all;
 }
 
 final AsyncNotifierProvider<BillingController, BillingSnapshot>
-    billingControllerProvider =
+billingControllerProvider =
     AsyncNotifierProvider<BillingController, BillingSnapshot>(
-        BillingController.new);
+      BillingController.new,
+    );

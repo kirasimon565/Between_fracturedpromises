@@ -53,7 +53,11 @@ class AudioController {
       if (effect.stop || effect.track == null) {
         await stopMusic(fade: effect.fade);
       } else {
-        await playMusic(effect.track!, volume: effect.volume, loop: effect.loop);
+        await playMusic(
+          effect.track!,
+          volume: effect.volume,
+          loop: effect.loop,
+        );
       }
       return true;
     }
@@ -84,7 +88,9 @@ class AudioController {
     await _play(_music, track, volume);
   }
 
-  Future<void> stopMusic({Duration fade = const Duration(milliseconds: 500)}) async {
+  Future<void> stopMusic({
+    Duration fade = const Duration(milliseconds: 500),
+  }) async {
     _currentTrack = null;
     try {
       const int steps = 6;
@@ -145,8 +151,8 @@ class AudioController {
 
 final Provider<AudioController> audioControllerProvider =
     Provider<AudioController>((ref) {
-  final AudioController controller = AudioController();
-  unawaited(controller.initialise());
-  ref.onDispose(() => unawaited(controller.dispose()));
-  return controller;
-});
+      final AudioController controller = AudioController();
+      unawaited(controller.initialise());
+      ref.onDispose(() => unawaited(controller.dispose()));
+      return controller;
+    });

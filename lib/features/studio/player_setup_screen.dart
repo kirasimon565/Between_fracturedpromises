@@ -39,8 +39,9 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
     final PlayerProfile profile = ref.read(profileControllerProvider);
     _name = TextEditingController(text: profile.name);
     final List<String> parts = profile.displayName.split(' ');
-    _surname =
-        TextEditingController(text: parts.length > 1 ? parts.last : 'Carter');
+    _surname = TextEditingController(
+      text: parts.length > 1 ? parts.last : 'Carter',
+    );
     if (_pronounOptions.contains(profile.pronouns)) {
       _pronouns = profile.pronouns;
     }
@@ -57,7 +58,9 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
     if (_saving) return;
     setState(() => _saving = true);
 
-    final String first = _name.text.trim().isEmpty ? 'Nadia' : _name.text.trim();
+    final String first = _name.text.trim().isEmpty
+        ? 'Nadia'
+        : _name.text.trim();
     final String last = _surname.text.trim();
 
     final PlayerProfile profile = PlayerProfile(
@@ -113,13 +116,16 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
                       ),
                       const SizedBox(height: 30),
                       Center(
-                        child: CharacterAvatar(
-                          id: 'nadia',
-                          name: _name.text,
-                          size: 92,
-                          ring: AppColors.ember,
-                        ),
-                      ).animate().fadeIn(duration: 600.ms).scale(
+                            child: CharacterAvatar(
+                              id: 'nadia',
+                              name: _name.text,
+                              size: 92,
+                              ring: AppColors.ember,
+                            ),
+                          )
+                          .animate()
+                          .fadeIn(duration: 600.ms)
+                          .scale(
                             begin: const Offset(0.9, 0.9),
                             end: const Offset(1, 1),
                             duration: 600.ms,
@@ -163,8 +169,9 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
                               selected: _pronouns == option,
                               showCheckmark: false,
                               backgroundColor: AppColors.surfaceHigh,
-                              selectedColor:
-                                  AppColors.ember.withValues(alpha: 0.22),
+                              selectedColor: AppColors.ember.withValues(
+                                alpha: 0.22,
+                              ),
                               side: BorderSide(
                                 color: _pronouns == option
                                     ? AppColors.ember
@@ -187,8 +194,11 @@ class _PlayerSetupScreenState extends ConsumerState<PlayerSetupScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Icon(Icons.lock_outline_rounded,
-                                size: 18, color: AppColors.textFaint),
+                            Icon(
+                              Icons.lock_outline_rounded,
+                              size: 18,
+                              color: AppColors.textFaint,
+                            ),
                             SizedBox(width: 12),
                             Expanded(
                               child: Text(

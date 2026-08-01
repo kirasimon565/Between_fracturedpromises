@@ -9,20 +9,23 @@ import 'command_helpers.dart';
 ///
 /// This family is what turns a text file into a conversation.
 List<CommandHandler> messagingCommands() => <CommandHandler>[
-      const FunctionCommand(<String>['message', 'msg', 'say'], _message),
-      const FunctionCommand(<String>['typing'], _typing),
-      const FunctionCommand(
-          <String>['narration', 'narrate', 'narrator'], _narration),
-      const FunctionCommand(<String>['thought', 'think'], _thought),
-      const FunctionCommand(<String>['system'], _system),
-      const FunctionCommand(<String>['delay', 'wait', 'pause_for'], _delay),
-      const FunctionCommand(<String>['seen'], _seen),
-      const FunctionCommand(<String>['reaction'], _reaction),
-      const FunctionCommand(<String>['unsend'], _unsend),
-      const FunctionCommand(<String>['clear_chat'], _clearChat),
-      const FunctionCommand(<String>['thread'], _thread),
-      const FunctionCommand(<String>['character'], _character),
-    ];
+  const FunctionCommand(<String>['message', 'msg', 'say'], _message),
+  const FunctionCommand(<String>['typing'], _typing),
+  const FunctionCommand(<String>[
+    'narration',
+    'narrate',
+    'narrator',
+  ], _narration),
+  const FunctionCommand(<String>['thought', 'think'], _thought),
+  const FunctionCommand(<String>['system'], _system),
+  const FunctionCommand(<String>['delay', 'wait', 'pause_for'], _delay),
+  const FunctionCommand(<String>['seen'], _seen),
+  const FunctionCommand(<String>['reaction'], _reaction),
+  const FunctionCommand(<String>['unsend'], _unsend),
+  const FunctionCommand(<String>['clear_chat'], _clearChat),
+  const FunctionCommand(<String>['thread'], _thread),
+  const FunctionCommand(<String>['character'], _character),
+];
 
 CommandOutcome _message(CommandContext ctx) {
   // `@message ethan "text"` or `@message "text"` (narrator).
@@ -38,7 +41,8 @@ CommandOutcome _message(CommandContext ctx) {
   if (body.isEmpty) return CommandOutcome.next;
 
   final bool fromPlayer = ctx.isPlayer(sender);
-  final bool systemish = sender == EngineDefaults.systemCharacterId ||
+  final bool systemish =
+      sender == EngineDefaults.systemCharacterId ||
       sender == EngineDefaults.narratorCharacterId;
 
   final String threadId = ctx.resolveThreadId(sender);
@@ -52,8 +56,8 @@ CommandOutcome _message(CommandContext ctx) {
 
   final MessageKind kind = systemish
       ? (sender == EngineDefaults.narratorCharacterId
-          ? MessageKind.narration
-          : MessageKind.system)
+            ? MessageKind.narration
+            : MessageKind.system)
       : MessageKind.message;
 
   final String? attachment =
@@ -78,17 +82,19 @@ CommandOutcome _message(CommandContext ctx) {
   );
 
   ctx.engine.state.appendMessage(message);
-  ctx.engine.emitEvent(EngineEvents.messageSent, data: <String, Object?>{
-    'thread': threadId,
-    'sender': sender,
-    'player': fromPlayer,
-  });
+  ctx.engine.emitEvent(
+    EngineEvents.messageSent,
+    data: <String, Object?>{
+      'thread': threadId,
+      'sender': sender,
+      'player': fromPlayer,
+    },
+  );
 
   if (!systemish) {
-    ctx.engine.emitEffect(PlaySoundEffect(
-      fromPlayer ? 'msg_send' : 'msg_ping',
-      volume: 0.7,
-    ));
+    ctx.engine.emitEffect(
+      PlaySoundEffect(fromPlayer ? 'msg_send' : 'msg_ping', volume: 0.7),
+    );
   }
 
   final Duration pause = ctx.has('delay')
@@ -130,18 +136,20 @@ CommandOutcome _typing(CommandContext ctx) {
   return CommandOutcome.wait(duration);
 }
 
-CommandOutcome _narration(CommandContext ctx) =>
-    _pushSpecial(ctx, MessageKind.narration,
-        senderOverride: EngineDefaults.narratorCharacterId);
+CommandOutcome _narration(CommandContext ctx) => _pushSpecial(
+  ctx,
+  MessageKind.narration,
+  senderOverride: EngineDefaults.narratorCharacterId,
+);
 
 CommandOutcome _thought(CommandContext ctx) =>
     _pushSpecial(ctx, MessageKind.thought);
 
 CommandOutcome _system(CommandContext ctx) => _pushSpecial(
-      ctx,
-      MessageKind.system,
-      senderOverride: EngineDefaults.systemCharacterId,
-    );
+  ctx,
+  MessageKind.system,
+  senderOverride: EngineDefaults.systemCharacterId,
+);
 
 CommandOutcome _pushSpecial(
   CommandContext ctx,
@@ -162,17 +170,19 @@ CommandOutcome _pushSpecial(
   final String threadId = ctx.resolveThreadId(sender);
   ctx.openThread(threadId);
 
-  ctx.engine.state.appendMessage(ChatMessage(
-    id: ctx.uid('x'),
-    threadId: threadId,
-    senderId: sender,
-    text: body,
-    timestamp: ctx.engine.clock.now(),
-    kind: kind,
-    isPlayer: kind == MessageKind.thought,
-    style: ctx.namedStrOrNull('style'),
-    clock: ctx.engine.state.phone.clock,
-  ));
+  ctx.engine.state.appendMessage(
+    ChatMessage(
+      id: ctx.uid('x'),
+      threadId: threadId,
+      senderId: sender,
+      text: body,
+      timestamp: ctx.engine.clock.now(),
+      kind: kind,
+      isPlayer: kind == MessageKind.thought,
+      style: ctx.namedStrOrNull('style'),
+      clock: ctx.engine.state.phone.clock,
+    ),
+  );
 
   final Duration pause = ctx.has('delay')
       ? ctx.namedDuration('delay', Duration.zero)
@@ -184,8 +194,9 @@ CommandOutcome _delay(CommandContext ctx) {
   final num seconds = ctx.count > 0
       ? ctx.number(0, 1)
       : ctx.namedNum('seconds', ctx.namedNum('ms', 1000) / 1000);
-  final Duration duration =
-      ctx.engine.pace(Duration(milliseconds: (seconds * 1000).round()));
+  final Duration duration = ctx.engine.pace(
+    Duration(milliseconds: (seconds * 1000).round()),
+  );
   return CommandOutcome.wait(duration);
 }
 
@@ -197,8 +208,10 @@ CommandOutcome _seen(CommandContext ctx) {
   ctx.engine.state.updateThread(threadId, (ChatThread thread) {
     return thread.copyWith(
       messages: thread.messages
-          .map((ChatMessage m) =>
-              m.isPlayer ? m.copyWith(status: MessageStatus.seen) : m)
+          .map(
+            (ChatMessage m) =>
+                m.isPlayer ? m.copyWith(status: MessageStatus.seen) : m,
+          )
           .toList(),
     );
   });
@@ -207,8 +220,10 @@ CommandOutcome _seen(CommandContext ctx) {
 
 CommandOutcome _reaction(CommandContext ctx) {
   final String emoji = ctx.str(0, '❤️');
-  final String threadId = ctx.namedStr('thread',
-      ctx.engine.state.activeThreadId ?? '');
+  final String threadId = ctx.namedStr(
+    'thread',
+    ctx.engine.state.activeThreadId ?? '',
+  );
   if (threadId.isEmpty) return CommandOutcome.next;
   ctx.engine.state.updateThread(threadId, (ChatThread thread) {
     if (thread.messages.isEmpty) return thread;
@@ -221,8 +236,10 @@ CommandOutcome _reaction(CommandContext ctx) {
 }
 
 CommandOutcome _unsend(CommandContext ctx) {
-  final String threadId = ctx.namedStr('thread',
-      ctx.engine.state.activeThreadId ?? '');
+  final String threadId = ctx.namedStr(
+    'thread',
+    ctx.engine.state.activeThreadId ?? '',
+  );
   if (threadId.isEmpty) return CommandOutcome.next;
   ctx.engine.state.updateThread(threadId, (ChatThread thread) {
     if (thread.messages.isEmpty) return thread;
@@ -234,8 +251,9 @@ CommandOutcome _unsend(CommandContext ctx) {
 }
 
 CommandOutcome _clearChat(CommandContext ctx) {
-  final String threadId =
-      ctx.count > 0 ? ctx.id(0) : (ctx.engine.state.activeThreadId ?? '');
+  final String threadId = ctx.count > 0
+      ? ctx.id(0)
+      : (ctx.engine.state.activeThreadId ?? '');
   if (threadId.isEmpty) return CommandOutcome.next;
   ctx.engine.state.updateThread(
     threadId,
@@ -257,12 +275,13 @@ CommandOutcome _thread(CommandContext ctx) {
     participants: <String>{id, ctx.playerId}.toList(),
   );
   ctx.engine.state.updateThread(
-      id,
-      (ChatThread thread) => thread.copyWith(
-            pinned: ctx.namedBool('pinned', thread.pinned),
-            muted: ctx.namedBool('muted', thread.muted),
-            title: ctx.namedStrOrNull('title') ?? thread.title,
-          ));
+    id,
+    (ChatThread thread) => thread.copyWith(
+      pinned: ctx.namedBool('pinned', thread.pinned),
+      muted: ctx.namedBool('muted', thread.muted),
+      title: ctx.namedStrOrNull('title') ?? thread.title,
+    ),
+  );
   ctx.engine.state.activeThreadId = id;
   return CommandOutcome.next;
 }
@@ -275,8 +294,8 @@ CommandOutcome _character(CommandContext ctx) {
     id,
     (CharacterState character) => character.copyWith(
       name: ctx.namedStrOrNull('name'),
-      status: ctx.namedStrOrNull('status') ??
-          (ctx.count > 1 ? ctx.str(1) : null),
+      status:
+          ctx.namedStrOrNull('status') ?? (ctx.count > 1 ? ctx.str(1) : null),
       avatar: ctx.namedStrOrNull('avatar'),
       about: ctx.namedStrOrNull('about'),
       phone: ctx.namedStrOrNull('phone'),

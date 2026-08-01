@@ -5,13 +5,13 @@ import 'command_helpers.dart';
 
 /// Voice / video call flow.
 List<CommandHandler> callCommands() => <CommandHandler>[
-      const FunctionCommand(<String>['call_incoming'], _incoming),
-      const FunctionCommand(<String>['call_start'], _start),
-      const FunctionCommand(<String>['call_line'], _line),
-      const FunctionCommand(<String>['call_end'], _end),
-      const FunctionCommand(<String>['voicemail'], _voicemail),
-      const FunctionCommand(<String>['missed_call'], _missed),
-    ];
+  const FunctionCommand(<String>['call_incoming'], _incoming),
+  const FunctionCommand(<String>['call_start'], _start),
+  const FunctionCommand(<String>['call_line'], _line),
+  const FunctionCommand(<String>['call_end'], _end),
+  const FunctionCommand(<String>['voicemail'], _voicemail),
+  const FunctionCommand(<String>['missed_call'], _missed),
+];
 
 CommandOutcome _incoming(CommandContext ctx) {
   final String character = ctx.id(0);
@@ -25,16 +25,23 @@ CommandOutcome _incoming(CommandContext ctx) {
     startedAt: ctx.engine.clock.now(),
     video: ctx.namedBool('video'),
   );
-  ctx.engine.state.updatePhone((PhoneState p) => p.copyWith(
-        activeCall: call,
-        calls: <PhoneCall>[call, ...p.calls],
-        locked: false,
-      ));
-  ctx.engine.emitEffect(OpenAppEffect('calls',
-      screen: 'incoming',
-      arguments: <String, Object?>{'character': character}));
+  ctx.engine.state.updatePhone(
+    (PhoneState p) => p.copyWith(
+      activeCall: call,
+      calls: <PhoneCall>[call, ...p.calls],
+      locked: false,
+    ),
+  );
   ctx.engine.emitEffect(
-      PlaySoundEffect(ctx.namedStr('ringtone', 'vibrate'), volume: 0.9));
+    OpenAppEffect(
+      'calls',
+      screen: 'incoming',
+      arguments: <String, Object?>{'character': character},
+    ),
+  );
+  ctx.engine.emitEffect(
+    PlaySoundEffect(ctx.namedStr('ringtone', 'vibrate'), volume: 0.9),
+  );
   ctx.engine.emitEffect(const VibrateEffect(milliseconds: 400));
   return CommandOutcome.next;
 }
@@ -48,10 +55,10 @@ CommandOutcome _start(CommandContext ctx) {
     startedAt: ctx.engine.clock.now(),
     video: ctx.namedBool('video'),
   );
-  ctx.engine.state.updatePhone((PhoneState p) => p.copyWith(
-        activeCall: call,
-        calls: <PhoneCall>[call, ...p.calls],
-      ));
+  ctx.engine.state.updatePhone(
+    (PhoneState p) =>
+        p.copyWith(activeCall: call, calls: <PhoneCall>[call, ...p.calls]),
+  );
   ctx.engine.emitEffect(const OpenAppEffect('calls', screen: 'active'));
   return CommandOutcome.next;
 }
@@ -80,8 +87,10 @@ CommandOutcome _end(CommandContext ctx) {
     if (call == null) return p;
     final PhoneCall ended = call.copyWith(
       state: CallState.ended,
-      durationSeconds:
-          ctx.engine.clock.now().difference(call.startedAt).inSeconds,
+      durationSeconds: ctx.engine.clock
+          .now()
+          .difference(call.startedAt)
+          .inSeconds,
     );
     return p.copyWith(
       activeCall: null,
@@ -105,7 +114,8 @@ CommandOutcome _voicemail(CommandContext ctx) {
     transcript: <String>[ctx.str(1)],
   );
   ctx.engine.state.updatePhone(
-      (PhoneState p) => p.copyWith(calls: <PhoneCall>[call, ...p.calls]));
+    (PhoneState p) => p.copyWith(calls: <PhoneCall>[call, ...p.calls]),
+  );
   return CommandOutcome.next;
 }
 
@@ -117,9 +127,9 @@ CommandOutcome _missed(CommandContext ctx) {
     state: CallState.missed,
     startedAt: ctx.engine.clock.now(),
   );
-  ctx.engine.state.updatePhone((PhoneState p) => p.copyWith(
-        calls: <PhoneCall>[call, ...p.calls],
-        activeCall: null,
-      ));
+  ctx.engine.state.updatePhone(
+    (PhoneState p) =>
+        p.copyWith(calls: <PhoneCall>[call, ...p.calls], activeCall: null),
+  );
   return CommandOutcome.next;
 }

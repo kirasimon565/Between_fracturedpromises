@@ -58,9 +58,9 @@ abstract final class AppConfig {
   ];
 
   static EpisodeManifest episode(String id) => episodes.firstWhere(
-        (EpisodeManifest e) => e.id == id,
-        orElse: () => episodes.first,
-      );
+    (EpisodeManifest e) => e.id == id,
+    orElse: () => episodes.first,
+  );
 
   static const String defaultEpisodeId = 'ep1';
 }

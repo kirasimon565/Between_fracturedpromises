@@ -112,8 +112,11 @@ mixin ExpressionParsing on TokenReader {
         (current.type == TokenType.arithmetic && current.lexeme == '-')) {
       final Token op = advance();
       final Expression operand = _parseUnary();
-      return UnaryExpression(op.lexeme == 'not' ? '!' : op.lexeme, operand,
-          op.span);
+      return UnaryExpression(
+        op.lexeme == 'not' ? '!' : op.lexeme,
+        operand,
+        op.span,
+      );
     }
     return _parsePrimary();
   }
@@ -124,8 +127,9 @@ mixin ExpressionParsing on TokenReader {
       case TokenType.number:
         advance();
         return LiteralExpression(
-            EngineValue.of(token.value ?? num.tryParse(token.lexeme) ?? 0),
-            token.span);
+          EngineValue.of(token.value ?? num.tryParse(token.lexeme) ?? 0),
+          token.span,
+        );
 
       case TokenType.string:
         advance();
@@ -192,13 +196,9 @@ mixin ExpressionParsing on TokenReader {
             peek().type == TokenType.string)) {
       advance();
       final Token argument = advance();
-      return CallExpression(
-        predicate,
-        <Expression>[
-          LiteralExpression(EngineValue.string(argument.lexeme), argument.span)
-        ],
-        token.span,
-      );
+      return CallExpression(predicate, <Expression>[
+        LiteralExpression(EngineValue.string(argument.lexeme), argument.span),
+      ], token.span);
     }
 
     advance();
@@ -268,8 +268,9 @@ mixin ExpressionParsing on TokenReader {
     }
     final Lexer lexer = Lexer(source, sourceName: span.source);
     final List<Token> innerTokens = lexer.tokenize();
-    final _EmbeddedExpressionParser parser =
-        _EmbeddedExpressionParser(innerTokens);
+    final _EmbeddedExpressionParser parser = _EmbeddedExpressionParser(
+      innerTokens,
+    );
     final Expression expression = parser.parseExpression();
     diagnostics.addAll(parser.diagnostics.all);
     return expression;

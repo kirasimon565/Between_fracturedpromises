@@ -47,15 +47,13 @@ class EngineSettings {
   Duration scaleStory(Duration duration) {
     if (instantMode) return Duration.zero;
     final double speed = textSpeed <= 0 ? 1 : textSpeed;
-    return Duration(
-        microseconds: (duration.inMicroseconds / speed).round());
+    return Duration(microseconds: (duration.inMicroseconds / speed).round());
   }
 
   Duration scaleTyping(Duration duration) {
     if (instantMode) return Duration.zero;
     final double speed = typingSpeed <= 0 ? 1 : typingSpeed;
-    return Duration(
-        microseconds: (duration.inMicroseconds / speed).round());
+    return Duration(microseconds: (duration.inMicroseconds / speed).round());
   }
 
   EngineSettings copyWith({
@@ -74,59 +72,59 @@ class EngineSettings {
     double? sfxVolume,
     bool? debugOverlay,
     String? locale,
-  }) =>
-      EngineSettings(
-        textSpeed: textSpeed ?? this.textSpeed,
-        typingSpeed: typingSpeed ?? this.typingSpeed,
-        autoAdvance: autoAdvance ?? this.autoAdvance,
-        autoAdvanceDelay: autoAdvanceDelay ?? this.autoAdvanceDelay,
-        skipSeen: skipSeen ?? this.skipSeen,
-        instantMode: instantMode ?? this.instantMode,
-        reducedMotion: reducedMotion ?? this.reducedMotion,
-        soundEnabled: soundEnabled ?? this.soundEnabled,
-        musicEnabled: musicEnabled ?? this.musicEnabled,
-        hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
-        masterVolume: masterVolume ?? this.masterVolume,
-        musicVolume: musicVolume ?? this.musicVolume,
-        sfxVolume: sfxVolume ?? this.sfxVolume,
-        debugOverlay: debugOverlay ?? this.debugOverlay,
-        locale: locale ?? this.locale,
-      );
+  }) => EngineSettings(
+    textSpeed: textSpeed ?? this.textSpeed,
+    typingSpeed: typingSpeed ?? this.typingSpeed,
+    autoAdvance: autoAdvance ?? this.autoAdvance,
+    autoAdvanceDelay: autoAdvanceDelay ?? this.autoAdvanceDelay,
+    skipSeen: skipSeen ?? this.skipSeen,
+    instantMode: instantMode ?? this.instantMode,
+    reducedMotion: reducedMotion ?? this.reducedMotion,
+    soundEnabled: soundEnabled ?? this.soundEnabled,
+    musicEnabled: musicEnabled ?? this.musicEnabled,
+    hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
+    masterVolume: masterVolume ?? this.masterVolume,
+    musicVolume: musicVolume ?? this.musicVolume,
+    sfxVolume: sfxVolume ?? this.sfxVolume,
+    debugOverlay: debugOverlay ?? this.debugOverlay,
+    locale: locale ?? this.locale,
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'textSpeed': textSpeed,
-        'typingSpeed': typingSpeed,
-        'autoAdvance': autoAdvance,
-        'autoAdvanceMs': autoAdvanceDelay.inMilliseconds,
-        'skipSeen': skipSeen,
-        'instant': instantMode,
-        'reducedMotion': reducedMotion,
-        'sound': soundEnabled,
-        'music': musicEnabled,
-        'haptics': hapticsEnabled,
-        'master': masterVolume,
-        'musicVolume': musicVolume,
-        'sfxVolume': sfxVolume,
-        'debug': debugOverlay,
-        'locale': locale,
-      };
+    'textSpeed': textSpeed,
+    'typingSpeed': typingSpeed,
+    'autoAdvance': autoAdvance,
+    'autoAdvanceMs': autoAdvanceDelay.inMilliseconds,
+    'skipSeen': skipSeen,
+    'instant': instantMode,
+    'reducedMotion': reducedMotion,
+    'sound': soundEnabled,
+    'music': musicEnabled,
+    'haptics': hapticsEnabled,
+    'master': masterVolume,
+    'musicVolume': musicVolume,
+    'sfxVolume': sfxVolume,
+    'debug': debugOverlay,
+    'locale': locale,
+  };
 
   factory EngineSettings.fromJson(Map<String, dynamic> json) => EngineSettings(
-        textSpeed: (json['textSpeed'] as num?)?.toDouble() ?? 1.0,
-        typingSpeed: (json['typingSpeed'] as num?)?.toDouble() ?? 1.0,
-        autoAdvance: json['autoAdvance'] as bool? ?? false,
-        autoAdvanceDelay: Duration(
-            milliseconds: (json['autoAdvanceMs'] as num?)?.toInt() ?? 1400),
-        skipSeen: json['skipSeen'] as bool? ?? false,
-        instantMode: json['instant'] as bool? ?? false,
-        reducedMotion: json['reducedMotion'] as bool? ?? false,
-        soundEnabled: json['sound'] as bool? ?? true,
-        musicEnabled: json['music'] as bool? ?? true,
-        hapticsEnabled: json['haptics'] as bool? ?? true,
-        masterVolume: (json['master'] as num?)?.toDouble() ?? 1.0,
-        musicVolume: (json['musicVolume'] as num?)?.toDouble() ?? 0.7,
-        sfxVolume: (json['sfxVolume'] as num?)?.toDouble() ?? 0.9,
-        debugOverlay: json['debug'] as bool? ?? false,
-        locale: json['locale'] as String? ?? 'en',
-      );
+    textSpeed: (json['textSpeed'] as num?)?.toDouble() ?? 1.0,
+    typingSpeed: (json['typingSpeed'] as num?)?.toDouble() ?? 1.0,
+    autoAdvance: json['autoAdvance'] as bool? ?? false,
+    autoAdvanceDelay: Duration(
+      milliseconds: (json['autoAdvanceMs'] as num?)?.toInt() ?? 1400,
+    ),
+    skipSeen: json['skipSeen'] as bool? ?? false,
+    instantMode: json['instant'] as bool? ?? false,
+    reducedMotion: json['reducedMotion'] as bool? ?? false,
+    soundEnabled: json['sound'] as bool? ?? true,
+    musicEnabled: json['music'] as bool? ?? true,
+    hapticsEnabled: json['haptics'] as bool? ?? true,
+    masterVolume: (json['master'] as num?)?.toDouble() ?? 1.0,
+    musicVolume: (json['musicVolume'] as num?)?.toDouble() ?? 0.7,
+    sfxVolume: (json['sfxVolume'] as num?)?.toDouble() ?? 0.9,
+    debugOverlay: json['debug'] as bool? ?? false,
+    locale: json['locale'] as String? ?? 'en',
+  );
 }

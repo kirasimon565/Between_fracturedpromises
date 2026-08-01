@@ -23,8 +23,11 @@ class SourceSpan {
   /// Number of characters covered by the span.
   final int length;
 
-  static const SourceSpan unknown =
-      SourceSpan(source: '<unknown>', line: 0, column: 0);
+  static const SourceSpan unknown = SourceSpan(
+    source: '<unknown>',
+    line: 0,
+    column: 0,
+  );
 
   SourceSpan copyWith({String? source, int? line, int? column, int? length}) {
     return SourceSpan(
@@ -36,18 +39,18 @@ class SourceSpan {
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        's': source,
-        'l': line,
-        'c': column,
-        'n': length,
-      };
+    's': source,
+    'l': line,
+    'c': column,
+    'n': length,
+  };
 
   factory SourceSpan.fromJson(Map<String, dynamic> json) => SourceSpan(
-        source: (json['s'] as String?) ?? '<unknown>',
-        line: (json['l'] as num?)?.toInt() ?? 0,
-        column: (json['c'] as num?)?.toInt() ?? 0,
-        length: (json['n'] as num?)?.toInt() ?? 0,
-      );
+    source: (json['s'] as String?) ?? '<unknown>',
+    line: (json['l'] as num?)?.toInt() ?? 0,
+    column: (json['c'] as num?)?.toInt() ?? 0,
+    length: (json['n'] as num?)?.toInt() ?? 0,
+  );
 
   @override
   String toString() => '$source:$line:$column';

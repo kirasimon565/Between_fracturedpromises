@@ -7,8 +7,8 @@ import 'dart:async';
 /// (player tapped an app icon, download finished).
 class EngineEvent {
   EngineEvent(this.name, {Map<String, Object?>? data, this.source = 'engine'})
-      : data = data ?? const <String, Object?>{},
-        timestamp = DateTime.now();
+    : data = data ?? const <String, Object?>{},
+      timestamp = DateTime.now();
 
   final String name;
   final Map<String, Object?> data;
@@ -103,11 +103,11 @@ class EventHandlerRegistration {
   bool consumed = false;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'event': event,
-        'address': address,
-        'once': once,
-        'consumed': consumed,
-      };
+    'event': event,
+    'address': address,
+    'once': once,
+    'consumed': consumed,
+  };
 
   factory EventHandlerRegistration.fromJson(Map<String, dynamic> json) {
     final EventHandlerRegistration registration = EventHandlerRegistration(

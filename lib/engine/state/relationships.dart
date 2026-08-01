@@ -79,15 +79,14 @@ class Relationship {
     num? love,
     num? tension,
     num? suspicion,
-  }) =>
-      Relationship(
-        characterId: characterId,
-        trust: trust ?? this.trust,
-        friendship: friendship ?? this.friendship,
-        love: love ?? this.love,
-        tension: tension ?? this.tension,
-        suspicion: suspicion ?? this.suspicion,
-      );
+  }) => Relationship(
+    characterId: characterId,
+    trust: trust ?? this.trust,
+    friendship: friendship ?? this.friendship,
+    love: love ?? this.love,
+    tension: tension ?? this.tension,
+    suspicion: suspicion ?? this.suspicion,
+  );
 
   /// Rough label used by the Contacts app and the journal.
   String get bondLabel {
@@ -101,20 +100,20 @@ class Relationship {
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': characterId,
-        'trust': trust,
-        'friendship': friendship,
-        'love': love,
-        'tension': tension,
-        'suspicion': suspicion,
-      };
+    'id': characterId,
+    'trust': trust,
+    'friendship': friendship,
+    'love': love,
+    'tension': tension,
+    'suspicion': suspicion,
+  };
 
   factory Relationship.fromJson(Map<String, dynamic> json) => Relationship(
-        characterId: json['id'] as String,
-        trust: (json['trust'] as num?) ?? 0,
-        friendship: (json['friendship'] as num?) ?? 0,
-        love: (json['love'] as num?) ?? 0,
-        tension: (json['tension'] as num?) ?? 0,
-        suspicion: (json['suspicion'] as num?) ?? 0,
-      );
+    characterId: json['id'] as String,
+    trust: (json['trust'] as num?) ?? 0,
+    friendship: (json['friendship'] as num?) ?? 0,
+    love: (json['love'] as num?) ?? 0,
+    tension: (json['tension'] as num?) ?? 0,
+    suspicion: (json['suspicion'] as num?) ?? 0,
+  );
 }

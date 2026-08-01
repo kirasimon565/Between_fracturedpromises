@@ -34,44 +34,43 @@ class InstalledApp {
     int? badge,
     bool? hidden,
     String? source,
-  }) =>
-      InstalledApp(
-        id: id,
-        name: name ?? this.name,
-        icon: icon ?? this.icon,
-        installedAt: installedAt,
-        badge: badge ?? this.badge,
-        system: system,
-        hidden: hidden ?? this.hidden,
-        source: source ?? this.source,
-        accent: accent,
-      );
+  }) => InstalledApp(
+    id: id,
+    name: name ?? this.name,
+    icon: icon ?? this.icon,
+    installedAt: installedAt,
+    badge: badge ?? this.badge,
+    system: system,
+    hidden: hidden ?? this.hidden,
+    source: source ?? this.source,
+    accent: accent,
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'name': name,
-        if (icon != null) 'icon': icon,
-        if (installedAt != null) 'at': installedAt!.millisecondsSinceEpoch,
-        'badge': badge,
-        'system': system,
-        'hidden': hidden,
-        'source': source,
-        if (accent != null) 'accent': accent,
-      };
+    'id': id,
+    'name': name,
+    if (icon != null) 'icon': icon,
+    if (installedAt != null) 'at': installedAt!.millisecondsSinceEpoch,
+    'badge': badge,
+    'system': system,
+    'hidden': hidden,
+    'source': source,
+    if (accent != null) 'accent': accent,
+  };
 
   factory InstalledApp.fromJson(Map<String, dynamic> json) => InstalledApp(
-        id: json['id'] as String,
-        name: json['name'] as String? ?? json['id'] as String,
-        icon: json['icon'] as String?,
-        installedAt: json['at'] == null
-            ? null
-            : DateTime.fromMillisecondsSinceEpoch((json['at'] as num).toInt()),
-        badge: (json['badge'] as num?)?.toInt() ?? 0,
-        system: json['system'] as bool? ?? false,
-        hidden: json['hidden'] as bool? ?? false,
-        source: json['source'] as String? ?? 'system',
-        accent: (json['accent'] as num?)?.toInt(),
-      );
+    id: json['id'] as String,
+    name: json['name'] as String? ?? json['id'] as String,
+    icon: json['icon'] as String?,
+    installedAt: json['at'] == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch((json['at'] as num).toInt()),
+    badge: (json['badge'] as num?)?.toInt() ?? 0,
+    system: json['system'] as bool? ?? false,
+    hidden: json['hidden'] as bool? ?? false,
+    source: json['source'] as String? ?? 'system',
+    accent: (json['accent'] as num?)?.toInt(),
+  );
 }
 
 class GameNotification {
@@ -100,30 +99,30 @@ class GameNotification {
   final String? sound;
 
   GameNotification copyWith({bool? read}) => GameNotification(
-        id: id,
-        appId: appId,
-        title: title,
-        body: body,
-        timestamp: timestamp,
-        icon: icon,
-        threadId: threadId,
-        sticky: sticky,
-        read: read ?? this.read,
-        sound: sound,
-      );
+    id: id,
+    appId: appId,
+    title: title,
+    body: body,
+    timestamp: timestamp,
+    icon: icon,
+    threadId: threadId,
+    sticky: sticky,
+    read: read ?? this.read,
+    sound: sound,
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'app': appId,
-        'title': title,
-        'body': body,
-        'ts': timestamp.millisecondsSinceEpoch,
-        if (icon != null) 'icon': icon,
-        if (threadId != null) 'thread': threadId,
-        'sticky': sticky,
-        'read': read,
-        if (sound != null) 'sound': sound,
-      };
+    'id': id,
+    'app': appId,
+    'title': title,
+    'body': body,
+    'ts': timestamp.millisecondsSinceEpoch,
+    if (icon != null) 'icon': icon,
+    if (threadId != null) 'thread': threadId,
+    'sticky': sticky,
+    'read': read,
+    if (sound != null) 'sound': sound,
+  };
 
   factory GameNotification.fromJson(Map<String, dynamic> json) =>
       GameNotification(
@@ -132,7 +131,8 @@ class GameNotification {
         title: json['title'] as String? ?? '',
         body: json['body'] as String? ?? '',
         timestamp: DateTime.fromMillisecondsSinceEpoch(
-            (json['ts'] as num?)?.toInt() ?? 0),
+          (json['ts'] as num?)?.toInt() ?? 0,
+        ),
         icon: json['icon'] as String?,
         threadId: json['thread'] as String?,
         sticky: json['sticky'] as bool? ?? false,
@@ -166,43 +166,44 @@ class PhoneCall {
     CallState? state,
     int? durationSeconds,
     List<String>? transcript,
-  }) =>
-      PhoneCall(
-        id: id,
-        characterId: characterId,
-        state: state ?? this.state,
-        startedAt: startedAt,
-        video: video,
-        durationSeconds: durationSeconds ?? this.durationSeconds,
-        transcript: transcript ?? this.transcript,
-      );
+  }) => PhoneCall(
+    id: id,
+    characterId: characterId,
+    state: state ?? this.state,
+    startedAt: startedAt,
+    video: video,
+    durationSeconds: durationSeconds ?? this.durationSeconds,
+    transcript: transcript ?? this.transcript,
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'char': characterId,
-        'state': state.name,
-        'at': startedAt.millisecondsSinceEpoch,
-        'video': video,
-        'dur': durationSeconds,
-        'transcript': transcript,
-      };
+    'id': id,
+    'char': characterId,
+    'state': state.name,
+    'at': startedAt.millisecondsSinceEpoch,
+    'video': video,
+    'dur': durationSeconds,
+    'transcript': transcript,
+  };
 
   factory PhoneCall.fromJson(Map<String, dynamic> json) => PhoneCall(
-        id: json['id'] as String,
-        characterId: json['char'] as String? ?? '',
-        state: CallState.values.firstWhere(
-          (CallState s) => s.name == json['state'],
-          orElse: () => CallState.idle,
-        ),
-        startedAt: DateTime.fromMillisecondsSinceEpoch(
-            (json['at'] as num?)?.toInt() ?? 0),
-        video: json['video'] as bool? ?? false,
-        durationSeconds: (json['dur'] as num?)?.toInt() ?? 0,
-        transcript: (json['transcript'] as List<dynamic>?)
-                ?.map((dynamic e) => e.toString())
-                .toList() ??
-            const <String>[],
-      );
+    id: json['id'] as String,
+    characterId: json['char'] as String? ?? '',
+    state: CallState.values.firstWhere(
+      (CallState s) => s.name == json['state'],
+      orElse: () => CallState.idle,
+    ),
+    startedAt: DateTime.fromMillisecondsSinceEpoch(
+      (json['at'] as num?)?.toInt() ?? 0,
+    ),
+    video: json['video'] as bool? ?? false,
+    durationSeconds: (json['dur'] as num?)?.toInt() ?? 0,
+    transcript:
+        (json['transcript'] as List<dynamic>?)
+            ?.map((dynamic e) => e.toString())
+            .toList() ??
+        const <String>[],
+  );
 }
 
 /// Everything the status bar, home screen and app switcher need.
@@ -321,64 +322,76 @@ class PhoneState {
   static const Object _sentinel = Object();
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'battery': battery,
-        'charging': charging,
-        'signal': signal,
-        'wifi': wifi,
-        'airplane': airplaneMode,
-        'network': networkState,
-        'clock': clock,
-        'date': date,
-        'location': location,
-        'weather': weather,
-        'locked': locked,
-        'silent': silent,
-        if (wallpaper != null) 'wallpaper': wallpaper,
-        if (currentApp != null) 'app': currentApp,
-        if (currentScreen != null) 'screen': currentScreen,
-        'theme': theme,
-        'apps': apps.map((InstalledApp a) => a.toJson()).toList(),
-        'notifications':
-            notifications.map((GameNotification n) => n.toJson()).toList(),
-        'calls': calls.map((PhoneCall c) => c.toJson()).toList(),
-        if (activeCall != null) 'activeCall': activeCall!.toJson(),
-      };
+    'battery': battery,
+    'charging': charging,
+    'signal': signal,
+    'wifi': wifi,
+    'airplane': airplaneMode,
+    'network': networkState,
+    'clock': clock,
+    'date': date,
+    'location': location,
+    'weather': weather,
+    'locked': locked,
+    'silent': silent,
+    if (wallpaper != null) 'wallpaper': wallpaper,
+    if (currentApp != null) 'app': currentApp,
+    if (currentScreen != null) 'screen': currentScreen,
+    'theme': theme,
+    'apps': apps.map((InstalledApp a) => a.toJson()).toList(),
+    'notifications': notifications
+        .map((GameNotification n) => n.toJson())
+        .toList(),
+    'calls': calls.map((PhoneCall c) => c.toJson()).toList(),
+    if (activeCall != null) 'activeCall': activeCall!.toJson(),
+  };
 
   factory PhoneState.fromJson(Map<String, dynamic> json) => PhoneState(
-        battery: (json['battery'] as num?)?.toInt() ?? 78,
-        charging: json['charging'] as bool? ?? false,
-        signal: (json['signal'] as num?)?.toInt() ?? 4,
-        wifi: json['wifi'] as bool? ?? true,
-        airplaneMode: json['airplane'] as bool? ?? false,
-        networkState: json['network'] as String? ?? 'online',
-        clock: json['clock'] as String? ?? '21:00',
-        date: json['date'] as String? ?? '',
-        location: json['location'] as String? ?? '',
-        weather: json['weather'] as String? ?? '',
-        locked: json['locked'] as bool? ?? false,
-        silent: json['silent'] as bool? ?? false,
-        wallpaper: json['wallpaper'] as String?,
-        currentApp: json['app'] as String?,
-        currentScreen: json['screen'] as String?,
-        theme: json['theme'] as String? ?? 'dark',
-        apps: (json['apps'] as List<dynamic>?)
-                ?.map((dynamic e) =>
-                    InstalledApp.fromJson(Map<String, dynamic>.from(e as Map)))
-                .toList() ??
-            const <InstalledApp>[],
-        notifications: (json['notifications'] as List<dynamic>?)
-                ?.map((dynamic e) => GameNotification.fromJson(
-                    Map<String, dynamic>.from(e as Map)))
-                .toList() ??
-            const <GameNotification>[],
-        calls: (json['calls'] as List<dynamic>?)
-                ?.map((dynamic e) =>
-                    PhoneCall.fromJson(Map<String, dynamic>.from(e as Map)))
-                .toList() ??
-            const <PhoneCall>[],
-        activeCall: json['activeCall'] == null
-            ? null
-            : PhoneCall.fromJson(
-                Map<String, dynamic>.from(json['activeCall'] as Map)),
-      );
+    battery: (json['battery'] as num?)?.toInt() ?? 78,
+    charging: json['charging'] as bool? ?? false,
+    signal: (json['signal'] as num?)?.toInt() ?? 4,
+    wifi: json['wifi'] as bool? ?? true,
+    airplaneMode: json['airplane'] as bool? ?? false,
+    networkState: json['network'] as String? ?? 'online',
+    clock: json['clock'] as String? ?? '21:00',
+    date: json['date'] as String? ?? '',
+    location: json['location'] as String? ?? '',
+    weather: json['weather'] as String? ?? '',
+    locked: json['locked'] as bool? ?? false,
+    silent: json['silent'] as bool? ?? false,
+    wallpaper: json['wallpaper'] as String?,
+    currentApp: json['app'] as String?,
+    currentScreen: json['screen'] as String?,
+    theme: json['theme'] as String? ?? 'dark',
+    apps:
+        (json['apps'] as List<dynamic>?)
+            ?.map(
+              (dynamic e) =>
+                  InstalledApp.fromJson(Map<String, dynamic>.from(e as Map)),
+            )
+            .toList() ??
+        const <InstalledApp>[],
+    notifications:
+        (json['notifications'] as List<dynamic>?)
+            ?.map(
+              (dynamic e) => GameNotification.fromJson(
+                Map<String, dynamic>.from(e as Map),
+              ),
+            )
+            .toList() ??
+        const <GameNotification>[],
+    calls:
+        (json['calls'] as List<dynamic>?)
+            ?.map(
+              (dynamic e) =>
+                  PhoneCall.fromJson(Map<String, dynamic>.from(e as Map)),
+            )
+            .toList() ??
+        const <PhoneCall>[],
+    activeCall: json['activeCall'] == null
+        ? null
+        : PhoneCall.fromJson(
+            Map<String, dynamic>.from(json['activeCall'] as Map),
+          ),
+  );
 }

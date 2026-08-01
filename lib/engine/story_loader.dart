@@ -29,7 +29,8 @@ class CompiledStory {
 
   bool get hasErrors => diagnostics.any((Diagnostic d) => d.isError);
 
-  Iterable<Diagnostic> get errors => diagnostics.where((Diagnostic d) => d.isError);
+  Iterable<Diagnostic> get errors =>
+      diagnostics.where((Diagnostic d) => d.isError);
 
   String get title => program.metaString('title', program.id);
 
@@ -53,8 +54,10 @@ class StoryLoader {
 
   final Map<String, CompiledStory> _cache = <String, CompiledStory>{};
 
-  static final RegExp _includePattern =
-      RegExp(r'^\s*@include\s+(.+?)\s*$', caseSensitive: false);
+  static final RegExp _includePattern = RegExp(
+    r'^\s*@include\s+(.+?)\s*$',
+    caseSensitive: false,
+  );
 
   /// Compiles [path], reusing the cached program unless [reload] is set.
   Future<CompiledStory> load(
@@ -68,8 +71,13 @@ class StoryLoader {
 
     final DiagnosticBag diagnostics = DiagnosticBag();
     final List<String> sources = <String>[];
-    final String source =
-        await _expand(path, diagnostics, sources, <String>{}, 0);
+    final String source = await _expand(
+      path,
+      diagnostics,
+      sources,
+      <String>{},
+      0,
+    );
 
     final Parser parser = Parser.fromSource(
       source,
@@ -173,7 +181,8 @@ class StoryLoader {
       final String resolved = _resolveRelative(path, target);
       out.writeln('# --- begin include $resolved ---');
       out.write(
-          await _expand(resolved, diagnostics, sources, visiting, depth + 1));
+        await _expand(resolved, diagnostics, sources, visiting, depth + 1),
+      );
       out.writeln('# --- end include $resolved ---');
     }
 

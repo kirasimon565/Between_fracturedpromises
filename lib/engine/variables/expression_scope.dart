@@ -17,7 +17,7 @@ abstract class ExpressionScope {
 /// constant folding.
 class MapScope implements ExpressionScope {
   MapScope([Map<String, Object?>? values])
-      : _values = <String, Object?>{...?values};
+    : _values = <String, Object?>{...?values};
 
   final Map<String, Object?> _values;
 

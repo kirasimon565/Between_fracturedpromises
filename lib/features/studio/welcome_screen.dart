@@ -77,20 +77,21 @@ class WelcomeScreen extends ConsumerWidget {
                   for (int i = 0; i < _lines.length; i++)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 14),
-                      child: Text(
-                        _lines[i],
-                        style: TextStyle(
-                          color: i == _lines.length - 1
-                              ? AppColors.textDim
-                              : AppColors.text,
-                          fontSize: 16,
-                          height: 1.55,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      )
-                          .animate(delay: (700 + i * 320).ms)
-                          .fadeIn(duration: 800.ms)
-                          .moveY(begin: 8, end: 0, duration: 800.ms),
+                      child:
+                          Text(
+                                _lines[i],
+                                style: TextStyle(
+                                  color: i == _lines.length - 1
+                                      ? AppColors.textDim
+                                      : AppColors.text,
+                                  fontSize: 16,
+                                  height: 1.55,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              )
+                              .animate(delay: (700 + i * 320).ms)
+                              .fadeIn(duration: 800.ms)
+                              .moveY(begin: 8, end: 0, duration: 800.ms),
                     ),
                   const Spacer(),
                   FilledButton(

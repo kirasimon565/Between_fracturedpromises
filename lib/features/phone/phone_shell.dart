@@ -74,8 +74,9 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final GameSessionController session =
-        ref.read(gameSessionProvider.notifier);
+    final GameSessionController session = ref.read(
+      gameSessionProvider.notifier,
+    );
     switch (state) {
       case AppLifecycleState.paused:
       case AppLifecycleState.hidden:
@@ -105,8 +106,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (BuildContext context) =>
-          _EpisodeCompleteSheet(effect: effect),
+      builder: (BuildContext context) => _EpisodeCompleteSheet(effect: effect),
     );
   }
 
@@ -131,26 +131,26 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen>
   }
 
   Future<bool?> _confirmLeave() => showDialog<bool>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          title: const Text('Put the phone down?'),
-          content: const Text(
-            'Your progress is saved automatically. You can pick the story '
-            'back up from the main menu.',
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Keep reading'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Save & exit'),
-            ),
-          ],
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      backgroundColor: AppColors.surface,
+      title: const Text('Put the phone down?'),
+      content: const Text(
+        'Your progress is saved automatically. You can pick the story '
+        'back up from the main menu.',
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Keep reading'),
         ),
-      );
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Save & exit'),
+        ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -267,18 +267,18 @@ class _PhoneBooting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Scaffold(
-        backgroundColor: AppColors.voidBlack,
-        body: Center(
-          child: SizedBox(
-            width: 26,
-            height: 26,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: AppColors.ember,
-            ),
-          ),
+    backgroundColor: AppColors.voidBlack,
+    body: Center(
+      child: SizedBox(
+        width: 26,
+        height: 26,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: AppColors.ember,
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _PhoneFailure extends ConsumerWidget {
@@ -288,24 +288,22 @@ class _PhoneFailure extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-        backgroundColor: AppColors.voidBlack,
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(28),
-            child: EmptyState(
-              icon: Icons.error_outline_rounded,
-              title: 'The story could not start',
-              message: message,
-              action: FilledButton(
-                onPressed: () => ref
-                    .read(gameSessionProvider.notifier)
-                    .newGame(),
-                child: const Text('Try again'),
-              ),
-            ),
+    backgroundColor: AppColors.voidBlack,
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: EmptyState(
+          icon: Icons.error_outline_rounded,
+          title: 'The story could not start',
+          message: message,
+          action: FilledButton(
+            onPressed: () => ref.read(gameSessionProvider.notifier).newGame(),
+            child: const Text('Try again'),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _UnknownApp extends StatelessWidget {
@@ -316,17 +314,17 @@ class _UnknownApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        children: <Widget>[
-          AppHeader(title: appId, onBack: onExit),
-          const Expanded(
-            child: EmptyState(
-              icon: Icons.hourglass_empty_rounded,
-              title: 'Not installed yet',
-              message: 'This app appears later in the story.',
-            ),
-          ),
-        ],
-      );
+    children: <Widget>[
+      AppHeader(title: appId, onBack: onExit),
+      const Expanded(
+        child: EmptyState(
+          icon: Icons.hourglass_empty_rounded,
+          title: 'Not installed yet',
+          message: 'This app appears later in the story.',
+        ),
+      ),
+    ],
+  );
 }
 
 class _EpisodeCompleteSheet extends ConsumerWidget {

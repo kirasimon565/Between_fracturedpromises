@@ -101,43 +101,47 @@ class StoreProduct {
     String? price,
     String? currency,
     int? priceMicros,
-  }) =>
-      StoreProduct(
-        sku: sku,
-        title: title ?? this.title,
-        description: description ?? this.description,
-        price: price ?? this.price,
-        kind: kind,
-        crystals: crystals,
-        bonusCrystals: bonusCrystals,
-        currency: currency ?? this.currency,
-        priceMicros: priceMicros ?? this.priceMicros,
-        badge: badge,
-        highlight: highlight,
-      );
+  }) => StoreProduct(
+    sku: sku,
+    title: title ?? this.title,
+    description: description ?? this.description,
+    price: price ?? this.price,
+    kind: kind,
+    crystals: crystals,
+    bonusCrystals: bonusCrystals,
+    currency: currency ?? this.currency,
+    priceMicros: priceMicros ?? this.priceMicros,
+    badge: badge,
+    highlight: highlight,
+  );
 
   factory StoreProduct.fromMap(
     Map<Object?, Object?> map, {
     StoreProduct? template,
-  }) =>
-      StoreProduct(
-        sku: (map['sku'] ?? template?.sku ?? '').toString(),
-        title: (map['title'] ?? template?.title ?? '').toString(),
-        description:
-            (map['description'] ?? template?.description ?? '').toString(),
-        price: (map['price'] ?? template?.price ?? '').toString(),
-        kind: template?.kind ?? ProductKind.consumable,
-        crystals: template?.crystals ?? 0,
-        bonusCrystals: template?.bonusCrystals ?? 0,
-        currency: (map['currency'] ?? template?.currency ?? '').toString(),
-        priceMicros:
-            (map['priceMicros'] as num?)?.toInt() ?? template?.priceMicros ?? 0,
-        badge: template?.badge,
-        highlight: template?.highlight ?? false,
-      );
+  }) => StoreProduct(
+    sku: (map['sku'] ?? template?.sku ?? '').toString(),
+    title: (map['title'] ?? template?.title ?? '').toString(),
+    description: (map['description'] ?? template?.description ?? '').toString(),
+    price: (map['price'] ?? template?.price ?? '').toString(),
+    kind: template?.kind ?? ProductKind.consumable,
+    crystals: template?.crystals ?? 0,
+    bonusCrystals: template?.bonusCrystals ?? 0,
+    currency: (map['currency'] ?? template?.currency ?? '').toString(),
+    priceMicros:
+        (map['priceMicros'] as num?)?.toInt() ?? template?.priceMicros ?? 0,
+    badge: template?.badge,
+    highlight: template?.highlight ?? false,
+  );
 }
 
-enum PurchaseState { purchased, pending, cancelled, failed, restored, alreadyOwned }
+enum PurchaseState {
+  purchased,
+  pending,
+  cancelled,
+  failed,
+  restored,
+  alreadyOwned,
+}
 
 /// Outcome of a purchase or restore.
 class PurchaseResult {
@@ -153,19 +157,19 @@ class PurchaseResult {
   });
 
   const PurchaseResult.cancelled(this.sku, this.provider)
-      : state = PurchaseState.cancelled,
-        orderId = '',
-        token = '',
-        quantity = 1,
-        message = null,
-        raw = const <String, Object?>{};
+    : state = PurchaseState.cancelled,
+      orderId = '',
+      token = '',
+      quantity = 1,
+      message = null,
+      raw = const <String, Object?>{};
 
   const PurchaseResult.failed(this.sku, this.provider, this.message)
-      : state = PurchaseState.failed,
-        orderId = '',
-        token = '',
-        quantity = 1,
-        raw = const <String, Object?>{};
+    : state = PurchaseState.failed,
+      orderId = '',
+      token = '',
+      quantity = 1,
+      raw = const <String, Object?>{};
 
   final String sku;
   final PurchaseState state;
@@ -180,8 +184,9 @@ class PurchaseResult {
       state == PurchaseState.purchased || state == PurchaseState.restored;
 
   /// Stable identifier used to de-duplicate receipts across restores.
-  String get receiptId =>
-      orderId.isNotEmpty ? orderId : (token.isNotEmpty ? token : '$provider:$sku');
+  String get receiptId => orderId.isNotEmpty
+      ? orderId
+      : (token.isNotEmpty ? token : '$provider:$sku');
 
   factory PurchaseResult.fromMap(
     Map<Object?, Object?> map, {
@@ -201,7 +206,8 @@ class PurchaseResult {
       quantity: (map['quantity'] as num?)?.toInt() ?? 1,
       message: map['message']?.toString(),
       raw: map.map<String, Object?>(
-          (Object? k, Object? v) => MapEntry<String, Object?>(k.toString(), v)),
+        (Object? k, Object? v) => MapEntry<String, Object?>(k.toString(), v),
+      ),
     );
   }
 }

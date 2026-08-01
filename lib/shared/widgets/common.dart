@@ -71,10 +71,10 @@ class CharacterAvatar extends StatelessWidget {
     final String initials = label.isEmpty
         ? '?'
         : label
-            .split(RegExp(r'\s+'))
-            .take(2)
-            .map((String p) => p.isEmpty ? '' : p[0].toUpperCase())
-            .join();
+              .split(RegExp(r'\s+'))
+              .take(2)
+              .map((String p) => p.isEmpty ? '' : p[0].toUpperCase())
+              .join();
 
     return SizedBox(
       width: size,
@@ -95,9 +95,7 @@ class CharacterAvatar extends StatelessWidget {
                   color.withValues(alpha: 0.35),
                 ],
               ),
-              border: ring == null
-                  ? null
-                  : Border.all(color: ring!, width: 2),
+              border: ring == null ? null : Border.all(color: ring!, width: 2),
               image: image == null
                   ? null
                   : DecorationImage(
@@ -169,8 +167,11 @@ class CrystalChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const Icon(Icons.diamond_outlined,
-                size: 15, color: AppColors.crystal),
+            const Icon(
+              Icons.diamond_outlined,
+              size: 15,
+              color: AppColors.crystal,
+            ),
             const SizedBox(width: 6),
             Text(
               '$amount',
@@ -233,8 +234,7 @@ class _TypingDotsState extends State<TypingDots>
                   width: widget.size,
                   height: widget.size,
                   decoration: BoxDecoration(
-                    color: widget.color
-                        .withValues(alpha: 0.45 + lift * 0.45),
+                    color: widget.color.withValues(alpha: 0.45 + lift * 0.45),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -354,7 +354,7 @@ class SectionLabel extends StatelessWidget {
               ),
             ),
           ),
-          ?trailing
+          ?trailing,
         ],
       ),
     );

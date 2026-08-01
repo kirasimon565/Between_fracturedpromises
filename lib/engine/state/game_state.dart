@@ -50,11 +50,11 @@ class GameState {
     Wallet? wallet,
     PhoneState? phone,
     BrowserState? browser,
-  })  : variables = variables ?? VariableStore(),
-        _profile = profile ?? const PlayerProfile(),
-        _wallet = wallet ?? const Wallet(),
-        _phone = phone ?? const PhoneState(),
-        _browser = browser ?? const BrowserState();
+  }) : variables = variables ?? VariableStore(),
+       _profile = profile ?? const PlayerProfile(),
+       _wallet = wallet ?? const Wallet(),
+       _phone = phone ?? const PhoneState(),
+       _browser = browser ?? const BrowserState();
 
   final VariableStore variables;
 
@@ -118,8 +118,7 @@ class GameState {
     if (changed) _touch(GameStateSlice.flags, id: key);
   }
 
-  void toggleFlag(String name) =>
-      setFlag(name, value: !hasFlag(name));
+  void toggleFlag(String name) => setFlag(name, value: !hasFlag(name));
 
   // ── Relationships ───────────────────────────────────────────────────────
 
@@ -183,15 +182,18 @@ class GameState {
   Map<String, ChatThread> get threads =>
       Map<String, ChatThread>.unmodifiable(_threads);
 
-  List<ChatThread> threadsForApp(String app) => _threads.values
-      .where((ChatThread t) => t.app == app && !t.archived)
-      .toList()
-    ..sort((ChatThread a, ChatThread b) {
-      if (a.pinned != b.pinned) return a.pinned ? -1 : 1;
-      final DateTime at = a.lastActivity ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final DateTime bt = b.lastActivity ?? DateTime.fromMillisecondsSinceEpoch(0);
-      return bt.compareTo(at);
-    });
+  List<ChatThread> threadsForApp(String app) =>
+      _threads.values
+          .where((ChatThread t) => t.app == app && !t.archived)
+          .toList()
+        ..sort((ChatThread a, ChatThread b) {
+          if (a.pinned != b.pinned) return a.pinned ? -1 : 1;
+          final DateTime at =
+              a.lastActivity ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final DateTime bt =
+              b.lastActivity ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return bt.compareTo(at);
+        });
 
   ChatThread? thread(String id) => _threads[id];
 
@@ -225,10 +227,7 @@ class GameState {
   }
 
   void appendMessage(ChatMessage message) {
-    final ChatThread thread = ensureThread(
-      message.threadId,
-      app: 'messenger',
-    );
+    final ChatThread thread = ensureThread(message.threadId, app: 'messenger');
     final bool active = activeThreadId == thread.id;
     _threads[thread.id] = thread.copyWith(
       messages: <ChatMessage>[...thread.messages, message],
@@ -264,32 +263,39 @@ class GameState {
 
   void installApp(InstalledApp app) {
     if (_phone.hasApp(app.id)) return;
-    updatePhone((PhoneState p) =>
-        p.copyWith(apps: <InstalledApp>[...p.apps, app]));
+    updatePhone(
+      (PhoneState p) => p.copyWith(apps: <InstalledApp>[...p.apps, app]),
+    );
   }
 
   void uninstallApp(String id) {
-    updatePhone((PhoneState p) => p.copyWith(
-          apps: p.apps
-              .where((InstalledApp a) => a.id != id.toLowerCase() || a.system)
-              .toList(),
-        ));
+    updatePhone(
+      (PhoneState p) => p.copyWith(
+        apps: p.apps
+            .where((InstalledApp a) => a.id != id.toLowerCase() || a.system)
+            .toList(),
+      ),
+    );
   }
 
   void pushNotification(GameNotification notification) {
-    updatePhone((PhoneState p) => p.copyWith(
-          notifications: <GameNotification>[notification, ...p.notifications],
-        ));
+    updatePhone(
+      (PhoneState p) => p.copyWith(
+        notifications: <GameNotification>[notification, ...p.notifications],
+      ),
+    );
   }
 
   void clearNotifications({String? appId}) {
-    updatePhone((PhoneState p) => p.copyWith(
-          notifications: appId == null
-              ? const <GameNotification>[]
-              : p.notifications
+    updatePhone(
+      (PhoneState p) => p.copyWith(
+        notifications: appId == null
+            ? const <GameNotification>[]
+            : p.notifications
                   .where((GameNotification n) => n.appId != appId)
                   .toList(),
-        ));
+      ),
+    );
   }
 
   // ── Browser ─────────────────────────────────────────────────────────────
@@ -349,16 +355,16 @@ class GameState {
     final EvidenceEntry? left = _evidence[a.toLowerCase()];
     if (left == null) return;
     if (left.linkedTo.contains(b.toLowerCase())) return;
-    _evidence[a.toLowerCase()] =
-        left.copyWith(linkedTo: <String>[...left.linkedTo, b.toLowerCase()]);
+    _evidence[a.toLowerCase()] = left.copyWith(
+      linkedTo: <String>[...left.linkedTo, b.toLowerCase()],
+    );
     _touch(GameStateSlice.evidence, id: a);
   }
 
   List<JournalEntry> get journal => List<JournalEntry>.unmodifiable(_journal);
 
   void addJournalEntry(JournalEntry entry) {
-    final int index =
-        _journal.indexWhere((JournalEntry e) => e.id == entry.id);
+    final int index = _journal.indexWhere((JournalEntry e) => e.id == entry.id);
     if (index >= 0) {
       _journal[index] = entry;
     } else {
@@ -387,8 +393,10 @@ class GameState {
   void setObjectiveStatus(String id, ObjectiveStatus status) {
     final Objective? objective = _objectives[id.toLowerCase()];
     if (objective == null) return;
-    _objectives[id.toLowerCase()] =
-        objective.copyWith(status: status, updatedAt: DateTime.now());
+    _objectives[id.toLowerCase()] = objective.copyWith(
+      status: status,
+      updatedAt: DateTime.now(),
+    );
     _touch(GameStateSlice.objectives, id: id);
   }
 
@@ -521,14 +529,16 @@ class GameState {
         return EngineValue.number(_gallery.length);
       case 'achievement_count':
         return EngineValue.number(
-            _achievements.values.where((Achievement a) => a.unlocked).length);
+          _achievements.values.where((Achievement a) => a.unlocked).length,
+        );
     }
 
     // `trust_daniel`, `love_ethan`, … resolve against the relationship map.
     final int underscore = name.indexOf('_');
     if (underscore > 0) {
-      final RelationshipAxis? axis =
-          relationshipAxisFromName(name.substring(0, underscore));
+      final RelationshipAxis? axis = relationshipAxisFromName(
+        name.substring(0, underscore),
+      );
       if (axis != null) {
         final String character = name.substring(underscore + 1);
         if (_relationships.containsKey(character)) {
@@ -545,77 +555,95 @@ class GameState {
   // ── Serialisation ───────────────────────────────────────────────────────
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'variables': variables.toJson(),
-        'flags': _flags.toList(),
-        'relationships': _relationships.values
-            .map((Relationship r) => r.toJson())
-            .toList(),
-        'characters':
-            _characters.values.map((CharacterState c) => c.toJson()).toList(),
-        'threads': _threads.values.map((ChatThread t) => t.toJson()).toList(),
-        'phone': _phone.toJson(),
-        'browser': _browser.toJson(),
-        'inventory':
-            _inventory.values.map((InventoryItem i) => i.toJson()).toList(),
-        'evidence':
-            _evidence.values.map((EvidenceEntry e) => e.toJson()).toList(),
-        'journal': _journal.map((JournalEntry j) => j.toJson()).toList(),
-        'objectives':
-            _objectives.values.map((Objective o) => o.toJson()).toList(),
-        'achievements':
-            _achievements.values.map((Achievement a) => a.toJson()).toList(),
-        'gallery':
-            _gallery.values.map((GalleryUnlock g) => g.toJson()).toList(),
-        'wallet': _wallet.toJson(),
-        'profile': _profile.toJson(),
-        'seen': _seenLabels.toList(),
-        'picked': _pickedChoices.toList(),
-        'visited': _visitedUrls.toList(),
-        'episodeId': episodeId,
-        'scene': currentScene,
-        'label': currentLabel,
-        if (background != null) 'background': background,
-        if (musicTrack != null) 'music': musicTrack,
-        'musicVolume': musicVolume,
-        if (activeThreadId != null) 'activeThread': activeThreadId,
-        'theme': theme,
-      };
+    'variables': variables.toJson(),
+    'flags': _flags.toList(),
+    'relationships': _relationships.values
+        .map((Relationship r) => r.toJson())
+        .toList(),
+    'characters': _characters.values
+        .map((CharacterState c) => c.toJson())
+        .toList(),
+    'threads': _threads.values.map((ChatThread t) => t.toJson()).toList(),
+    'phone': _phone.toJson(),
+    'browser': _browser.toJson(),
+    'inventory': _inventory.values
+        .map((InventoryItem i) => i.toJson())
+        .toList(),
+    'evidence': _evidence.values.map((EvidenceEntry e) => e.toJson()).toList(),
+    'journal': _journal.map((JournalEntry j) => j.toJson()).toList(),
+    'objectives': _objectives.values.map((Objective o) => o.toJson()).toList(),
+    'achievements': _achievements.values
+        .map((Achievement a) => a.toJson())
+        .toList(),
+    'gallery': _gallery.values.map((GalleryUnlock g) => g.toJson()).toList(),
+    'wallet': _wallet.toJson(),
+    'profile': _profile.toJson(),
+    'seen': _seenLabels.toList(),
+    'picked': _pickedChoices.toList(),
+    'visited': _visitedUrls.toList(),
+    'episodeId': episodeId,
+    'scene': currentScene,
+    'label': currentLabel,
+    if (background != null) 'background': background,
+    if (musicTrack != null) 'music': musicTrack,
+    'musicVolume': musicVolume,
+    if (activeThreadId != null) 'activeThread': activeThreadId,
+    'theme': theme,
+  };
 
   void restore(Map<String, dynamic> json) {
-    variables.restore(Map<String, Object?>.from(
-        (json['variables'] as Map?) ?? const <String, Object?>{}));
+    variables.restore(
+      Map<String, Object?>.from(
+        (json['variables'] as Map?) ?? const <String, Object?>{},
+      ),
+    );
 
     _flags
       ..clear()
-      ..addAll((json['flags'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) => e.toString()));
+      ..addAll(
+        (json['flags'] as List<dynamic>? ?? const <dynamic>[]).map(
+          (dynamic e) => e.toString(),
+        ),
+      );
 
     _relationships
       ..clear()
-      ..addEntries((json['relationships'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) {
-        final Relationship r =
-            Relationship.fromJson(Map<String, dynamic>.from(e as Map));
-        return MapEntry<String, Relationship>(r.characterId, r);
-      }));
+      ..addEntries(
+        (json['relationships'] as List<dynamic>? ?? const <dynamic>[]).map((
+          dynamic e,
+        ) {
+          final Relationship r = Relationship.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          );
+          return MapEntry<String, Relationship>(r.characterId, r);
+        }),
+      );
 
     _characters
       ..clear()
-      ..addEntries((json['characters'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) {
-        final CharacterState c =
-            CharacterState.fromJson(Map<String, dynamic>.from(e as Map));
-        return MapEntry<String, CharacterState>(c.id, c);
-      }));
+      ..addEntries(
+        (json['characters'] as List<dynamic>? ?? const <dynamic>[]).map((
+          dynamic e,
+        ) {
+          final CharacterState c = CharacterState.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          );
+          return MapEntry<String, CharacterState>(c.id, c);
+        }),
+      );
 
     _threads
       ..clear()
-      ..addEntries((json['threads'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) {
-        final ChatThread t =
-            ChatThread.fromJson(Map<String, dynamic>.from(e as Map));
-        return MapEntry<String, ChatThread>(t.id, t);
-      }));
+      ..addEntries(
+        (json['threads'] as List<dynamic>? ?? const <dynamic>[]).map((
+          dynamic e,
+        ) {
+          final ChatThread t = ChatThread.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          );
+          return MapEntry<String, ChatThread>(t.id, t);
+        }),
+      );
 
     _phone = json['phone'] == null
         ? const PhoneState()
@@ -623,58 +651,82 @@ class GameState {
     _browser = json['browser'] == null
         ? const BrowserState()
         : BrowserState.fromJson(
-            Map<String, dynamic>.from(json['browser'] as Map));
+            Map<String, dynamic>.from(json['browser'] as Map),
+          );
 
     _inventory
       ..clear()
-      ..addEntries((json['inventory'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) {
-        final InventoryItem i =
-            InventoryItem.fromJson(Map<String, dynamic>.from(e as Map));
-        return MapEntry<String, InventoryItem>(i.id, i);
-      }));
+      ..addEntries(
+        (json['inventory'] as List<dynamic>? ?? const <dynamic>[]).map((
+          dynamic e,
+        ) {
+          final InventoryItem i = InventoryItem.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          );
+          return MapEntry<String, InventoryItem>(i.id, i);
+        }),
+      );
 
     _evidence
       ..clear()
-      ..addEntries((json['evidence'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) {
-        final EvidenceEntry v =
-            EvidenceEntry.fromJson(Map<String, dynamic>.from(e as Map));
-        return MapEntry<String, EvidenceEntry>(v.id, v);
-      }));
+      ..addEntries(
+        (json['evidence'] as List<dynamic>? ?? const <dynamic>[]).map((
+          dynamic e,
+        ) {
+          final EvidenceEntry v = EvidenceEntry.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          );
+          return MapEntry<String, EvidenceEntry>(v.id, v);
+        }),
+      );
 
     _journal
       ..clear()
-      ..addAll((json['journal'] as List<dynamic>? ?? const <dynamic>[]).map(
+      ..addAll(
+        (json['journal'] as List<dynamic>? ?? const <dynamic>[]).map(
           (dynamic e) =>
-              JournalEntry.fromJson(Map<String, dynamic>.from(e as Map))));
+              JournalEntry.fromJson(Map<String, dynamic>.from(e as Map)),
+        ),
+      );
 
     _objectives
       ..clear()
-      ..addEntries((json['objectives'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) {
-        final Objective o =
-            Objective.fromJson(Map<String, dynamic>.from(e as Map));
-        return MapEntry<String, Objective>(o.id, o);
-      }));
+      ..addEntries(
+        (json['objectives'] as List<dynamic>? ?? const <dynamic>[]).map((
+          dynamic e,
+        ) {
+          final Objective o = Objective.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          );
+          return MapEntry<String, Objective>(o.id, o);
+        }),
+      );
 
     _achievements
       ..clear()
-      ..addEntries((json['achievements'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) {
-        final Achievement a =
-            Achievement.fromJson(Map<String, dynamic>.from(e as Map));
-        return MapEntry<String, Achievement>(a.id, a);
-      }));
+      ..addEntries(
+        (json['achievements'] as List<dynamic>? ?? const <dynamic>[]).map((
+          dynamic e,
+        ) {
+          final Achievement a = Achievement.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          );
+          return MapEntry<String, Achievement>(a.id, a);
+        }),
+      );
 
     _gallery
       ..clear()
-      ..addEntries((json['gallery'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) {
-        final GalleryUnlock g =
-            GalleryUnlock.fromJson(Map<String, dynamic>.from(e as Map));
-        return MapEntry<String, GalleryUnlock>(g.id, g);
-      }));
+      ..addEntries(
+        (json['gallery'] as List<dynamic>? ?? const <dynamic>[]).map((
+          dynamic e,
+        ) {
+          final GalleryUnlock g = GalleryUnlock.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          );
+          return MapEntry<String, GalleryUnlock>(g.id, g);
+        }),
+      );
 
     _wallet = json['wallet'] == null
         ? const Wallet()
@@ -682,20 +734,30 @@ class GameState {
     _profile = json['profile'] == null
         ? const PlayerProfile()
         : PlayerProfile.fromJson(
-            Map<String, dynamic>.from(json['profile'] as Map));
+            Map<String, dynamic>.from(json['profile'] as Map),
+          );
 
     _seenLabels
       ..clear()
-      ..addAll((json['seen'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) => e.toString()));
+      ..addAll(
+        (json['seen'] as List<dynamic>? ?? const <dynamic>[]).map(
+          (dynamic e) => e.toString(),
+        ),
+      );
     _pickedChoices
       ..clear()
-      ..addAll((json['picked'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) => e.toString()));
+      ..addAll(
+        (json['picked'] as List<dynamic>? ?? const <dynamic>[]).map(
+          (dynamic e) => e.toString(),
+        ),
+      );
     _visitedUrls
       ..clear()
-      ..addAll((json['visited'] as List<dynamic>? ?? const <dynamic>[])
-          .map((dynamic e) => e.toString()));
+      ..addAll(
+        (json['visited'] as List<dynamic>? ?? const <dynamic>[]).map(
+          (dynamic e) => e.toString(),
+        ),
+      );
 
     episodeId = json['episodeId'] as String? ?? '';
     currentScene = json['scene'] as String? ?? '';
@@ -712,7 +774,9 @@ class GameState {
   static String _titleCase(String value) => value
       .split(RegExp(r'[_\s]+'))
       .where((String part) => part.isNotEmpty)
-      .map((String part) =>
-          part[0].toUpperCase() + part.substring(1).toLowerCase())
+      .map(
+        (String part) =>
+            part[0].toUpperCase() + part.substring(1).toLowerCase(),
+      )
       .join(' ');
 }

@@ -46,8 +46,9 @@ class _BrowserAppState extends ConsumerState<BrowserApp> {
   @override
   Widget build(BuildContext context) {
     final BrowserState browser = ref.watch(browserStateProvider);
-    final AsyncValue<WebsiteRepository> sites =
-        ref.watch(websiteRepositoryProvider);
+    final AsyncValue<WebsiteRepository> sites = ref.watch(
+      websiteRepositoryProvider,
+    );
     final String url = browser.currentUrl;
 
     if (!_editing && _urlController.text != url) {
@@ -72,16 +73,15 @@ class _BrowserAppState extends ConsumerState<BrowserApp> {
             Expanded(
               child: sites.when(
                 loading: () => const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2)),
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
                 error: (Object error, _) => EmptyState(
                   icon: Icons.wifi_off_rounded,
                   title: 'No connection',
                   message: '$error',
                 ),
-                data: (WebsiteRepository repository) => _PageView(
-                  page: repository.resolve(url),
-                  onNavigate: _go,
-                ),
+                data: (WebsiteRepository repository) =>
+                    _PageView(page: repository.resolve(url), onNavigate: _go),
               ),
             ),
             if (browser.downloads.isNotEmpty)
@@ -166,9 +166,13 @@ class _OmniBar extends StatelessWidget {
                 child: Row(
                   children: <Widget>[
                     Icon(
-                      incognito ? Icons.visibility_off_rounded : Icons.lock_outline,
+                      incognito
+                          ? Icons.visibility_off_rounded
+                          : Icons.lock_outline,
                       size: 13,
-                      color: incognito ? AppColors.warning : AppColors.textFaint,
+                      color: incognito
+                          ? AppColors.warning
+                          : AppColors.textFaint,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -180,7 +184,9 @@ class _OmniBar extends StatelessWidget {
                               onSubmitted: onSubmit,
                               textInputAction: TextInputAction.go,
                               style: const TextStyle(
-                                  color: AppColors.text, fontSize: 13),
+                                color: AppColors.text,
+                                fontSize: 13,
+                              ),
                               decoration: const InputDecoration(
                                 isDense: true,
                                 filled: false,
@@ -196,7 +202,9 @@ class _OmniBar extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                  color: AppColors.textDim, fontSize: 13),
+                                color: AppColors.textDim,
+                                fontSize: 13,
+                              ),
                             ),
                     ),
                   ],
@@ -241,10 +249,10 @@ class _PageView extends ConsumerWidget {
   final ValueChanged<String> onNavigate;
 
   Color get _accent => switch (page.accent) {
-        'makelove' => AppColors.makelove,
-        'browser' => AppColors.browser,
-        _ => AppColors.browser,
-      };
+    'makelove' => AppColors.makelove,
+    'browser' => AppColors.browser,
+    _ => AppColors.browser,
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -300,7 +308,10 @@ class _PageView extends ConsumerWidget {
         return Text(
           block.text,
           style: const TextStyle(
-              color: AppColors.textDim, fontSize: 14, height: 1.6),
+            color: AppColors.textDim,
+            fontSize: 14,
+            height: 1.6,
+          ),
         );
 
       case 'quote':
@@ -310,7 +321,8 @@ class _PageView extends ConsumerWidget {
             color: AppColors.surface,
             borderRadius: AppRadii.card,
             border: Border(
-                left: BorderSide(color: _accent.withValues(alpha: 0.6), width: 2)),
+              left: BorderSide(color: _accent.withValues(alpha: 0.6), width: 2),
+            ),
           ),
           child: Text(
             block.text,
@@ -340,16 +352,19 @@ class _PageView extends ConsumerWidget {
                         width: 4,
                         height: 4,
                         decoration: BoxDecoration(
-                            color: _accent, shape: BoxShape.circle),
+                          color: _accent,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
                     Expanded(
                       child: Text(
                         item.toString(),
                         style: const TextStyle(
-                            color: AppColors.textDim,
-                            fontSize: 13.5,
-                            height: 1.5),
+                          color: AppColors.textDim,
+                          fontSize: 13.5,
+                          height: 1.5,
+                        ),
                       ),
                     ),
                   ],
@@ -383,15 +398,18 @@ class _PageView extends ConsumerWidget {
                       Text(
                         item['url'].toString(),
                         style: const TextStyle(
-                            color: AppColors.success, fontSize: 11),
+                          color: AppColors.success,
+                          fontSize: 11,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         (item['snippet'] ?? '').toString(),
                         style: const TextStyle(
-                            color: AppColors.textFaint,
-                            fontSize: 12.5,
-                            height: 1.5),
+                          color: AppColors.textFaint,
+                          fontSize: 12.5,
+                          height: 1.5,
+                        ),
                       ),
                     ],
                   ),
@@ -447,14 +465,18 @@ class _PageView extends ConsumerWidget {
             const SizedBox(width: 8),
             Text(
               '${block.number('value') ?? 0} · ${block.str('count') ?? ''}',
-              style:
-                  const TextStyle(color: AppColors.textFaint, fontSize: 11.5),
+              style: const TextStyle(
+                color: AppColors.textFaint,
+                fontSize: 11.5,
+              ),
             ),
             const Spacer(),
             Text(
               block.str('size') ?? '',
-              style:
-                  const TextStyle(color: AppColors.textFaint, fontSize: 11.5),
+              style: const TextStyle(
+                color: AppColors.textFaint,
+                fontSize: 11.5,
+              ),
             ),
           ],
         );
@@ -485,17 +507,21 @@ class _PageView extends ConsumerWidget {
                         ),
                         const SizedBox(width: 8),
                         for (int i = 0; i < ((item['stars'] as num?) ?? 0); i++)
-                          const Icon(Icons.star_rounded,
-                              size: 11, color: AppColors.warning),
+                          const Icon(
+                            Icons.star_rounded,
+                            size: 11,
+                            color: AppColors.warning,
+                          ),
                       ],
                     ),
                     const SizedBox(height: 5),
                     Text(
                       item['body'].toString(),
                       style: const TextStyle(
-                          color: AppColors.textFaint,
-                          fontSize: 12.5,
-                          height: 1.45),
+                        color: AppColors.textFaint,
+                        fontSize: 12.5,
+                        height: 1.45,
+                      ),
                     ),
                   ],
                 ),
@@ -509,19 +535,26 @@ class _PageView extends ConsumerWidget {
           decoration: BoxDecoration(
             color: AppColors.warning.withValues(alpha: 0.1),
             borderRadius: AppRadii.card,
-            border:
-                Border.all(color: AppColors.warning.withValues(alpha: 0.35)),
+            border: Border.all(
+              color: AppColors.warning.withValues(alpha: 0.35),
+            ),
           ),
           child: Row(
             children: <Widget>[
-              const Icon(Icons.warning_amber_rounded,
-                  size: 17, color: AppColors.warning),
+              const Icon(
+                Icons.warning_amber_rounded,
+                size: 17,
+                color: AppColors.warning,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   block.text,
                   style: const TextStyle(
-                      color: AppColors.warning, fontSize: 12.5, height: 1.45),
+                    color: AppColors.warning,
+                    fontSize: 12.5,
+                    height: 1.45,
+                  ),
                 ),
               ),
             ],
@@ -533,10 +566,12 @@ class _PageView extends ConsumerWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: AppRadii.card,
-            gradient: LinearGradient(colors: <Color>[
-              AppColors.makelove.withValues(alpha: 0.24),
-              AppColors.ember.withValues(alpha: 0.16),
-            ]),
+            gradient: LinearGradient(
+              colors: <Color>[
+                AppColors.makelove.withValues(alpha: 0.24),
+                AppColors.ember.withValues(alpha: 0.16),
+              ],
+            ),
           ),
           child: Row(
             children: <Widget>[
@@ -544,12 +579,16 @@ class _PageView extends ConsumerWidget {
                 child: Text(
                   block.text,
                   style: const TextStyle(
-                      color: AppColors.text, fontSize: 13, height: 1.4),
+                    color: AppColors.text,
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
                 ),
               ),
-              const Text('Ad',
-                  style:
-                      TextStyle(color: AppColors.textFaint, fontSize: 10)),
+              const Text(
+                'Ad',
+                style: TextStyle(color: AppColors.textFaint, fontSize: 10),
+              ),
             ],
           ),
         );
@@ -595,13 +634,15 @@ class _InstallBlockState extends ConsumerState<_InstallBlock> {
             ? null
             : () {
                 setState(() => _pressed = true);
-                ref.read(gameSessionProvider.notifier).emitUiEvent(
-                  'browser_install_confirm',
-                  data: <String, Object?>{
-                    'app': appId,
-                    'name': widget.block.str('name') ?? appId,
-                  },
-                );
+                ref
+                    .read(gameSessionProvider.notifier)
+                    .emitUiEvent(
+                      'browser_install_confirm',
+                      data: <String, Object?>{
+                        'app': appId,
+                        'name': widget.block.str('name') ?? appId,
+                      },
+                    );
               },
         style: FilledButton.styleFrom(
           backgroundColor: widget.accent,
@@ -614,7 +655,9 @@ class _InstallBlockState extends ConsumerState<_InstallBlock> {
         label: Text(
           installed
               ? 'Installed'
-              : (_pressed ? 'Starting…' : (widget.block.str('label') ?? 'Install')),
+              : (_pressed
+                    ? 'Starting…'
+                    : (widget.block.str('label') ?? 'Install')),
         ),
       ),
     );
@@ -681,10 +724,7 @@ class _TabSwitcher extends StatelessWidget {
         color: AppColors.voidBlack.withValues(alpha: 0.92),
         padding: const EdgeInsets.fromLTRB(16, 70, 16, 20),
         child: browser.tabs.isEmpty
-            ? const EmptyState(
-                icon: Icons.tab_outlined,
-                title: 'No open tabs',
-              )
+            ? const EmptyState(icon: Icons.tab_outlined, title: 'No open tabs')
             : ListView(
                 children: <Widget>[
                   for (final BrowserTab tab in browser.tabs)
@@ -708,13 +748,17 @@ class _TabSwitcher extends StatelessWidget {
                             Text(
                               tab.title.isEmpty ? tab.url : tab.title,
                               style: const TextStyle(
-                                  color: AppColors.text, fontSize: 14),
+                                color: AppColors.text,
+                                fontSize: 14,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               tab.url,
                               style: const TextStyle(
-                                  color: AppColors.textFaint, fontSize: 11),
+                                color: AppColors.textFaint,
+                                fontSize: 11,
+                              ),
                             ),
                           ],
                         ),
@@ -764,8 +808,11 @@ class _PopupLayer extends StatelessWidget {
                 if (popup.closable)
                   InkWell(
                     onTap: onDismiss,
-                    child: const Icon(Icons.close_rounded,
-                        size: 18, color: AppColors.textFaint),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 18,
+                      color: AppColors.textFaint,
+                    ),
                   ),
               ],
             ),
@@ -774,7 +821,10 @@ class _PopupLayer extends StatelessWidget {
               Text(
                 popup.body,
                 style: const TextStyle(
-                    color: AppColors.textDim, fontSize: 13, height: 1.5),
+                  color: AppColors.textDim,
+                  fontSize: 13,
+                  height: 1.5,
+                ),
               ),
             ],
             const SizedBox(height: 18),

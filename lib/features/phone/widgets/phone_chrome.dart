@@ -58,7 +58,11 @@ class PhoneStatusBar extends ConsumerWidget {
                 : color.withValues(alpha: 0.8),
           ),
           const SizedBox(width: 8),
-          _Battery(level: phone.battery, charging: phone.charging, color: color),
+          _Battery(
+            level: phone.battery,
+            charging: phone.charging,
+            color: color,
+          ),
         ],
       ),
     );
@@ -236,8 +240,10 @@ class AppIconTile extends StatelessWidget {
                   right: -4,
                   top: -4,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     constraints: const BoxConstraints(minWidth: 20),
                     decoration: BoxDecoration(
                       color: AppColors.danger,
@@ -260,8 +266,10 @@ class AppIconTile extends StatelessWidget {
                   left: -2,
                   bottom: -2,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.success,
                       borderRadius: AppRadii.pill,
@@ -312,8 +320,9 @@ class PhoneHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final List<InstalledApp> apps = ref.watch(installedAppsProvider);
     final PhoneState phone = ref.watch(phoneStateProvider);
-    final GameSessionController session =
-        ref.read(gameSessionProvider.notifier);
+    final GameSessionController session = ref.read(
+      gameSessionProvider.notifier,
+    );
 
     final List<InstalledApp> grid = apps
         .where((InstalledApp a) => !dockApps.contains(a.id))
@@ -452,10 +461,7 @@ class AppHeader extends StatelessWidget {
             )
           else
             const SizedBox(width: 12),
-          if (leading != null) ...<Widget>[
-            leading!,
-            const SizedBox(width: 12),
-          ],
+          if (leading != null) ...<Widget>[leading!, const SizedBox(width: 12)],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

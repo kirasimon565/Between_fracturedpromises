@@ -19,8 +19,9 @@ class PhoneSettingsApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final EngineSettings settings = ref.watch(settingsControllerProvider);
-    final SettingsController controller =
-        ref.read(settingsControllerProvider.notifier);
+    final SettingsController controller = ref.read(
+      settingsControllerProvider.notifier,
+    );
     final PhoneState phone = ref.watch(phoneStateProvider);
     final PlayerProfile profile = ref.watch(profileProvider);
     final GameSession session = ref.watch(gameSessionProvider);
@@ -44,8 +45,9 @@ class PhoneSettingsApp extends ConsumerWidget {
                 min: 0.5,
                 max: 3,
                 display: '${settings.textSpeed.toStringAsFixed(1)}×',
-                onChanged: (double v) =>
-                    controller.patch((EngineSettings s) => s.copyWith(textSpeed: v)),
+                onChanged: (double v) => controller.patch(
+                  (EngineSettings s) => s.copyWith(textSpeed: v),
+                ),
               ),
               _SliderTile(
                 label: 'Typing speed',
@@ -53,42 +55,48 @@ class PhoneSettingsApp extends ConsumerWidget {
                 min: 0.5,
                 max: 3,
                 display: '${settings.typingSpeed.toStringAsFixed(1)}×',
-                onChanged: (double v) => controller
-                    .patch((EngineSettings s) => s.copyWith(typingSpeed: v)),
+                onChanged: (double v) => controller.patch(
+                  (EngineSettings s) => s.copyWith(typingSpeed: v),
+                ),
               ),
               _SwitchTile(
                 label: 'Auto advance',
                 subtitle: 'Continue without tapping',
                 value: settings.autoAdvance,
-                onChanged: (bool v) => controller
-                    .patch((EngineSettings s) => s.copyWith(autoAdvance: v)),
+                onChanged: (bool v) => controller.patch(
+                  (EngineSettings s) => s.copyWith(autoAdvance: v),
+                ),
               ),
               _SwitchTile(
                 label: 'Skip seen scenes',
                 subtitle: 'Fast-forward beats you already read',
                 value: settings.skipSeen,
-                onChanged: (bool v) => controller
-                    .patch((EngineSettings s) => s.copyWith(skipSeen: v)),
+                onChanged: (bool v) => controller.patch(
+                  (EngineSettings s) => s.copyWith(skipSeen: v),
+                ),
               ),
               _SwitchTile(
                 label: 'Reduced motion',
                 subtitle: 'Fewer shakes, glitches and flashes',
                 value: settings.reducedMotion,
-                onChanged: (bool v) => controller
-                    .patch((EngineSettings s) => s.copyWith(reducedMotion: v)),
+                onChanged: (bool v) => controller.patch(
+                  (EngineSettings s) => s.copyWith(reducedMotion: v),
+                ),
               ),
               const SectionLabel('Sound'),
               _SwitchTile(
                 label: 'Music',
                 value: settings.musicEnabled,
-                onChanged: (bool v) => controller
-                    .patch((EngineSettings s) => s.copyWith(musicEnabled: v)),
+                onChanged: (bool v) => controller.patch(
+                  (EngineSettings s) => s.copyWith(musicEnabled: v),
+                ),
               ),
               _SwitchTile(
                 label: 'Sound effects',
                 value: settings.soundEnabled,
-                onChanged: (bool v) => controller
-                    .patch((EngineSettings s) => s.copyWith(soundEnabled: v)),
+                onChanged: (bool v) => controller.patch(
+                  (EngineSettings s) => s.copyWith(soundEnabled: v),
+                ),
               ),
               _SliderTile(
                 label: 'Music volume',
@@ -96,8 +104,9 @@ class PhoneSettingsApp extends ConsumerWidget {
                 min: 0,
                 max: 1,
                 display: '${(settings.musicVolume * 100).round()}%',
-                onChanged: (double v) => controller
-                    .patch((EngineSettings s) => s.copyWith(musicVolume: v)),
+                onChanged: (double v) => controller.patch(
+                  (EngineSettings s) => s.copyWith(musicVolume: v),
+                ),
               ),
               const SectionLabel('Story'),
               _InfoTile(
@@ -112,10 +121,7 @@ class PhoneSettingsApp extends ConsumerWidget {
                     ? session.state!.currentScene
                     : '—',
               ),
-              _InfoTile(
-                label: 'Runtime',
-                value: session.status.name,
-              ),
+              _InfoTile(label: 'Runtime', value: session.status.name),
               const SizedBox(height: 14),
               OutlinedButton.icon(
                 onPressed: () =>
@@ -172,7 +178,9 @@ class _ProfileCard extends StatelessWidget {
                 Text(
                   '${profile.pronouns} · ${phone.networkState}',
                   style: const TextStyle(
-                      color: AppColors.textFaint, fontSize: 12),
+                    color: AppColors.textFaint,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -202,13 +210,16 @@ class _SwitchTile extends StatelessWidget {
       value: value,
       onChanged: onChanged,
       contentPadding: EdgeInsets.zero,
-      title: Text(label,
-          style: const TextStyle(color: AppColors.text, fontSize: 14.5)),
+      title: Text(
+        label,
+        style: const TextStyle(color: AppColors.text, fontSize: 14.5),
+      ),
       subtitle: subtitle == null
           ? null
-          : Text(subtitle!,
-              style:
-                  const TextStyle(color: AppColors.textFaint, fontSize: 12)),
+          : Text(
+              subtitle!,
+              style: const TextStyle(color: AppColors.textFaint, fontSize: 12),
+            ),
     );
   }
 }
@@ -240,13 +251,18 @@ class _SliderTile extends StatelessWidget {
           Row(
             children: <Widget>[
               Expanded(
-                child: Text(label,
-                    style: const TextStyle(
-                        color: AppColors.text, fontSize: 14.5)),
+                child: Text(
+                  label,
+                  style: const TextStyle(color: AppColors.text, fontSize: 14.5),
+                ),
               ),
-              Text(display,
-                  style: const TextStyle(
-                      color: AppColors.textFaint, fontSize: 12.5)),
+              Text(
+                display,
+                style: const TextStyle(
+                  color: AppColors.textFaint,
+                  fontSize: 12.5,
+                ),
+              ),
             ],
           ),
           Slider(
@@ -274,9 +290,10 @@ class _InfoTile extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Expanded(
-            child: Text(label,
-                style:
-                    const TextStyle(color: AppColors.textDim, fontSize: 13.5)),
+            child: Text(
+              label,
+              style: const TextStyle(color: AppColors.textDim, fontSize: 13.5),
+            ),
           ),
           Flexible(
             child: Text(

@@ -6,7 +6,7 @@ import '../lexer/token.dart';
 /// parser (which is mixed into it).
 abstract class TokenReader {
   TokenReader(this.tokens, {DiagnosticBag? diagnostics})
-      : diagnostics = diagnostics ?? DiagnosticBag();
+    : diagnostics = diagnostics ?? DiagnosticBag();
 
   final List<Token> tokens;
   final DiagnosticBag diagnostics;
@@ -16,8 +16,7 @@ abstract class TokenReader {
   Token get current =>
       position < tokens.length ? tokens[position] : tokens.last;
 
-  Token get previous =>
-      position > 0 ? tokens[position - 1] : tokens.first;
+  Token get previous => position > 0 ? tokens[position - 1] : tokens.first;
 
   Token peek([int ahead = 1]) {
     final int index = position + ahead;

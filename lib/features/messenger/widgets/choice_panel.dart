@@ -78,8 +78,9 @@ class _ChoicePanelState extends ConsumerState<ChoicePanel> {
     if (!option.enabled) return;
 
     setState(() => _submitting = true);
-    final bool accepted =
-        await ref.read(gameSessionProvider.notifier).select(option.index);
+    final bool accepted = await ref
+        .read(gameSessionProvider.notifier)
+        .select(option.index);
     if (!accepted && mounted) setState(() => _submitting = false);
   }
 
@@ -87,15 +88,18 @@ class _ChoicePanelState extends ConsumerState<ChoicePanel> {
   Widget build(BuildContext context) {
     final PendingChoice choice = widget.choice;
     final double progress = choice.isTimed && choice.timeout!.inMilliseconds > 0
-        ? (_remaining.inMilliseconds / choice.timeout!.inMilliseconds)
-            .clamp(0.0, 1.0)
+        ? (_remaining.inMilliseconds / choice.timeout!.inMilliseconds).clamp(
+            0.0,
+            1.0,
+          )
         : 0;
 
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
-            top: BorderSide(color: widget.accent.withValues(alpha: 0.28))),
+          top: BorderSide(color: widget.accent.withValues(alpha: 0.28)),
+        ),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.4),
@@ -137,15 +141,16 @@ class _ChoicePanelState extends ConsumerState<ChoicePanel> {
                   for (int i = 0; i < choice.options.length; i++)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
-                      child: _OptionButton(
-                        option: choice.options[i],
-                        accent: widget.accent,
-                        disabled: _submitting,
-                        onTap: () => _pick(choice.options[i]),
-                      )
-                          .animate(delay: Duration(milliseconds: 60 * i))
-                          .fadeIn(duration: 220.ms)
-                          .slideY(begin: 0.25, end: 0),
+                      child:
+                          _OptionButton(
+                                option: choice.options[i],
+                                accent: widget.accent,
+                                disabled: _submitting,
+                                onTap: () => _pick(choice.options[i]),
+                              )
+                              .animate(delay: Duration(milliseconds: 60 * i))
+                              .fadeIn(duration: 220.ms)
+                              .slideY(begin: 0.25, end: 0),
                     ),
                 ],
               ),
@@ -177,8 +182,8 @@ class _OptionButton extends StatelessWidget {
     final Color border = premium
         ? AppColors.crystal.withValues(alpha: 0.55)
         : (locked
-            ? AppColors.outline
-            : accent.withValues(alpha: option.picked ? 0.25 : 0.45));
+              ? AppColors.outline
+              : accent.withValues(alpha: option.picked ? 0.25 : 0.45));
 
     final Color background = premium
         ? AppColors.crystal.withValues(alpha: 0.09)
@@ -201,12 +206,18 @@ class _OptionButton extends StatelessWidget {
             child: Row(
               children: <Widget>[
                 if (premium) ...<Widget>[
-                  const Icon(Icons.diamond_outlined,
-                      size: 16, color: AppColors.crystal),
+                  const Icon(
+                    Icons.diamond_outlined,
+                    size: 16,
+                    color: AppColors.crystal,
+                  ),
                   const SizedBox(width: 10),
                 ] else if (locked) ...<Widget>[
-                  const Icon(Icons.lock_outline_rounded,
-                      size: 15, color: AppColors.textFaint),
+                  const Icon(
+                    Icons.lock_outline_rounded,
+                    size: 15,
+                    color: AppColors.textFaint,
+                  ),
                   const SizedBox(width: 10),
                 ],
                 Expanded(
@@ -241,7 +252,9 @@ class _OptionButton extends StatelessWidget {
                   const SizedBox(width: 10),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 9, vertical: 4),
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.crystal.withValues(alpha: 0.16),
                       borderRadius: AppRadii.pill,
@@ -256,8 +269,11 @@ class _OptionButton extends StatelessWidget {
                     ),
                   ),
                 ] else if (premium && option.alreadyOwned)
-                  const Icon(Icons.check_circle_outline_rounded,
-                      size: 16, color: AppColors.success),
+                  const Icon(
+                    Icons.check_circle_outline_rounded,
+                    size: 16,
+                    color: AppColors.success,
+                  ),
               ],
             ),
           ),

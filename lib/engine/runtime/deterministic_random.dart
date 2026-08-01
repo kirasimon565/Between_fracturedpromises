@@ -4,7 +4,7 @@
 /// save file must replay the same "random" beats when reloaded.
 class DeterministicRandom {
   DeterministicRandom([int? seed])
-      : _state = (seed ?? DateTime.now().microsecondsSinceEpoch) & 0x7FFFFFFF {
+    : _state = (seed ?? DateTime.now().microsecondsSinceEpoch) & 0x7FFFFFFF {
     if (_state == 0) _state = 0x2545F491;
   }
 

@@ -98,9 +98,10 @@ class _FileRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(title,
-                    style: const TextStyle(
-                        color: AppColors.text, fontSize: 13.5)),
+                Text(
+                  title,
+                  style: const TextStyle(color: AppColors.text, fontSize: 13.5),
+                ),
                 if (subtitle.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
@@ -109,16 +110,19 @@ class _FileRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          color: AppColors.textFaint, fontSize: 11.5),
+                        color: AppColors.textFaint,
+                        fontSize: 11.5,
+                      ),
                     ),
                   ),
               ],
             ),
           ),
           if (trailing != null)
-            Text(trailing!,
-                style: const TextStyle(
-                    color: AppColors.textFaint, fontSize: 11)),
+            Text(
+              trailing!,
+              style: const TextStyle(color: AppColors.textFaint, fontSize: 11),
+            ),
         ],
       ),
     );

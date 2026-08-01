@@ -79,9 +79,9 @@ abstract final class StoreCatalog {
   ];
 
   static List<StoreProduct> get all => <StoreProduct>[
-        ...crystalPacks,
-        ...specials,
-      ];
+    ...crystalPacks,
+    ...specials,
+  ];
 
   static List<String> get skus =>
       all.map((StoreProduct p) => p.sku).toList(growable: false);

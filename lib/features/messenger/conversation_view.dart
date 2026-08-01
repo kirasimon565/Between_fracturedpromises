@@ -61,7 +61,9 @@ class _ConversationViewState extends ConsumerState<ConversationView> {
   Widget build(BuildContext context) {
     final ChatThread? thread = ref.watch(threadProvider(widget.threadId));
     final GameSession session = ref.watch(gameSessionProvider);
-    final Map<String, CharacterState> characters = ref.watch(charactersProvider);
+    final Map<String, CharacterState> characters = ref.watch(
+      charactersProvider,
+    );
 
     if (thread == null) {
       return const Center(
@@ -79,12 +81,14 @@ class _ConversationViewState extends ConsumerState<ConversationView> {
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
     }
 
-    final CharacterState? partner = characters[thread.participants.firstWhere(
-      (String id) => characters[id] != null && id != 'nadia',
-      orElse: () => thread.id,
-    )];
+    final CharacterState? partner =
+        characters[thread.participants.firstWhere(
+          (String id) => characters[id] != null && id != 'nadia',
+          orElse: () => thread.id,
+        )];
 
-    final bool showChoice = session.waitingForChoice &&
+    final bool showChoice =
+        session.waitingForChoice &&
         (session.state?.activeThreadId == thread.id ||
             session.state?.activeThreadId == null);
 
@@ -95,8 +99,8 @@ class _ConversationViewState extends ConsumerState<ConversationView> {
           subtitle: thread.typingBy != null
               ? 'typing…'
               : (partner?.isOnline == true
-                  ? 'online'
-                  : (partner?.status ?? 'offline')),
+                    ? 'online'
+                    : (partner?.status ?? 'offline')),
           accent: widget.accent,
           onBack: widget.onBack,
           leading: CharacterAvatar(
@@ -109,11 +113,14 @@ class _ConversationViewState extends ConsumerState<ConversationView> {
           actions: <Widget>[
             IconButton(
               tooltip: 'Call',
-              onPressed: () =>
-                  ref.read(gameSessionProvider.notifier).emitUiEvent(
-                'call_requested',
-                data: <String, Object?>{'character': partner?.id ?? thread.id},
-              ),
+              onPressed: () => ref
+                  .read(gameSessionProvider.notifier)
+                  .emitUiEvent(
+                    'call_requested',
+                    data: <String, Object?>{
+                      'character': partner?.id ?? thread.id,
+                    },
+                  ),
               icon: const Icon(Icons.call_outlined, size: 19),
               color: AppColors.textDim,
             ),
@@ -139,9 +146,11 @@ class _ConversationViewState extends ConsumerState<ConversationView> {
                 }
 
                 final ChatMessage message = messages[index];
-                final ChatMessage? next =
-                    index + 1 < messages.length ? messages[index + 1] : null;
-                final bool tail = next == null ||
+                final ChatMessage? next = index + 1 < messages.length
+                    ? messages[index + 1]
+                    : null;
+                final bool tail =
+                    next == null ||
                     next.senderId != message.senderId ||
                     next.kind != message.kind;
 
@@ -205,14 +214,18 @@ class _StatusFooter extends ConsumerWidget {
                 width: 14,
                 height: 14,
                 child: CircularProgressIndicator(
-                    strokeWidth: 1.6, color: accent.withValues(alpha: 0.7)),
+                  strokeWidth: 1.6,
+                  color: accent.withValues(alpha: 0.7),
+                ),
               ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
                 style: const TextStyle(
-                    color: AppColors.textFaint, fontSize: 12.5),
+                  color: AppColors.textFaint,
+                  fontSize: 12.5,
+                ),
               ),
             ),
             if (status == RuntimeStatus.waiting)

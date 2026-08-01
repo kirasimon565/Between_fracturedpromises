@@ -100,8 +100,7 @@ class CommandContext {
     return value.asNum;
   }
 
-  int integer(int index, [int fallback = 0]) =>
-      number(index, fallback).round();
+  int integer(int index, [int fallback = 0]) => number(index, fallback).round();
 
   bool flag(int index, [bool fallback = true]) {
     final Expression? expression = arguments.positionalAt(index);
@@ -113,8 +112,7 @@ class CommandContext {
 
   bool has(String key) => arguments.hasNamed(key);
 
-  EngineValue named(String key) =>
-      engine.evaluate(arguments.namedOrNull(key));
+  EngineValue named(String key) => engine.evaluate(arguments.namedOrNull(key));
 
   String namedStr(String key, [String fallback = '']) {
     final Expression? expression = arguments.namedOrNull(key);
@@ -203,8 +201,7 @@ class CommandRegistry {
   void registerFunction(
     List<String> names,
     FutureOr<CommandOutcome> Function(CommandContext context) body,
-  ) =>
-      register(FunctionCommand(names, body));
+  ) => register(FunctionCommand(names, body));
 
   bool contains(String name) => _handlers.containsKey(name.toLowerCase());
 
