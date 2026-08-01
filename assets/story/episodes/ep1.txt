@@ -1,0 +1,1730 @@
+:: episode_1_the_spark
+@title "The Spark"
+@episode 1
+@author "Between"
+@difficulty 3
+
+:: scene_01_domestic_silence
+@scene messenger_night
+@time 23:47
+@location "Home - Living Room"
+@music "silence_broken" volume 0.2
+@phone_battery 43
+
+@character ethan status online
+@character claire status online
+@character olivia status online
+
+@notification "Ethan Carter is typing..."
+
+@typing ethan 4
+@message ethan "Hey. Still at the office. Site meeting ran over."
+
+@choice
+"I'm going to bed." -> @scene_ethan_bed
+"Again?" -> @scene_ethan_again
+"Don't rush." -> @scene_ethan_dontrush
+
+:: scene_ethan_bed
+@typing nadia 3
+@message nadia "I'm going to bed."
+
+@typing ethan 4
+@message ethan "Already? It's not even midnight."
+
+@typing nadia 5
+@message nadia "I'm tired, Ethan."
+
+@typing ethan 6
+@message ethan "Okay. I'll be quiet when I come in."
+
+@typing nadia 4
+@message nadia "Whatever."
+
+@thought nadia "He doesn't even ask why I'm tired."
+
+@goto @scene_claire_checkin
+
+:: scene_ethan_again
+@typing nadia 3
+@message nadia "Again?"
+
+@typing ethan 4
+@message ethan "Yeah. You know how it is."
+
+@typing nadia 5
+@message nadia "I know how it is."
+
+@typing ethan 6
+@message ethan "Did you eat?"
+
+@typing nadia 4
+@message nadia "Leftovers."
+
+@typing ethan 5
+@message ethan "I'll cook tomorrow. Promise."
+
+@typing nadia 6
+@message nadia "You always promise."
+
+@thought nadia "He always promises. He never does."
+
+@goto @scene_claire_checkin
+
+:: scene_ethan_dontrush
+@typing nadia 3
+@message nadia "Don't rush."
+
+@typing ethan 4
+@message ethan "What do you mean?"
+
+@typing nadia 5
+@message nadia "I'm already asleep. Just come home when you're done."
+
+@typing ethan 6
+@message ethan "Are you mad at me?"
+
+@typing nadia 4
+@message nadia "No. Just tired."
+
+@thought nadia "I'm not mad. I'm empty."
+
+@goto @scene_claire_checkin
+
+:: scene_claire_checkin
+@notification "Claire Mitchell is typing..."
+
+@typing claire 4
+@message claire "Hey. I saw you were online. You okay?"
+
+@choice
+"I can't sleep." -> @scene_claire_sleep
+"I don't know." -> @scene_claire_dontknow
+"I'm fine." -> @scene_claire_fine
+
+:: scene_claire_sleep
+@typing nadia 3
+@message nadia "I can't sleep."
+
+@typing claire 4
+@message claire "What's keeping you up?"
+
+@typing nadia 5
+@message nadia "Everything. Nothing. I don't know."
+
+@typing claire 6
+@message claire "That's not an answer."
+
+@typing nadia 4
+@message nadia "It's the only one I have."
+
+@thought nadia "She wants answers I don't have."
+
+@goto @scene_claire_probes
+
+:: scene_claire_dontknow
+@typing nadia 3
+@message nadia "I don't know."
+
+@typing claire 4
+@message claire "You don't know if you're okay?"
+
+@typing nadia 5
+@message nadia "I don't know what I am anymore."
+
+@typing claire 6
+@message claire "Nadia. Talk to me."
+
+@typing nadia 4
+@message nadia "I can't. I don't know how."
+
+@thought nadia "She's my best friend. Why can't I just tell her?"
+
+@goto @scene_claire_probes
+
+:: scene_claire_fine
+@typing nadia 3
+@message nadia "I'm fine."
+
+@typing claire 4
+@message claire "You're lying."
+
+@typing nadia 5
+@message nadia "I'm not."
+
+@typing claire 6
+@message claire "You are. I know you."
+
+@typing nadia 4
+@message nadia "I'm just tired."
+
+@thought nadia "She knows me too well. I need to be more careful."
+
+@goto @scene_claire_probes
+
+:: scene_claire_probes
+@typing claire 5
+@message claire "When was the last time you and Ethan actually talked?"
+
+@choice
+"This morning." -> @scene_claire_talk_1
+"I don't remember." -> @scene_claire_talk_2
+"I don't want to talk about him." -> @scene_claire_talk_3
+
+:: scene_claire_talk_1
+@typing nadia 3
+@message nadia "This morning. We talked this morning."
+
+@typing claire 4
+@message claire "About what?"
+
+@typing nadia 5
+@message nadia "Work. Our kid. The usual."
+
+@typing claire 6
+@message claire "That's not talking. That's surviving."
+
+@typing nadia 4
+@message nadia "What do you want me to say?"
+
+@typing claire 5
+@message claire "I want you to say something real."
+
+@thought nadia "I can't tell her what's real. I don't know myself."
+
+@goto @scene_claire_ends
+
+:: scene_claire_talk_2
+@typing nadia 3
+@message nadia "I don't remember."
+
+@typing claire 4
+@message claire "You don't remember?"
+
+@typing nadia 5
+@message nadia "We talk. We just don't... connect."
+
+@typing claire 6
+@message claire "That's a problem, Nadia."
+
+@typing nadia 4
+@message nadia "I know."
+
+@thought nadia "I know it's a problem. I don't know how to fix it."
+
+@goto @scene_claire_ends
+
+:: scene_claire_talk_3
+@typing nadia 3
+@message nadia "I don't want to talk about him."
+
+@typing claire 4
+@message claire "Then talk about you."
+
+@typing nadia 5
+@message nadia "What about me?"
+
+@typing claire 6
+@message claire "What's going on with you?"
+
+@typing nadia 4
+@message nadia "I don't know."
+
+@thought nadia "I hate that answer. But it's the truth."
+
+@goto @scene_claire_ends
+
+:: scene_claire_ends
+@typing claire 5
+@message claire "I'm worried about you."
+
+@choice
+"I'll be okay." -> @scene_claire_final_1
+"I'm worried about me too." -> @scene_claire_final_2
+"Don't be." -> @scene_claire_final_3
+
+:: scene_claire_final_1
+@typing nadia 3
+@message nadia "I'll be okay."
+
+@typing claire 4
+@message claire "Promise?"
+
+@typing nadia 5
+@message nadia "I promise."
+
+@thought nadia "I'm lying to her. Again."
+
+@goto @scene_olivia_pokes
+
+:: scene_claire_final_2
+@typing nadia 3
+@message nadia "I'm worried about me too."
+
+@typing claire 4
+@message claire "Then let me help you."
+
+@typing nadia 5
+@message nadia "I don't know how."
+
+@typing claire 6
+@message claire "Start by telling me the truth."
+
+@typing nadia 4
+@message nadia "I can't."
+
+@thought nadia "I can't tell her the truth because I haven't faced it myself."
+
+@goto @scene_olivia_pokes
+
+:: scene_claire_final_3
+@typing nadia 3
+@message nadia "Don't be."
+
+@typing claire 4
+@message claire "I can't help it. I love you."
+
+@typing nadia 5
+@message nadia "I love you too."
+
+@typing claire 6
+@message claire "Promise me you'll talk to me. Before it gets worse."
+
+@typing nadia 4
+@message nadia "I promise."
+
+@thought nadia "It's already worse. She just doesn't know it yet."
+
+@goto @scene_olivia_pokes
+
+:: scene_olivia_pokes
+@notification "Olivia Carter is typing..."
+
+@typing olivia 4
+@message olivia "I saw you were online at 2 AM last night."
+
+@choice
+"So?" -> @scene_olivia_1
+"I couldn't sleep." -> @scene_olivia_2
+"Are you stalking me?" -> @scene_olivia_3
+
+:: scene_olivia_1
+@typing nadia 3
+@message nadia "So?"
+
+@typing olivia 4
+@message olivia "So that's strange behavior for a married woman."
+
+@typing nadia 5
+@message nadia "What are you implying?"
+
+@typing olivia 6
+@message olivia "I'm not implying anything. I'm observing."
+
+@typing nadia 4
+@message nadia "Observe something else."
+
+@thought nadia "She's going to be a problem."
+
+@goto @scene_olivia_continues
+
+:: scene_olivia_2
+@typing nadia 3
+@message nadia "I couldn't sleep."
+
+@typing olivia 4
+@message olivia "At 2 AM? You have a daughter. A husband."
+
+@typing nadia 5
+@message nadia "And I still couldn't sleep."
+
+@typing olivia 6
+@message olivia "There's something going on."
+
+@typing nadia 4
+@message nadia "There's nothing going on."
+
+@thought nadia "She smells something. I can feel it."
+
+@goto @scene_olivia_continues
+
+:: scene_olivia_3
+@typing nadia 3
+@message nadia "Are you stalking me?"
+
+@typing olivia 4
+@message olivia "I'm watching out for my brother."
+
+@typing nadia 5
+@message nadia "He's fine."
+
+@typing olivia 6
+@message olivia "Is he? Because you're acting strange."
+
+@typing nadia 4
+@message nadia "I'm not acting strange."
+
+@typing olivia 5
+@message olivia "Okay. But I'm watching."
+
+@thought nadia "She's always watching. I need to be more careful."
+
+@goto @scene_olivia_continues
+
+:: scene_olivia_continues
+@typing olivia 5
+@message olivia "Is everything okay with you and my brother?"
+
+@choice
+"We're fine." -> @scene_olivia_ans_1
+"Why do you ask?" -> @scene_olivia_ans_2
+"Mind your own business." -> @scene_olivia_ans_3
+
+:: scene_olivia_ans_1
+@typing nadia 3
+@message nadia "We're fine."
+
+@typing olivia 4
+@message olivia "You sure?"
+
+@typing nadia 5
+@message nadia "I'm sure."
+
+@typing olivia 6
+@message olivia "Because if something was going on..."
+
+@typing nadia 4
+@message nadia "Nothing's going on."
+
+@thought nadia "Nothing's going on. Yet."
+
+@goto @scene_olivia_end
+
+:: scene_olivia_ans_2
+@typing nadia 3
+@message nadia "Why do you ask?"
+
+@typing olivia 4
+@message olivia "Because my brother's been different lately."
+
+@typing nadia 5
+@message nadia "He works a lot. That's all."
+
+@typing olivia 6
+@message olivia "That's not all. I can tell."
+
+@typing nadia 4
+@message nadia "You can't tell anything."
+
+@thought nadia "She's too observant. I need to shut this down."
+
+@goto @scene_olivia_end
+
+:: scene_olivia_ans_3
+@typing nadia 3
+@message nadia "Mind your own business."
+
+@typing olivia 4
+@message olivia "My brother's marriage is my business."
+
+@typing nadia 5
+@message nadia "It's not your marriage."
+
+@typing olivia 6
+@message olivia "Fine. But I'm watching."
+
+@typing nadia 4
+@message nadia "Watch all you want. You'll find nothing."
+
+@thought nadia "I need to make sure she finds nothing."
+
+@goto @scene_olivia_end
+
+:: scene_olivia_end
+@message system "Olivia's suspicion grows."
+
+@set olivia_suspicion = 1
+@flag olivia_suspicious true
+
+:: scene_02_the_app
+@scene makelove_install
+@time 02:13
+@location "Bedroom - Nadia's Phone"
+@music "temptation_hum" volume 0.15
+@phone_battery 32
+
+@message system "An ad appears on your screen."
+@message system "Makelove - Connect with someone who gets you."
+
+@choice
+"Another dating app. Pass." -> @scene_ignore_ad
+"What's this?" -> @scene_curious_ad
+"I shouldn't..." -> @scene_guilty_ad
+
+:: scene_ignore_ad
+@thought nadia "I should delete this ad. I'm married."
+
+@delay 3
+@message nadia "But I can't stop looking at it."
+
+@message system "You close the ad, but it stays in your head."
+
+@delay 2
+@message nadia "A minute passes."
+
+@message system "You open the app store."
+
+@flag installed_makelove true
+@goto @scene_app_opens
+
+:: scene_curious_ad
+@message nadia "Connect with someone who gets you."
+
+@message nadia "What does that even mean?"
+
+@delay 2
+@message nadia "I've forgotten what that feels like."
+
+@message system "You click the ad. The download starts."
+
+@flag installed_makelove true
+@goto @scene_app_opens
+
+:: scene_guilty_ad
+@message nadia "I shouldn't. I'm married."
+
+@delay 3
+@message nadia "But..."
+
+@delay 2
+@message nadia "I'm so tired of pretending."
+
+@message system "Your finger hovers over the download button."
+
+@message nadia "One click. What's the worst that could happen?"
+
+@message system "You download the app."
+
+@flag installed_makelove true
+@goto @scene_app_opens
+
+:: scene_app_opens
+@scene makelove_chat
+@music "first_contact" volume 0.2
+
+@message system "The app opens. It's sleek. Minimal. Addictive."
+
+@character daniel status online
+
+@message system "You get matched instantly."
+
+@typing daniel 5
+@message daniel "Well, well. Looks like someone got curious."
+
+@choice
+"I was just browsing." -> @scene_daniel_1
+"Maybe I was." -> @scene_daniel_2
+"Who are you?" -> @scene_daniel_3
+
+:: scene_daniel_1
+@typing nadia 4
+@message nadia "I was just browsing."
+
+@typing daniel 5
+@message daniel "People don't browse here. They're looking for something."
+
+@typing nadia 6
+@message nadia "I don't know what I'm looking for."
+
+@typing daniel 7
+@message daniel "That's the first honest thing anyone's said to me all day."
+
+@goto @scene_daniel_continues
+
+:: scene_daniel_2
+@typing nadia 4
+@message nadia "Maybe I was."
+
+@typing daniel 5
+@message daniel "I like that. Honest."
+
+@typing nadia 6
+@message nadia "What else would I be?"
+
+@typing daniel 7
+@message daniel "Most people lie. Even to themselves."
+
+@typing nadia 8
+@message nadia "And you don't?"
+
+@typing daniel 5
+@message daniel "I try not to."
+
+@goto @scene_daniel_continues
+
+:: scene_daniel_3
+@typing nadia 4
+@message nadia "Who are you?"
+
+@typing daniel 5
+@message daniel "Just someone who was waiting for someone interesting to show up."
+
+@typing nadia 6
+@message nadia "And you think I'm interesting?"
+
+@typing daniel 7
+@message daniel "I think you're curious. That's the first step."
+
+@goto @scene_daniel_continues
+
+:: scene_daniel_continues
+@typing daniel 5
+@message daniel "What's your name?"
+
+@choice
+"Nadia." -> @scene_name_real
+"Does it matter?" -> @scene_name_mysterious
+"I'll tell you if you tell me yours first." -> @scene_name_playful
+
+:: scene_name_real
+@typing nadia 4
+@message nadia "Nadia."
+
+@typing daniel 5
+@message daniel "Nadia. That's a beautiful name."
+
+@typing nadia 6
+@message nadia "Thanks."
+
+@typing daniel 7
+@message daniel "I'm Daniel."
+
+@flag daniel_knows_nadia true
+@goto @scene_daniel_first_chat
+
+:: scene_name_mysterious
+@typing nadia 4
+@message nadia "Does it matter?"
+
+@typing daniel 5
+@message daniel "It matters to me."
+
+@typing nadia 6
+@message nadia "Why?"
+
+@typing daniel 7
+@message daniel "Because I want to know who I'm talking to."
+
+@typing nadia 8
+@message nadia "I'll tell you when I'm ready."
+
+@typing daniel 5
+@message daniel "Fair enough."
+
+@flag daniel_name_mystery true
+@goto @scene_daniel_first_chat
+
+:: scene_name_playful
+@typing nadia 4
+@message nadia "I'll tell you if you tell me yours first."
+
+@typing daniel 5
+@message daniel "Daniel."
+
+@typing nadia 6
+@message nadia "Nadia."
+
+@typing daniel 7
+@message daniel "Nice to meet you, Nadia."
+
+@flag daniel_knows_nadia true
+@goto @scene_daniel_first_chat
+
+:: scene_daniel_first_chat
+@typing daniel 5
+@message daniel "So, Nadia. What brings you here?"
+
+@choice
+"Curiosity." -> @scene_reason_1
+"Loneliness." -> @scene_reason_2
+"I don't know." -> @scene_reason_3
+
+:: scene_reason_1
+@typing nadia 4
+@message nadia "Curiosity."
+
+@typing daniel 5
+@message daniel "Curiosity about what?"
+
+@typing nadia 6
+@message nadia "About... something different."
+
+@typing daniel 7
+@message daniel "Different from what?"
+
+@typing nadia 8
+@message nadia "My life."
+
+@goto @scene_daniel_deeper
+
+:: scene_reason_2
+@typing nadia 4
+@message nadia "Loneliness."
+
+@typing daniel 5
+@message daniel "That's heavy."
+
+@typing nadia 6
+@message nadia "It's the truth."
+
+@typing daniel 7
+@message daniel "I'm glad you told me."
+
+@goto @scene_daniel_deeper
+
+:: scene_reason_3
+@typing nadia 4
+@message nadia "I don't know."
+
+@typing daniel 5
+@message daniel "You don't know why you're here?"
+
+@typing nadia 6
+@message nadia "I don't know what I'm looking for."
+
+@typing daniel 7
+@message daniel "Maybe that's okay."
+
+@goto @scene_daniel_deeper
+
+:: scene_daniel_deeper
+@typing daniel 5
+@message daniel "What do you do, Nadia?"
+
+@choice
+"Marketing." -> @scene_job_1
+"I don't want to talk about that." -> @scene_job_2
+"What do you do?" -> @scene_job_3
+
+:: scene_job_1
+@typing nadia 4
+@message nadia "Marketing. Nothing interesting."
+
+@typing daniel 5
+@message daniel "What makes you say that?"
+
+@typing nadia 6
+@message nadia "It's just... a job."
+
+@typing daniel 7
+@message daniel "Most jobs are. Doesn't mean you are."
+
+@goto @scene_daniel_job_response
+
+:: scene_job_2
+@typing nadia 4
+@message nadia "I don't want to talk about that."
+
+@typing daniel 5
+@message daniel "Okay. What do you want to talk about?"
+
+@typing nadia 6
+@message nadia "I don't know. Anything else."
+
+@typing daniel 7
+@message daniel "How about something that makes you smile?"
+
+@goto @scene_daniel_job_response
+
+:: scene_job_3
+@typing nadia 4
+@message nadia "What do you do?"
+
+@typing daniel 5
+@message daniel "I design things. Digital stuff."
+
+@typing nadia 6
+@message nadia "That sounds interesting."
+
+@typing daniel 7
+@message daniel "It's just... a job."
+
+@goto @scene_daniel_job_response
+
+:: scene_daniel_job_response
+@typing daniel 5
+@message daniel "I think you're different from the others here."
+
+@choice
+"Why?" -> @scene_different_1
+"Different how?" -> @scene_different_2
+"Everyone says that." -> @scene_different_3
+
+:: scene_different_1
+@typing nadia 4
+@message nadia "Why?"
+
+@typing daniel 5
+@message daniel "Because you're not asking for photos. You're not playing games."
+
+@typing nadia 6
+@message nadia "What makes you think I'm not playing games?"
+
+@typing daniel 7
+@message daniel "Because you're still talking to me."
+
+@goto @scene_daniel_premium
+
+:: scene_different_2
+@typing nadia 4
+@message nadia "Different how?"
+
+@typing daniel 5
+@message daniel "You're looking for something real. Most people are just bored."
+
+@typing nadia 6
+@message nadia "Maybe I'm bored too."
+
+@typing daniel 7
+@message daniel "Bored people don't ask 'how'."
+
+@goto @scene_daniel_premium
+
+:: scene_different_3
+@typing nadia 4
+@message nadia "Everyone says that."
+
+@typing daniel 5
+@message daniel "Maybe they mean it. Maybe you're just not ready to hear it."
+
+@typing nadia 6
+@message nadia "Maybe."
+
+@typing daniel 7
+@message daniel "I'll say it again when you're ready."
+
+@goto @scene_daniel_premium
+
+:: scene_daniel_premium
+@typing daniel 5
+@message daniel "I have to go. But I'd like to talk to you again."
+
+@choice
+"I'd like that." -> @scene_daniel_again_1
+"Maybe." -> @scene_daniel_again_2
+"I'll think about it." -> @scene_daniel_again_3
+💎 "Ask him something personal." (15 crystals) -> @scene_daniel_premium_personal
+
+:: scene_daniel_premium_personal
+@message system "💎 Premium choice unlocked - 15 crystals"
+
+@typing nadia 4
+@message nadia "Wait. Before you go..."
+
+@typing daniel 5
+@message daniel "Yes?"
+
+@typing nadia 6
+@message nadia "What's your story? Why are you really here?"
+
+@delay 3
+@typing daniel 7
+@message daniel "That's a loaded question."
+
+@typing nadia 8
+@message nadia "I know. But I want to know."
+
+@typing daniel 5
+@message daniel "I'm looking for something too. Something I lost."
+
+@typing nadia 6
+@message nadia "What did you lose?"
+
+@typing daniel 7
+@message daniel "Myself. I think."
+
+@thought nadia "He's hiding something. But so am I."
+
+@set daniel_connection += 3
+@flag premium_unlocked_daniel true
+@goto @scene_after_daniel
+
+:: scene_daniel_again_1
+@typing nadia 4
+@message nadia "I'd like that."
+
+@typing daniel 5
+@message daniel "Good. I'll be here."
+
+@typing nadia 6
+@message nadia "When?"
+
+@typing daniel 7
+@message daniel "Whenever you come back."
+
+@set daniel_connection += 1
+@goto @scene_after_daniel
+
+:: scene_daniel_again_2
+@typing nadia 4
+@message nadia "Maybe."
+
+@typing daniel 5
+@message daniel "Maybe is a yes with hesitation."
+
+@typing nadia 6
+@message nadia "Maybe is a no with doubt."
+
+@typing daniel 7
+@message daniel "I'll take the doubt."
+
+@set daniel_connection += 0
+@goto @scene_after_daniel
+
+:: scene_daniel_again_3
+@typing nadia 4
+@message nadia "I'll think about it."
+
+@typing daniel 5
+@message daniel "That's all I ask."
+
+@typing nadia 6
+@message nadia "Goodnight, Daniel."
+
+@typing daniel 7
+@message daniel "Goodnight, Nadia."
+
+@set daniel_connection += 0
+@goto @scene_after_daniel
+
+:: scene_after_daniel
+@message system "You close the app."
+
+@message nadia "I shouldn't have done that."
+
+@delay 2
+@message nadia "But I want to do it again."
+
+@flag installed_makelove true
+@flag talked_to_daniel true
+
+:: scene_03_first_secret
+@scene messenger_distracted
+@time 21:45
+@location "Home - Living Room"
+@music "guilt_first" volume 0.15
+
+@notification "Ethan Carter is typing..."
+
+@typing ethan 4
+@message ethan "Hey. You're quiet tonight."
+
+@choice
+"I'm just tired." -> @scene_ethan_quiet_1
+"I have a lot on my mind." -> @scene_ethan_quiet_2
+"I don't want to talk about it." -> @scene_ethan_quiet_3
+
+:: scene_ethan_quiet_1
+@typing nadia 3
+@message nadia "I'm just tired."
+
+@typing ethan 4
+@message ethan "You've been tired a lot lately."
+
+@typing nadia 5
+@message nadia "I know."
+
+@typing ethan 6
+@message ethan "I miss you."
+
+@typing nadia 4
+@message nadia "I'm right here."
+
+@typing ethan 5
+@message ethan "You know what I mean."
+
+@typing nadia 6
+@message nadia "I know."
+
+@goto @scene_ethan_final
+
+:: scene_ethan_quiet_2
+@typing nadia 3
+@message nadia "I have a lot on my mind."
+
+@typing ethan 4
+@message ethan "Like what?"
+
+@typing nadia 5
+@message nadia "I don't want to talk about it."
+
+@typing ethan 6
+@message ethan "Nadia. Talk to me."
+
+@typing nadia 4
+@message nadia "I can't."
+
+@typing ethan 5
+@message ethan "Why not?"
+
+@typing nadia 6
+@message nadia "Because I don't even know what to say."
+
+@goto @scene_ethan_final
+
+:: scene_ethan_quiet_3
+@typing nadia 3
+@message nadia "I don't want to talk about it."
+
+@typing ethan 4
+@message ethan "Okay."
+
+@typing ethan 5
+@message ethan "I'm here when you're ready."
+
+@typing nadia 6
+@message nadia "I know."
+
+@typing ethan 7
+@message ethan "I love you."
+
+@typing nadia 4
+@message nadia "I love you too."
+
+@goto @scene_ethan_final
+
+:: scene_ethan_final
+@typing ethan 5
+@message ethan "We should go out this weekend. Just us."
+
+@choice
+"That sounds nice." -> @scene_ethan_date_1
+"Okay." -> @scene_ethan_date_2
+"We'll see." -> @scene_ethan_date_3
+
+:: scene_ethan_date_1
+@typing nadia 3
+@message nadia "That sounds nice."
+
+@typing ethan 4
+@message ethan "I'll make it happen."
+
+@typing nadia 5
+@message nadia "You always say that."
+
+@typing ethan 6
+@message ethan "I mean it this time."
+
+@typing nadia 4
+@message nadia "I know you do."
+
+@goto @scene_claire_distracted
+
+:: scene_ethan_date_2
+@typing nadia 3
+@message nadia "Okay."
+
+@typing ethan 4
+@message ethan "You don't sound excited."
+
+@typing nadia 5
+@message nadia "I am. I'm just tired."
+
+@typing ethan 6
+@message ethan "Okay. I'll plan something."
+
+@typing nadia 4
+@message nadia "Sure."
+
+@goto @scene_claire_distracted
+
+:: scene_ethan_date_3
+@typing nadia 3
+@message nadia "We'll see."
+
+@typing ethan 4
+@message ethan "What does that mean?"
+
+@typing nadia 5
+@message nadia "It means let's see how the week goes."
+
+@typing ethan 6
+@message ethan "Okay. I'll hold you to that."
+
+@typing nadia 4
+@message nadia "I know you will."
+
+@goto @scene_claire_distracted
+
+:: scene_claire_distracted
+@notification "Claire Mitchell is typing..."
+
+@typing claire 4
+@message claire "You're online. Again."
+
+@typing claire 5
+@message claire "And ignoring Ethan."
+
+@choice
+"I'm not ignoring him." -> @scene_claire_ignore_1
+"I just need space." -> @scene_claire_ignore_2
+"I don't want to talk about him." -> @scene_claire_ignore_3
+
+:: scene_claire_ignore_1
+@typing nadia 3
+@message nadia "I'm not ignoring him."
+
+@typing claire 4
+@message claire "You are. He's texting you and you're not answering."
+
+@typing nadia 5
+@message nadia "I'm thinking."
+
+@typing claire 6
+@message claire "Thinking about what?"
+
+@typing nadia 4
+@message nadia "About what I want."
+
+@typing claire 5
+@message claire "And what's that?"
+
+@typing nadia 6
+@message nadia "I don't know yet."
+
+@goto @scene_first_lie_choice
+
+:: scene_claire_ignore_2
+@typing nadia 3
+@message nadia "I just need space."
+
+@typing claire 4
+@message claire "Space from what?"
+
+@typing nadia 5
+@message nadia "From everything."
+
+@typing claire 6
+@message claire "That's not how marriage works, Nadia."
+
+@typing nadia 4
+@message nadia "I know."
+
+@typing claire 5
+@message claire "Then what's going on?"
+
+@goto @scene_first_lie_choice
+
+:: scene_claire_ignore_3
+@typing nadia 3
+@message nadia "I don't want to talk about him."
+
+@typing claire 4
+@message claire "Okay. Then talk about you."
+
+@typing nadia 5
+@message nadia "What about me?"
+
+@typing claire 6
+@message claire "What's going on with you?"
+
+@typing nadia 4
+@message nadia "I don't know."
+
+@goto @scene_first_lie_choice
+
+:: scene_first_lie_choice
+@typing claire 5
+@message claire "You're hiding something."
+
+@choice
+"Nothing. I'm fine." -> @scene_lie_to_claire
+"Okay. I'm not fine." -> @scene_truth_to_claire
+
+:: scene_lie_to_claire
+@typing nadia 3
+@message nadia "Nothing. I'm fine."
+
+@typing claire 4
+@message claire "Nadia."
+
+@typing nadia 5
+@message nadia "I said I'm fine."
+
+@typing claire 6
+@message claire "Okay. If you say so."
+
+@typing nadia 4
+@message nadia "I need to go."
+
+@typing claire 5
+@message claire "Nadia..."
+
+@typing nadia 6
+@message nadia "Goodnight, Claire."
+
+@thought nadia "I just lied to Claire. That was the first time."
+
+@set trust_claire -= 5
+@set nadia_guilt += 1
+@flag lied_to_claire true
+@goto @scene_daniel_after_claire
+
+:: scene_truth_to_claire
+@typing nadia 3
+@message nadia "Okay. I'm not fine."
+
+@typing claire 4
+@message claire "Okay. Talk to me."
+
+@typing nadia 5
+@message nadia "I don't know what's wrong with me."
+
+@typing claire 6
+@message claire "Nothing's wrong with you."
+
+@typing nadia 4
+@message nadia "Something is. I feel it."
+
+@typing claire 5
+@message claire "Then let's figure it out together."
+
+@typing nadia 6
+@message nadia "I can't right now."
+
+@typing claire 7
+@message claire "Why not?"
+
+@typing nadia 4
+@message nadia "Because I don't know what to say."
+
+@typing claire 5
+@message claire "Start with something."
+
+@typing nadia 6
+@message nadia "I love you. That's all I know."
+
+@set trust_claire += 10
+@flag claire_knows_truth true
+@goto @scene_daniel_after_claire
+
+:: scene_daniel_after_claire
+@notification "Daniel Hayes is typing..."
+
+@typing daniel 5
+@message daniel "Hey. I was thinking about you."
+
+@choice
+"You were?" -> @scene_daniel_thinking_1
+"You just met me." -> @scene_daniel_thinking_2
+"Good or bad?" -> @scene_daniel_thinking_3
+
+:: scene_daniel_thinking_1
+@typing nadia 3
+@message nadia "You were?"
+
+@typing daniel 4
+@message daniel "I was. I wanted to ask you something."
+
+@typing nadia 5
+@message nadia "What?"
+
+@typing daniel 6
+@message daniel "What are you doing right now?"
+
+@typing nadia 4
+@message nadia "Trying to survive the evening."
+
+@typing daniel 5
+@message daniel "That sounds serious."
+
+@typing nadia 6
+@message nadia "It's not. Just tired."
+
+@goto @scene_daniel_pushes
+
+:: scene_daniel_thinking_2
+@typing nadia 3
+@message nadia "You just met me."
+
+@typing daniel 4
+@message daniel "Does that matter?"
+
+@typing nadia 5
+@message nadia "It should."
+
+@typing daniel 6
+@message daniel "I don't think it does."
+
+@typing nadia 4
+@message nadia "Why not?"
+
+@typing daniel 5
+@message daniel "Some connections are instant."
+
+@thought nadia "He's dangerous. I should stop this."
+
+@goto @scene_daniel_pushes
+
+:: scene_daniel_thinking_3
+@typing nadia 3
+@message nadia "Good or bad?"
+
+@typing daniel 4
+@message daniel "Good. Definitely good."
+
+@typing nadia 5
+@message nadia "You don't know me."
+
+@typing daniel 6
+@message daniel "I know enough."
+
+@typing nadia 4
+@message nadia "What do you know?"
+
+@typing daniel 5
+@message daniel "You're searching for something. I am too."
+
+@goto @scene_daniel_pushes
+
+:: scene_daniel_pushes
+@typing daniel 5
+@message daniel "Can I ask you something personal?"
+
+@choice
+"Okay." -> @scene_personal_1
+"That depends." -> @scene_personal_2
+"I'm not sure I want that." -> @scene_personal_3
+
+:: scene_personal_1
+@typing nadia 3
+@message nadia "Okay."
+
+@typing daniel 4
+@message daniel "When was the last time you felt truly happy?"
+
+@typing nadia 5
+@message nadia "I don't remember."
+
+@typing daniel 6
+@message daniel "That's heartbreaking."
+
+@typing nadia 4
+@message nadia "That's my life."
+
+@goto @scene_nighttime_flirt
+
+:: scene_personal_2
+@typing nadia 3
+@message nadia "That depends."
+
+@typing daniel 4
+@message daniel "On what?"
+
+@typing nadia 5
+@message nadia "On what you're asking."
+
+@typing daniel 6
+@message daniel "When was the last time you felt alive?"
+
+@typing nadia 4
+@message nadia "I don't know if I ever have."
+
+@typing daniel 5
+@message daniel "Then let me help you find it."
+
+@goto @scene_nighttime_flirt
+
+:: scene_personal_3
+@typing nadia 3
+@message nadia "I'm not sure I want that."
+
+@typing daniel 4
+@message daniel "Okay. I respect that."
+
+@typing daniel 5
+@message daniel "But I'll be here when you're ready."
+
+@typing nadia 6
+@message nadia "You don't know me."
+
+@typing daniel 4
+@message daniel "I know enough to want to."
+
+@goto @scene_nighttime_flirt
+
+:: scene_nighttime_flirt
+@scene makelove_late_night
+@time 01:47
+@location "Bedroom - Nadia's Phone"
+@music "slow_burn" volume 0.15
+
+@typing daniel 5
+@message daniel "I think you're trapped somewhere you don't belong."
+
+@choice
+"You don't know that." -> @scene_trapped_1
+"Maybe I am." -> @scene_trapped_2
+"What makes you say that?" -> @scene_trapped_3
+
+:: scene_trapped_1
+@typing nadia 3
+@message nadia "You don't know that."
+
+@typing daniel 4
+@message daniel "I know enough."
+
+@typing nadia 5
+@message nadia "What do you know?"
+
+@typing daniel 6
+@message daniel "I know you're looking for an escape."
+
+@typing nadia 4
+@message nadia "Maybe I am."
+
+@goto @scene_trapped_continues
+
+:: scene_trapped_2
+@typing nadia 3
+@message nadia "Maybe I am."
+
+@typing daniel 4
+@message daniel "Then let me help you."
+
+@typing nadia 5
+@message nadia "Help me how?"
+
+@typing daniel 6
+@message daniel "I don't know yet. But I'm here."
+
+@goto @scene_trapped_continues
+
+:: scene_trapped_3
+@typing nadia 3
+@message nadia "What makes you say that?"
+
+@typing daniel 4
+@message daniel "The way you talk. The way you hesitate."
+
+@typing nadia 5
+@message nadia "I don't hesitate."
+
+@typing daniel 6
+@message daniel "You do. Before every message. Like you're afraid."
+
+@typing nadia 4
+@message nadia "Maybe I am afraid."
+
+@goto @scene_trapped_continues
+
+:: scene_trapped_continues
+@typing daniel 5
+@message daniel "What are you afraid of?"
+
+@choice
+"Everything." -> @scene_afraid_1
+"Of how this makes me feel." -> @scene_afraid_2
+"I don't know." -> @scene_afraid_3
+
+:: scene_afraid_1
+@typing nadia 3
+@message nadia "Everything."
+
+@typing daniel 4
+@message daniel "That's a lot."
+
+@typing nadia 5
+@message nadia "I know."
+
+@typing daniel 6
+@message daniel "Start with one thing."
+
+@typing nadia 4
+@message nadia "I'm afraid of myself."
+
+@goto @scene_afraid_continues
+
+:: scene_afraid_2
+@typing nadia 3
+@message nadia "Of how this makes me feel."
+
+@typing daniel 4
+@message daniel "How does it make you feel?"
+
+@typing nadia 5
+@message nadia "Alive. And guilty."
+
+@typing daniel 6
+@message daniel "That's a dangerous combination."
+
+@typing nadia 4
+@message nadia "I know."
+
+@goto @scene_afraid_continues
+
+:: scene_afraid_3
+@typing nadia 3
+@message nadia "I don't know."
+
+@typing daniel 4
+@message daniel "That's okay."
+
+@typing nadia 5
+@message nadia "Is it?"
+
+@typing daniel 6
+@message daniel "It's okay to not know. It's not okay to stay stuck."
+
+@goto @scene_afraid_continues
+
+:: scene_afraid_continues
+@typing daniel 5
+@message daniel "I think you're brave for even being here."
+
+@typing nadia 6
+@message nadia "Brave?"
+
+@typing daniel 7
+@message daniel "Yeah. Brave."
+
+@typing nadia 8
+@message nadia "I don't feel brave."
+
+@typing daniel 5
+@message daniel "That's what bravery feels like."
+
+@choice
+"I like talking to you." -> @scene_like_talking
+"This is dangerous." -> @scene_dangerous
+"I should go." -> @scene_should_go
+💎 "Tell him something you've never told anyone." (25 crystals) -> @scene_premium_confession
+
+:: scene_premium_confession
+@message system "💎 Premium choice unlocked - 25 crystals"
+
+@typing nadia 4
+@message nadia "Can I tell you something?"
+
+@typing daniel 5
+@message daniel "Anything."
+
+@typing nadia 6
+@message nadia "I've never told this to anyone."
+
+@typing daniel 7
+@message daniel "I'm listening."
+
+@typing nadia 8
+@message nadia "I don't think I've ever been truly happy. I've been pretending for so long I forgot what it feels like."
+
+@delay 4
+@typing daniel 5
+@message daniel "Nadia..."
+
+@typing nadia 6
+@message nadia "I don't know why I just told you that."
+
+@typing daniel 7
+@message daniel "Because you trust me."
+
+@thought nadia "Do I trust him? I don't even know him."
+
+@set daniel_connection += 5
+@set vulnerability += 2
+@flag premium_confession_unlocked true
+@set crystals -= 25
+@goto @scene_after_afraid
+
+:: scene_like_talking
+@typing nadia 3
+@message nadia "I like talking to you."
+
+@typing daniel 4
+@message daniel "I like talking to you too."
+
+@typing nadia 5
+@message nadia "I don't know why."
+
+@typing daniel 6
+@message daniel "Because it's easy."
+
+@typing nadia 4
+@message nadia "Is it?"
+
+@typing daniel 5
+@message daniel "For me, yeah."
+
+@set daniel_connection += 2
+@goto @scene_after_afraid
+
+:: scene_dangerous
+@typing nadia 3
+@message nadia "This is dangerous."
+
+@typing daniel 4
+@message daniel "What is?"
+
+@typing nadia 5
+@message nadia "This. Us. Talking."
+
+@typing daniel 6
+@message daniel "Why?"
+
+@typing nadia 4
+@message nadia "Because I want to keep doing it."
+
+@typing daniel 5
+@message daniel "Then keep doing it."
+
+@set daniel_connection += 1
+@goto @scene_after_afraid
+
+:: scene_should_go
+@typing nadia 3
+@message nadia "I should go."
+
+@typing daniel 4
+@message daniel "Okay."
+
+@typing nadia 5
+@message nadia "You're not going to stop me?"
+
+@typing daniel 6
+@message daniel "I don't control you, Nadia."
+
+@typing nadia 4
+@message nadia "I know."
+
+@typing daniel 5
+@message daniel "But I'll be here."
+
+@set daniel_connection += 0
+@goto @scene_after_afraid
+
+:: scene_after_afraid
+@typing daniel 6
+@message daniel "Can I ask you one more thing?"
+
+@typing nadia 4
+@message nadia "Okay."
+
+@typing daniel 5
+@message daniel "Do you trust me?"
+
+@delay 4
+
+@choice
+"Not yet." -> @scene_trust_notyet
+"Maybe." -> @scene_trust_maybe
+"I don't know." -> @scene_trust_dontknow
+
+:: scene_trust_notyet
+@typing nadia 3
+@message nadia "Not yet."
+
+@typing daniel 4
+@message daniel "That's honest."
+
+@typing nadia 5
+@message nadia "I don't trust easily."
+
+@typing daniel 6
+@message daniel "I get that."
+
+@typing nadia 4
+@message nadia "Do you trust me?"
+
+@typing daniel 5
+@message daniel "I want to."
+
+@goto @scene_episode_final
+
+:: scene_trust_maybe
+@typing nadia 3
+@message nadia "Maybe."
+
+@typing daniel 4
+@message daniel "Maybe is a good start."
+
+@typing nadia 5
+@message nadia "I don't know what I want yet."
+
+@typing daniel 6
+@message daniel "That's okay. You don't have to know."
+
+@typing nadia 4
+@message nadia "You're too understanding."
+
+@typing daniel 5
+@message daniel "Is that a bad thing?"
+
+@goto @scene_episode_final
+
+:: scene_trust_dontknow
+@typing nadia 3
+@message nadia "I don't know."
+
+@typing daniel 4
+@message daniel "That's honest."
+
+@typing nadia 5
+@message nadia "I don't even trust myself right now."
+
+@typing daniel 6
+@message daniel "Then maybe trust me to hold onto you until you do."
+
+@typing nadia 4
+@message nadia "That's a dangerous thing to say."
+
+@typing daniel 5
+@message daniel "I know."
+
+@goto @scene_episode_final
+
+:: scene_episode_final
+@music "end_of_beginning" volume 0.15
+
+@typing daniel 6
+@message daniel "I have to go. But I'll be here if you come back."
+
+@typing nadia 4
+@message nadia "I'll think about it."
+
+@typing daniel 5
+@message daniel "That's all I ask."
+
+@typing nadia 6
+@message nadia "Goodnight, Daniel."
+
+@typing daniel 4
+@message daniel "Goodnight, Nadia."
+
+@delay 3
+
+@message nadia "I closed the app."
+
+@delay 2
+@message nadia "But I didn't delete it."
+
+@delay 2
+@message nadia "That was my first mistake."
+
+@message system "═══════════════════════════════════"
+@message system "EPISODE 1 - THE SPARK"
+@message system "COMPLETE."
+@message system "═══════════════════════════════════"
+
+@delay 2
+
+@message system "The cracks are forming."
+
+@message system "Ethan is oblivious. Claire is worried."
+
+@message system "Olivia is suspicious. Daniel is waiting."
+
+@message system "And Nadia? She's losing herself."
+
+@delay 2
+
+@message system "To be continued in Episode 2..."
