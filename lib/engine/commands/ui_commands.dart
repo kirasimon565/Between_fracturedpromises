@@ -17,16 +17,21 @@ List<CommandHandler> uiCommands() => <CommandHandler>[
 
 List<CommandHandler> animationCommands() => <CommandHandler>[
       const FunctionCommand(<String>['animate'], _animate),
-      const FunctionCommand(<String>['shake'],
-          (CommandContext ctx) => _screenEffect(ctx, 'shake')),
-      const FunctionCommand(<String>['flash'],
-          (CommandContext ctx) => _screenEffect(ctx, 'flash')),
-      const FunctionCommand(<String>['glitch'],
-          (CommandContext ctx) => _screenEffect(ctx, 'glitch')),
-      const FunctionCommand(<String>['fade'],
-          (CommandContext ctx) => _screenEffect(ctx, 'fade')),
+      const FunctionCommand(<String>['shake'], _shake),
+      const FunctionCommand(<String>['flash'], _flash),
+      const FunctionCommand(<String>['glitch'], _glitch),
+      const FunctionCommand(<String>['fade'], _fade),
       const FunctionCommand(<String>['shatter'], _shatter),
     ];
+
+
+CommandOutcome _shake(CommandContext ctx) => _screenEffect(ctx, 'shake');
+
+CommandOutcome _flash(CommandContext ctx) => _screenEffect(ctx, 'flash');
+
+CommandOutcome _glitch(CommandContext ctx) => _screenEffect(ctx, 'glitch');
+
+CommandOutcome _fade(CommandContext ctx) => _screenEffect(ctx, 'fade');
 
 CommandOutcome _ui(CommandContext ctx) {
   ctx.engine.emitEffect(GenericEffect('ui', <String, Object?>{

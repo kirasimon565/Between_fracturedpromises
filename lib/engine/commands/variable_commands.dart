@@ -17,18 +17,27 @@ List<CommandHandler> variableCommands() => <CommandHandler>[
     ];
 
 List<CommandHandler> relationshipCommands() => <CommandHandler>[
-      const FunctionCommand(<String>['trust'],
-          (CommandContext ctx) => _axis(ctx, RelationshipAxis.trust)),
-      const FunctionCommand(<String>['friendship'],
-          (CommandContext ctx) => _axis(ctx, RelationshipAxis.friendship)),
-      const FunctionCommand(<String>['love'],
-          (CommandContext ctx) => _axis(ctx, RelationshipAxis.love)),
-      const FunctionCommand(<String>['tension'],
-          (CommandContext ctx) => _axis(ctx, RelationshipAxis.tension)),
-      const FunctionCommand(<String>['suspicion'],
-          (CommandContext ctx) => _axis(ctx, RelationshipAxis.suspicion)),
+      const FunctionCommand(<String>['trust'], _trust),
+      const FunctionCommand(<String>['friendship'], _friendship),
+      const FunctionCommand(<String>['love'], _love),
+      const FunctionCommand(<String>['tension'], _tension),
+      const FunctionCommand(<String>['suspicion'], _suspicion),
       const FunctionCommand(<String>['relationship'], _relationship),
     ];
+
+
+CommandOutcome _trust(CommandContext ctx) => _axis(ctx, RelationshipAxis.trust);
+
+CommandOutcome _friendship(CommandContext ctx) =>
+    _axis(ctx, RelationshipAxis.friendship);
+
+CommandOutcome _love(CommandContext ctx) => _axis(ctx, RelationshipAxis.love);
+
+CommandOutcome _tension(CommandContext ctx) =>
+    _axis(ctx, RelationshipAxis.tension);
+
+CommandOutcome _suspicion(CommandContext ctx) =>
+    _axis(ctx, RelationshipAxis.suspicion);
 
 CommandOutcome _flag(CommandContext ctx) {
   final String name = ctx.id(0);
