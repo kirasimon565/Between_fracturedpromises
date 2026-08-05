@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../core/app_config.dart';
 import '../../core/providers/app_providers.dart';
@@ -26,10 +27,22 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
   Timer? _timer;
   bool _moved = false;
 
+  // Holds the runtime package version loaded from package_info_plus.
+  String _version = '';
+
   @override
   void initState() {
     super.initState();
     _timer = Timer(_length, _advance);
+
+    // Load the app version asynchronously and update the UI when available.
+    PackageInfo.fromPlatform().then((PackageInfo info) {
+      if (mounted) {
+        setState(() => _version = info.version);
+      }
+    }).catchError((_) {
+      // Ignore errors here; version will remain empty.
+    });
   }
 
   @override
@@ -47,8 +60,8 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Safely pull app version string from AppConfig or Bootstrap state
-    final String versionString = AppConfig.version;
+    // Safely pull app version string from runtime package info or Bootstrap state
+    final String versionString = _version;
     final String displayVersion =
         versionString.isNotEmpty ? 'v$versionString' : '';
 
