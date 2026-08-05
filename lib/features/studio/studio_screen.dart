@@ -47,11 +47,10 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Dynamic version lookup from app providers
-    final String appVersion = ref.watch(appVersionProvider).maybeWhen(
-          data: (version) => 'v$version',
-          orElse: () => '',
-        );
+    // Safely pull app version string from AppConfig or Bootstrap state
+    final String versionString = AppConfig.version;
+    final String displayVersion =
+        versionString.isNotEmpty ? 'v$versionString' : '';
 
     return Scaffold(
       backgroundColor: AppColors.voidBlack,
@@ -184,7 +183,7 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
               bottom: 36,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   // Left: Live Message Typing Indicator
                   const _TypingDotsIndicator()
@@ -193,7 +192,7 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
 
                   // Right: Dynamic App Version Tag
                   Text(
-                    appVersion,
+                    displayVersion,
                     style: TextStyle(
                       color: AppColors.textFaint.withValues(alpha: 0.6),
                       fontSize: 11,
