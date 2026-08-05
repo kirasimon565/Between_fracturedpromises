@@ -9,11 +9,10 @@ import '../../core/app_config.dart';
 import '../../core/providers/app_providers.dart';
 import '../../shared/theme/app_theme.dart';
 
-/// The studio sting.
+/// The BlackMoon Studio intro sequence.
 ///
-/// Two lines drift apart and never quite meet — the whole game in one shape.
-/// Tapping skips it, and returning players who have already been through the
-/// disclaimer go straight to the menu.
+/// Combines the studio emblem with layered glow animations, real-time typing indicators,
+/// dynamic app versioning, and auto-advance navigation.
 class StudioAnimationScreen extends ConsumerStatefulWidget {
   const StudioAnimationScreen({super.key});
 
@@ -23,7 +22,7 @@ class StudioAnimationScreen extends ConsumerStatefulWidget {
 }
 
 class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
-  static const Duration _length = Duration(milliseconds: 3400);
+  static const Duration _length = Duration(milliseconds: 4000);
   Timer? _timer;
   bool _moved = false;
 
@@ -48,93 +47,198 @@ class _StudioAnimationScreenState extends ConsumerState<StudioAnimationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Dynamic version lookup from app providers
+    final String appVersion = ref.watch(appVersionProvider).maybeWhen(
+          data: (version) => 'v$version',
+          orElse: () => '',
+        );
+
     return Scaffold(
       backgroundColor: AppColors.voidBlack,
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _advance,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              SizedBox(
-                width: 190,
-                height: 64,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    const _Thread(
-                          color: AppColors.messenger,
-                          alignment: Alignment.topCenter,
-                        )
-                        .animate()
-                        .fadeIn(duration: 700.ms)
-                        .moveY(begin: 14, end: 0, duration: 1100.ms)
-                        .then(delay: 300.ms)
-                        .moveY(begin: 0, end: -8, duration: 900.ms),
-                    const _Thread(
-                          color: AppColors.makelove,
-                          alignment: Alignment.bottomCenter,
-                        )
-                        .animate(delay: 200.ms)
-                        .fadeIn(duration: 700.ms)
-                        .moveY(begin: -14, end: 0, duration: 1100.ms)
-                        .then(delay: 300.ms)
-                        .moveY(begin: 0, end: 8, duration: 900.ms),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 34),
-              Text(
-                    AppConfig.studio.toUpperCase(),
-                    style: const TextStyle(
-                      color: AppColors.text,
-                      fontSize: 13,
-                      letterSpacing: 8,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  )
-                  .animate(delay: 1200.ms)
-                  .fadeIn(duration: 900.ms)
-                  .shimmer(
-                    delay: 500.ms,
-                    duration: 1400.ms,
-                    color: AppColors.ember.withValues(alpha: 0.6),
+        child: Stack(
+          children: <Widget>[
+            // Ambient Radial Center Background Glow
+            Center(
+              child: Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: <Color>[
+                      AppColors.ember.withValues(alpha: 0.15),
+                      AppColors.voidBlack.withValues(alpha: 0.0),
+                    ],
+                    stops: const <double>[0.0, 1.0],
                   ),
-              const SizedBox(height: 12),
-              const Text(
-                'presents',
-                style: TextStyle(
-                  color: AppColors.textFaint,
-                  fontSize: 10,
-                  letterSpacing: 4,
                 ),
-              ).animate(delay: 1900.ms).fadeIn(duration: 800.ms),
-            ],
-          ),
+              ).animate().fadeIn(duration: 1200.ms),
+            ),
+
+            // Main Content Layer
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  // Hero Logo Composition
+                  SizedBox(
+                    width: 260,
+                    height: 220,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: <Widget>[
+                        // Layer 1: Outer Ember Aura
+                        Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: <BoxShadow>[
+                              BoxShadow(
+                                color: AppColors.ember.withValues(alpha: 0.45),
+                                blurRadius: 65,
+                                spreadRadius: 15,
+                              ),
+                            ],
+                          ),
+                        )
+                            .animate()
+                            .fadeIn(duration: 900.ms)
+                            .scale(
+                              begin: const Offset(0.5, 0.5),
+                              end: const Offset(1.2, 1.2),
+                              duration: 1800.ms,
+                              curve: Curves.easeOutBack,
+                            ),
+
+                        // Layer 2: Core Moonlight Halo
+                        Container(
+                          width: 110,
+                          height: 110,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: <BoxShadow>[
+                              BoxShadow(
+                                color: Colors.white.withValues(alpha: 0.25),
+                                blurRadius: 35,
+                                spreadRadius: 5,
+                              ),
+                            ],
+                          ),
+                        )
+                            .animate(delay: 300.ms)
+                            .fadeIn(duration: 800.ms)
+                            .scale(
+                              begin: const Offset(0.8, 0.8),
+                              end: const Offset(1.0, 1.0),
+                              duration: 1200.ms,
+                              curve: Curves.easeOutCubic,
+                            ),
+
+                        // Layer 3: Main Emblem Image
+                        Image.asset(
+                          'assets/images/blackmoon_studio_logo.png',
+                          width: 220,
+                          fit: BoxFit.contain,
+                        )
+                            .animate()
+                            .fadeIn(duration: 1000.ms)
+                            .scale(
+                              begin: const Offset(0.9, 0.9),
+                              end: const Offset(1.0, 1.0),
+                              duration: 1400.ms,
+                              curve: Curves.easeOutExpo,
+                            )
+                            .then(delay: 300.ms)
+                            .shimmer(
+                              duration: 1500.ms,
+                              color: Colors.white.withValues(alpha: 0.4),
+                            ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // PRESENTS Subtitle
+                  const Text(
+                    'PRESENTS',
+                    style: TextStyle(
+                      color: AppColors.textFaint,
+                      fontSize: 10,
+                      letterSpacing: 6,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ).animate(delay: 1400.ms).fadeIn(duration: 800.ms),
+                ],
+              ),
+            ),
+
+            // Bottom Interface Bar (Typing Indicator + Dynamic Version)
+            Positioned(
+              left: 24,
+              right: 24,
+              bottom: 36,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAlignment.center,
+                children: <Widget>[
+                  // Left: Live Message Typing Indicator
+                  const _TypingDotsIndicator()
+                      .animate(delay: 1000.ms)
+                      .fadeIn(duration: 600.ms),
+
+                  // Right: Dynamic App Version Tag
+                  Text(
+                    appVersion,
+                    style: TextStyle(
+                      color: AppColors.textFaint.withValues(alpha: 0.6),
+                      fontSize: 11,
+                      letterSpacing: 2,
+                      fontFamily: 'Monospace',
+                    ),
+                  ).animate(delay: 1200.ms).fadeIn(duration: 600.ms),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _Thread extends StatelessWidget {
-  const _Thread({required this.color, required this.alignment});
-
-  final Color color;
-  final Alignment alignment;
+/// A custom real-time pulsing typing indicator widget (3 dots).
+class _TypingDotsIndicator extends StatelessWidget {
+  const _TypingDotsIndicator();
 
   @override
-  Widget build(BuildContext context) => Align(
-    alignment: alignment,
-    child: Container(
-      width: 190,
-      height: 2,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: <Color>[Colors.transparent, color, Colors.transparent],
-        ),
-      ),
-    ),
-  );
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List<Widget>.generate(3, (int index) {
+        return Container(
+          margin: const EdgeInsets.only(right: 4),
+          width: 5,
+          height: 5,
+          decoration: BoxDecoration(
+            color: AppColors.messenger.withValues(alpha: 0.85),
+            shape: BoxShape.circle,
+          ),
+        )
+            .animate(
+              onPlay: (AnimationController controller) => controller.repeat(),
+            )
+            .fadeIn(
+              duration: 400.ms,
+              delay: Duration(milliseconds: index * 200),
+            )
+            .then(delay: 200.ms)
+            .fadeOut(duration: 400.ms);
+      }),
+    );
+  }
 }
