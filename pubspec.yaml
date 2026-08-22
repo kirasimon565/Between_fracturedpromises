@@ -19,7 +19,7 @@ dependencies:
   flutter_riverpod: ^3.0.0
 
   # ── Navigation ───────────────────────────────────────────────────────────
-  go_router: ^17.3.0
+  go_router: ^17.5.0
 
   # ── Persistence (Drift / SQLite) ─────────────────────────────────────────
   drift: ^2.34.3
