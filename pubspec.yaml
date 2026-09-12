@@ -16,16 +16,16 @@ dependencies:
     sdk: flutter
 
   # ── State management (runtime state only) ────────────────────────────────
-  flutter_riverpod: ^3.0.0
+  flutter_riverpod: ^3.4.3
 
   # ── Navigation ───────────────────────────────────────────────────────────
-  go_router: ^17.3.0
+  go_router: ^18.0.1
 
   # ── Persistence (Drift / SQLite) ─────────────────────────────────────────
   drift: ^2.34.3
   # sqlite3_flutter_libs is end-of-life; SQLite 3.x (package:sqlite3) bundles its
   # native library automatically via Flutter asset hooks.
-  sqlite3: ^3.5.0
+  sqlite3: ^3.5.2
   path_provider: ^2.1.6
   path: ^1.9.1
 
